@@ -13,6 +13,20 @@ const SCOPES = [
   'https://www.googleapis.com/auth/webmasters.readonly',
 ];
 
+const ANALYTICS_API = 'https://analyticsreporting.googleapis.com/v4/reports:batchGet';
+function searchConsoleApi(siteUrl) {
+  return 'https://www.googleapis.com/webmasters/v3/sites/' + encodeURIComponent(siteUrl) + '/searchAnalytics/query';
+}
+
+function tokenFor(clientId, tool) {
+  const d = gtokens.get(clientId);
+  return d && d[tool] ? d[tool] : null;
+}
+function expired(token) {
+  if (!token) return true;
+  return Date.now() >= ((token.obtained_at || 0) + ((token.expires_in || 0) * 1000));
+}
+
 function portalUrl() {
   return process.env.PORTAL_URL || 'https://app.snbdhost.com';
 }
@@ -74,6 +88,53 @@ router.get('/disconnect/:tool', requireLogin, (req, res) => {
   gtokens.del(req.session.clientId, tool);
   req.session.flash = { type: 'success', message: 'Google tool disconnected.' };
   res.redirect('/google/tools');
+});
+
+router.get('/data/:tool', requireLogin, async (req, res) => {
+  const tool = req.params.tool;
+  if (!['analytics', 'searchconsole'].includes(tool)) {
+    return res.status(400).json({ error: 'Unknown tool.' });
+  }
+  const token = tokenFor(req.session.clientId, tool);
+  if (!token) {
+    return res.status(409).json({ error: 'not_connected', message: 'Connect ' + tool + ' first.' });
+  }
+  if (expired(token)) {
+    return res.status(409).json({ error: 'expired', message: 'Token for ' + tool + ' expired; reconnect.' });
+  }
+  try {
+    let data;
+    if (tool === 'analytics') {
+      const viewId = req.query.viewId || process.env.GOOGLE_ANALYTICS_VIEW_ID;
+      if (!viewId) {
+        return res.status(409).json({ error: 'missing_view_id', message: 'Set GOOGLE_ANALYTICS_VIEW_ID or pass ?viewId=' });
+      }
+      const r = await axios.post(ANALYTICS_API, {
+        reportRequests: [{
+          viewId,
+          dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
+          metrics: [{ expression: 'ga:sessions' }, { expression: 'ga:pageviews' }],
+          dimensions: [{ name: 'ga:date' }],
+        }],
+      }, { headers: { Authorization: 'Bearer ' + token.access_token } });
+      data = r.data;
+    } else {
+      const siteUrl = req.query.siteUrl || process.env.GOOGLE_SEARCHCONSOLE_SITE_URL;
+      if (!siteUrl) {
+        return res.status(409).json({ error: 'missing_site_url', message: 'Set GOOGLE_SEARCHCONSOLE_SITE_URL or pass ?siteUrl=' });
+      }
+      const r = await axios.post(searchConsoleApi(siteUrl), {
+        startDate: '7daysAgo',
+        endDate: 'today',
+        dimensions: ['date'],
+        rowLimit: 10,
+      }, { headers: { Authorization: 'Bearer ' + token.access_token } });
+      data = r.data;
+    }
+    res.json(data);
+  } catch (e) {
+    res.status(502).json({ error: 'google_api_error', message: e.message });
+  }
 });
 
 router.get('/tools', requireLogin, async (req, res) => {

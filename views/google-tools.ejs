@@ -4,6 +4,12 @@ const tools = [
   { key: 'analytics', name: t('gt.analytics'), icon: 'chart', desc: t('gt.analyticsDesc') },
   { key: 'searchconsole', name: t('gt.searchconsole'), icon: 'globe', desc: t('gt.searchconsoleDesc') },
 ];
+const steps = [
+  { n: 1, text: t('gt.step1') },
+  { n: 2, text: t('gt.step2') },
+  { n: 3, text: t('gt.step3') },
+  { n: 4, text: t('gt.step4') },
+];
 %>
 
 <section class="welcome reveal" aria-labelledby="gt-title">
@@ -33,6 +39,13 @@ const tools = [
                   <td><span class="pill ok"><%= t('gt.connected') %></span></td>
                   <td><a class="row-link" href="/google/disconnect/<%= tl.key %>"><%= t('gt.disconnect') %></a></td>
                 </tr>
+                <section class="panel reveal reveal-2" style="margin-top:0.75rem;" aria-labelledby="gt-data-<%= tl.key %>">
+                  <header><span id="gt-data-<%= tl.key %>"><%= tl.name %> <%= t('gt.demoData') %></span></header>
+                  <div class="pad">
+                    <button class="btn" onclick="loadData('<%= tl.key %>')"><%= t('gt.loadData') %></button>
+                    <pre id="gt-data-<%= tl.key %>-body" class="data-body"></pre>
+                  </div>
+                </section>
               <% } %>
             <% }) %>
             </tbody>
@@ -58,6 +71,17 @@ const tools = [
       </div>
     </section>
 
+    <section class="panel reveal reveal-3" aria-labelledby="gt-demo">
+      <header><span id="gt-demo"><%= t('gt.stepsTitle') %></span></header>
+      <div class="pad">
+        <ol class="steps">
+        <% steps.forEach(s => { %>
+          <li><span class="step-n"><%= s.n %></span> <%= s.text %></li>
+        <% }) %>
+        </ol>
+      </div>
+    </section>
+
     <section class="panel reveal reveal-3">
       <div class="help">
         <strong><%= t('gt.needHelp') %></strong>
@@ -67,4 +91,18 @@ const tools = [
     </section>
   </aside>
 </div>
+
+<script>
+async function loadData(tool) {
+  const body = document.getElementById('gt-data-' + tool + '-body');
+  body.textContent = 'Loading...';
+  try {
+    const r = await fetch('/google/data/' + tool);
+    const j = await r.json();
+    body.textContent = r.ok ? JSON.stringify(j, null, 2) : 'Error ' + r.status + ': ' + (j.error || j.message || '');
+  } catch (e) {
+    body.textContent = 'Error: ' + e.message;
+  }
+}
+</script>
 <%- include('_foot') %>

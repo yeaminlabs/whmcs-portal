@@ -4,7 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const FILE = path.join(__dirname, '..', '..', 'data', 'google-tokens.json');
+const FILE = process.env.GOOGLE_TOKENS_FILE || path.join(__dirname, '..', '..', 'data', 'google-tokens.json');
 
 function read() {
   try { return JSON.parse(fs.readFileSync(FILE, 'utf8')); } catch { return {}; }
