@@ -134,7 +134,7 @@ app.use('/', require('./routes/store'));
 app.use('/', require('./routes/services'));
 app.use('/', require('./routes/pay').router);
 app.use('/', require('./routes/portal'));
-app.use('/', require('./routes/google'));
+app.use('/google', require('./routes/google'));
 
 app.use((req, res) => {
   res.status(404).render('error', { title: 'Not found', message: 'Page not found.', back: '/' });
