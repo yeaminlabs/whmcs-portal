@@ -27,6 +27,7 @@ const config = {
     currencyId: parseInt(process.env.BKASH_CURRENCY_ID || '0', 10) || null,
   },
   googleClientId: process.env.GOOGLE_CLIENT_ID || '219815663641-p50rq613ol3ilqgbotogg4bb4hvg9s1e.apps.googleusercontent.com',
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
   uptimerobot: {
     apiKey: process.env.UPTIMEROBOT_API_KEY || '',
     baseUrl: 'https://api.uptimerobot.com/v3',

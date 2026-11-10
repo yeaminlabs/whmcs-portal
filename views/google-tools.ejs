@@ -1,0 +1,70 @@
+<%- include('_head') %>
+<%
+const tools = [
+  { key: 'analytics', name: t('gt.analytics'), icon: 'chart', desc: t('gt.analyticsDesc') },
+  { key: 'searchconsole', name: t('gt.searchconsole'), icon: 'globe', desc: t('gt.searchconsoleDesc') },
+];
+%>
+
+<section class="welcome reveal" aria-labelledby="gt-title">
+  <div class="welcome-row">
+    <div>
+      <h1 id="gt-title"><%= t('gt.title') %></h1>
+      <p><%= t('gt.intro') %></p>
+    </div>
+  </div>
+</section>
+
+<div class="dash-cols">
+  <div>
+    <section class="panel reveal reveal-2" aria-labelledby="gt-connected">
+      <header><span id="gt-connected"><%= t('gt.connected') %></span></header>
+      <div class="pad">
+        <% if (connected.length === 0) { %>
+          <p><%= t('gt.noneConnected') %></p>
+        <% } else { %>
+          <table>
+            <thead><tr><th><%= t('gt.tool') %></th><th><%= t('gt.status') %></th><th><span class="sr-only"><%= t('gt.actions') %></span></th></tr></thead>
+            <tbody>
+            <% tools.forEach(tl => { %>
+              <% if (connected.includes(tl.key)) { %>
+                <tr>
+                  <td><span class="cell-main"><%- icon(tl.icon) %><%= tl.name %></span><span class="cell-sub"><%= tl.desc %></span></td>
+                  <td><span class="pill ok"><%= t('gt.connected') %></span></td>
+                  <td><a class="row-link" href="/google/disconnect/<%= tl.key %>"><%= t('gt.disconnect') %></a></td>
+                </tr>
+              <% } %>
+            <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+    </section>
+  </div>
+
+  <aside>
+    <section class="panel reveal reveal-2" aria-labelledby="gt-connect">
+      <header><span id="gt-connect"><%= t('gt.connect') %></span></header>
+      <div class="pad">
+        <% tools.forEach(tl => { %>
+          <% if (!connected.includes(tl.key)) { %>
+            <div class="pad">
+              <strong><%- icon(tl.icon) %><%= tl.name %></strong><br>
+              <small><%= tl.desc %></small>
+              <a class="btn" href="/google/connect/<%= tl.key %>"><%= t('gt.connectBtn') %></a>
+            </div>
+          <% } %>
+        <% }) %>
+      </div>
+    </section>
+
+    <section class="panel reveal reveal-3">
+      <div class="help">
+        <strong><%= t('gt.needHelp') %></strong>
+        <p><%= t('gt.helpText') %></p>
+        <a class="btn" href="/dashboard"><%- icon('arrow') %><%= t('gt.backDashboard') %></a>
+      </div>
+    </section>
+  </aside>
+</div>
+<%- include('_foot') %>

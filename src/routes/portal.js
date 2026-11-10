@@ -13,6 +13,7 @@ const pay = require('./pay');
 const avatars = require('../lib/avatars');
 const { ownedInvoice, ownedService, ownedDomain, ownedQuote, ownedTicket } = require('../lib/ownership');
 const { cached } = require('../lib/cache');
+const gtokens = require('../lib/google-tokens');
 const { getClient, invalidateClient } = require('../lib/client');
 
 const router = express.Router();
@@ -165,6 +166,7 @@ router.get('/', async (req, res) => {
       invoices: listOf(invoices, 'invoices').slice(0, 5),
       tickets: listOf(tickets, 'tickets').slice(0, 5),
       ticketsUnavailable: !ticketsAllowed || Boolean(tickets && tickets.blocked),
+      gtools: gtokens.tools(cid),
     });
   } catch (e) {
     res.render('error', { title: 'Dashboard', message: 'Could not load dashboard data.', back: '/login' });
