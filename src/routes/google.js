@@ -13,7 +13,7 @@ const SCOPES = [
   'https://www.googleapis.com/auth/webmasters.readonly',
 ];
 
-const ANALYTICS_API = 'https://analyticsreporting.googleapis.com/v4/reports:batchGet';
+const ANALYTICS_API = 'https://analyticsdata.googleapis.com/v1beta/properties/';
 function searchConsoleApi(siteUrl) {
   return 'https://www.googleapis.com/webmasters/v3/sites/' + encodeURIComponent(siteUrl) + '/searchAnalytics/query';
 }
@@ -109,13 +109,10 @@ router.get('/data/:tool', requireLogin, async (req, res) => {
       if (!viewId) {
         return res.status(409).json({ error: 'missing_view_id', message: 'Set GOOGLE_ANALYTICS_VIEW_ID or pass ?viewId=' });
       }
-      const r = await axios.post(ANALYTICS_API, {
-        reportRequests: [{
-          viewId,
-          dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
-          metrics: [{ expression: 'ga:sessions' }, { expression: 'ga:pageviews' }],
-          dimensions: [{ name: 'ga:date' }],
-        }],
+      const r = await axios.post(ANALYTICS_API + viewId + ':runReport', {
+        dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
+        metrics: [{ name: 'sessions' }, { name: 'screenPageViews' }],
+        dimensions: [{ name: 'date' }],
       }, { headers: { Authorization: 'Bearer ' + token.access_token } });
       data = r.data;
     } else {

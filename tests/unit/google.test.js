@@ -100,8 +100,9 @@ describe('google routes', () => {
     expect(res._json).toEqual({ reports: [{ data: { totals: [] } }] });
     expect(axios.post).toHaveBeenCalledTimes(1);
     const [url, body, cfg] = axios.post.mock.calls[0];
-    expect(url).toContain('analyticsreporting.googleapis.com');
-    expect(body.reportRequests[0].viewId).toBe('123');
+    expect(url).toContain('analyticsdata.googleapis.com');
+    expect(url).toContain('123:runReport');
+    expect(body.metrics[0].name).toBe('sessions');
     expect(cfg.headers.Authorization).toBe('Bearer tok');
   });
 
