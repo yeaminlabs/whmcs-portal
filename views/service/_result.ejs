@@ -1,0 +1,31 @@
+<% const typedValue = service.domain || service.name; const d = result && result.data ? result.data : null; %>
+<% if (confirmAction) { %>
+<div class="alert svc-confirm" id="svc-confirm" role="alert">
+  <strong><%= t('svcx.confirmTitle', { action: confirmAction.label }) %></strong>
+  <p><%= t(confirmAction.danger ? 'svcx.confirmDanger' : 'svcx.confirmText', { action: confirmAction.label }) %></p>
+  <form method="post" action="/services/<%= service.id %>/action">
+    <input type="hidden" name="fn" value="<%= confirmAction.fn %>">
+    <input type="hidden" name="confirm" value="1">
+    <% if (confirmAction.danger) { %><label><%= t('svcx.typeToConfirm', { value: typedValue }) %><input name="typed" required autocomplete="off" spellcheck="false" pattern="<%= String(typedValue).replace(/[\^$\\.*+?()[\]{}|\/]/g, '\\$&') %>"></label><% } %>
+    <div class="svc-row">
+      <button type="submit" class="btn <%= confirmAction.danger ? 'red' : '' %>"><%= confirmAction.label %></button>
+      <a class="btn ghost" href="/services/<%= service.id %>"><%= t('svcx.cancel') %></a>
+    </div>
+  </form>
+</div>
+<% } %>
+<div id="svc-result" class="svc-result" aria-live="polite">
+<% if (d) { %>
+  <% if (d.password) { %>
+  <div class="svc-secret">
+    <span><%= t('svcx.newPassword') %></span>
+    <code class="mono"><%= d.password %></code>
+    <button type="button" class="btn ghost btn-sm svc-copy" data-copy="<%= d.password %>" hidden><%- icon('copy') %><span><%= t('svcx.copy') %></span></button>
+    <small><%= t('svcx.passwordOnce') %></small>
+  </div>
+  <% } %>
+  <% if (d.url) { %><p><a class="btn" href="<%= d.url %>" target="_blank" rel="noopener noreferrer"><%- icon('external') %><%= t('svcx.openConsole') %></a></p><% } %>
+  <% if (d.file) { %><p><a class="btn ghost" href="<%= d.file.url %>" rel="noopener noreferrer" download><%- icon('download') %><%= t('svcx.download', { name: d.file.name }) %></a></p><% } %>
+  <% if (d.logs && !locals.logsPanel) { %><pre class="svc-logs" tabindex="0"><%= d.logs %></pre><% } %>
+<% } %>
+</div>

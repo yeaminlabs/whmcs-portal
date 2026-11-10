@@ -1,0 +1,18 @@
+<%- include('_head') %>
+<div class="pagehead"><div><h1><%= t('tix.title') %></h1><p class="sub"><%= t('tix.sub') %></p></div><a class="btn red" href="/tickets/new"><%- icon('plus') %><%= t('tix.new') %></a></div>
+<% if (locals.ticketsUnavailable) { %><div class="ui-empty"><h3><%= t('tix.unavailable') %></h3><p><%= t('tix.unavailableHint') %></p><a class="btn" href="/contact"><%= t('nav.contact') %></a></div><% } else if (!tickets.length) { %><div class="ui-empty"><h3><%= t('dash.noTickets') %></h3><p><%= t('tix.emptyHint') %></p></div><% } else { %>
+<div class="panel"><div class="pad"><table>
+  <thead><tr><th><%= t('tix.subject') %></th><th><%= t('col.status') %></th><th><%= t('tix.priority') %></th><th><%= t('tix.lastReply') %></th></tr></thead>
+  <tbody>
+  <% tickets.forEach(tk => { %>
+    <tr>
+      <td><a class="cell-main" href="/tickets/<%= tk.id %>"><%= tk.subject %></a><span class="cell-sub">#<%= tk.tid || tk.id %></span></td>
+      <td><span class="pill <%= String(tk.status).replace(/\s+/g, '-') %>"><%= st(tk.status) %></span></td>
+      <td><%= st(tk.priority) %></td>
+      <td><%= fmtDate(tk.lastreply) %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table></div></div>
+<% } %>
+<%- include('_foot') %>

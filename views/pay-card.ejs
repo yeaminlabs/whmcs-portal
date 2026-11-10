@@ -1,0 +1,75 @@
+<%- include('_head') %>
+<% const js = (v) => JSON.stringify(v).replace(/</g, '\\u003c'); %>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/invoices"><%= t('nav.invoices') %></a><%- icon('chev') %><a href="/invoices/<%= invoice.invoiceid %>/pay">#<%= invoice.invoicenum || invoice.invoiceid %></a><%- icon('chev') %><span><%= t('card.title') %></span></nav>
+<div class="pagehead"><div><h1><%= t('card.heading') %></h1><p class="sub"><%= t('pay.heading', { n: invoice.invoicenum || invoice.invoiceid }) %></p></div></div>
+
+<div class="checkout">
+  <div class="checkout-main">
+    <section class="panel step">
+      <header><span><%- icon('lock') %> <%= t('card.details') %></span><small><%= t('card.poweredBy') %></small></header>
+      <form id="card-form" class="step-body">
+        <div id="payment-element" class="card-element"><p class="hint"><%= t('card.loading') %></p></div>
+        <p id="card-error" class="alert err" role="alert" hidden></p>
+        <button type="submit" id="card-submit" class="btn red sum-cta" disabled><%= t('card.pay', { amount: fmt(charge, chargeCurrency.code) }) %></button>
+      </form>
+    </section>
+  </div>
+  <aside class="checkout-side">
+    <div class="panel summary-card">
+      <header><%= t('pay.summary') %></header>
+      <div class="sum-body">
+        <dl>
+          <div><dt><%= t('pay.balance') %></dt><dd><%= price(invoice.balance, invoice.currencycode) %></dd></div>
+          <% if (chargeCurrency.code !== invoice.currencycode) { %><div><dt><%= t('card.charged', { code: chargeCurrency.code }) %></dt><dd><%= fmt(charge, chargeCurrency.code) %></dd></div><% } %>
+        </dl>
+        <% if (chargeCurrency.code !== invoice.currencycode) { %><p class="sum-note"><%= t('card.convertNote', { code: chargeCurrency.code }) %></p><% } %>
+        <p class="sum-secure"><%- icon('lock') %><%= t('card.secure') %></p>
+        <a class="btn ghost" href="/invoices/<%= invoice.invoiceid %>/pay" style="width:100%"><%= t('card.other') %></a>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+(() => {
+  const I18N = <%- js({ processing: t('card.processing'), failed: t('card.failed'), load: t('card.loadFail') }) %>;
+  const form = document.getElementById('card-form');
+  const btn = document.getElementById('card-submit');
+  const errBox = document.getElementById('card-error');
+  const label = btn.textContent;
+  const showError = (m) => { errBox.textContent = m; errBox.hidden = false; btn.disabled = false; btn.textContent = label; };
+  if (!window.Stripe) { showError(I18N.load); return; }
+  const stripe = Stripe(<%- js(publishableKey) %>, { locale: <%- js(lang === 'bn' ? 'auto' : 'en') %> });
+  const elements = stripe.elements({
+    clientSecret: <%- js(clientSecret) %>,
+    appearance: {
+      theme: 'stripe',
+      variables: { colorPrimary: '#d0021b', colorText: '#101828', colorDanger: '#b42318', fontFamily: 'Inter, system-ui, sans-serif', borderRadius: '8px', spacingUnit: '4px' },
+      rules: { '.Input': { borderColor: '#d0d5dd', boxShadow: '0 1px 2px rgba(16,24,40,.05)' }, '.Input:focus': { borderColor: '#d0021b', boxShadow: '0 0 0 4px rgba(208,2,27,.12)' } },
+    },
+  });
+  const el = elements.create('payment', { layout: 'tabs' });
+  el.on('ready', () => { btn.disabled = false; });
+  el.mount('#payment-element');
+  const done = <%- js('/invoices/' + invoice.invoiceid + '/pay/card/complete?payment_intent=') %>;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errBox.hidden = true;
+    btn.disabled = true;
+    btn.textContent = I18N.processing;
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      redirect: 'if_required',
+      confirmParams: { return_url: location.origin + done.replace(/\?.*$/, '') },
+    });
+    if (error) return showError(error.message || I18N.failed);
+    if (paymentIntent && ['succeeded', 'processing'].includes(paymentIntent.status)) {
+      location.href = done + encodeURIComponent(paymentIntent.id);
+      return;
+    }
+    showError(I18N.failed);
+  });
+})();
+</script>
+<%- include('_foot') %>

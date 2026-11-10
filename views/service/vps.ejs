@@ -1,0 +1,93 @@
+<%- include('../_head') %>
+<%- include('_header') %>
+<%
+const s = service;
+const p = panel;
+const STATES = ['running', 'stopped', 'starting', 'stopping', 'deploying', 'suspended', 'unknown'];
+const state = STATES.includes(p.state) ? p.state : 'unknown';
+const specs = p.specs || {};
+const ipv4 = Array.isArray(p.ipv4) ? p.ipv4 : [];
+const ipv6 = Array.isArray(p.ipv6) ? p.ipv6 : [];
+const power = actions.filter(a => !a.console);
+const consoleAction = p.consoleAvailable === false ? null : actions.find(a => a.console);
+const graphs = (Array.isArray(p.graphs) ? p.graphs : []).map(g => ({ name: String(g.name || ''), c: k.chart(g.points) })).filter(g => g.c);
+const locale = lang === 'bn' ? 'bn-BD' : 'en-GB';
+const hhmm = (d) => d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+const num = (v) => Number(v).toLocaleString(locale, { maximumFractionDigits: 1 });
+const graphName = (n) => { const key = 'svcx.graph.' + n; const v = t(key); return v === key ? n : v; };
+const ram = specs.ramMb != null ? (Number(specs.ramMb) >= 1024 ? `${+(Number(specs.ramMb) / 1024).toFixed(1)} GB` : `${specs.ramMb} MB`) : '—';
+const copyable = (v) => { %><span class="svc-copyable"><span class="mono"><%= v %></span><button type="button" class="svc-copy" data-copy="<%= v %>" aria-label="<%= t('svcx.copyValue', { value: v }) %>" hidden><%- icon('copy') %></button></span><% };
+%>
+<div class="detail-grid">
+  <div>
+    <section class="panel" id="svc-actions">
+      <header>
+        <span class="svc-hgroup"><%= t('svcx.vps.title') %><span class="svc-state" data-state="<%= state %>"><i aria-hidden="true"></i><%= t('svcx.state.' + state) %></span></span>
+        <% if (consoleAction) { %>
+        <form method="post" action="/services/<%= s.id %>/action" class="svc-act" data-label="<%= consoleAction.label %>" data-console="1">
+          <input type="hidden" name="fn" value="<%= consoleAction.fn %>">
+          <button type="submit" class="btn btn-sm"<% if (!active) { %> disabled<% } %>><%- icon('terminal') %><span><%= t('svcx.vps.console') %></span></button>
+        </form>
+        <% } %>
+      </header>
+      <div class="svc-body">
+        <% if (power.length) { %>
+          <p class="svc-label"><%= t(power.some(a => /start|stop|reboot|shutdown/i.test(a.fn)) ? 'svcx.vps.power' : 'svcx.vps.actions') %></p>
+          <%- include('_actions', { list: power }) %>
+          <% if (!active) { %><p class="hint"><%= t('svcx.whenActive') %></p><% } %>
+        <% } %>
+        <%- include('_result') %>
+        <div class="svc-specs">
+          <div><%- icon('cpu') %><span><%= t('svcx.cpu') %></span><b><%= specs.cpu != null ? t('svcx.cores', { n: specs.cpu }) : '—' %></b></div>
+          <div><%- icon('ram') %><span><%= t('svcx.ram') %></span><b><%= ram %></b></div>
+          <div><%- icon('disk') %><span><%= t('svcx.storage') %></span><b><%= specs.diskGb != null ? `${specs.diskGb} GB` : '—' %></b></div>
+        </div>
+      </div>
+      <dl class="kv svc-kv-top">
+        <div><dt><%= t('svcx.vps.hostname') %></dt><dd class="mono"><%= p.hostname || s.domain || '—' %></dd></div>
+        <div><dt>IPv4</dt><dd class="svc-lines"><% if (ipv4.length) { ipv4.forEach(ip => copyable(ip)) } else { %>—<% } %></dd></div>
+        <div><dt>IPv6</dt><dd class="svc-lines"><% if (ipv6.length) { ipv6.forEach(ip => copyable(ip)) } else { %><span class="svc-muted"><%= t('svcx.vps.noIpv6') %></span><% } %></dd></div>
+        <div><dt><%= t('svcx.vps.os') %></dt><dd><%= p.os || '—' %></dd></div>
+        <div><dt><%= t('svcx.vps.location') %></dt><dd><%= p.location || '—' %></dd></div>
+        <% if (s.username) { %><div><dt><%= t('svc.username') %></dt><dd class="mono"><%= s.username %></dd></div><% } %>
+      </dl>
+    </section>
+
+    <% if (graphs.length) { %>
+    <section class="panel">
+      <header><span><%= t('svcx.vps.graphs') %></span><small class="svc-head-note"><%= t('svcx.vps.graphsHint') %></small></header>
+      <div class="svc-body svc-charts">
+        <% graphs.forEach(g => { const c = g.c; const label = graphName(g.name); %>
+        <figure class="svc-chart">
+          <figcaption><span><%= label %></span><b><%= num(c.last) %></b></figcaption>
+          <svg viewBox="0 0 <%= c.w %> <%= c.h %>" preserveAspectRatio="none" role="img" aria-label="<%= t('svcx.vps.chartAria', { name: label, min: num(c.min), max: num(c.max), last: num(c.last) }) %>">
+            <line x1="0" x2="<%= c.w %>" y1="<%= c.h * 0.25 %>" y2="<%= c.h * 0.25 %>" class="grid"/>
+            <line x1="0" x2="<%= c.w %>" y1="<%= c.h * 0.5 %>" y2="<%= c.h * 0.5 %>" class="grid"/>
+            <line x1="0" x2="<%= c.w %>" y1="<%= c.h * 0.75 %>" y2="<%= c.h * 0.75 %>" class="grid"/>
+            <path d="<%= c.area %>" class="area"/>
+            <path d="<%= c.line %>" class="line" vector-effect="non-scaling-stroke"/>
+          </svg>
+          <div class="svc-chart-axis"><span><%= hhmm(c.from) %></span><span><%= t('svcx.vps.peak', { value: num(c.max) }) %></span><span><%= hhmm(c.to) %></span></div>
+        </figure>
+        <% }) %>
+      </div>
+    </section>
+    <% } %>
+  </div>
+
+  <div class="detail-side">
+    <% if (view.sso && view.sso.length) { %>
+    <section class="panel">
+      <header><%= t('svcx.vps.panelTitle') %></header>
+      <form method="post" action="/services/<%= s.id %>/sso" target="_blank" class="pad-form">
+        <input type="hidden" name="app" value="">
+        <p class="hint"><%= t('svcx.vps.panelHint') %></p>
+        <button type="submit" class="btn red svc-wide"<% if (!active) { %> disabled<% } %>><%- icon('external') %><%= t('svcx.vps.openPanel') %></button>
+      </form>
+    </section>
+    <% } %>
+    <%- include('_plan') %>
+  </div>
+</div>
+<%- include('_script') %>
+<%- include('../_foot') %>

@@ -1,0 +1,22 @@
+{
+  "name": "whmcs-portal",
+  "version": "1.0.0",
+  "description": "Client portal similar to WHMCS, powered by WHMCS External API. Built per whmcs-dev-skill standards.",
+  "type": "commonjs",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "express-session": "^1.18.0",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "whmcs": "^1.2.2"
+  }
+}

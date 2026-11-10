@@ -1,0 +1,69 @@
+<%- include('../_head') %>
+<%- include('_header') %>
+<%
+const s = service;
+const p = panel;
+const STATES = ['running', 'stopped', 'deploying', 'error', 'unknown'];
+const state = STATES.includes(p.state) ? p.state : 'unknown';
+const llm = p.llm || {};
+const unl = !(Number(llm.limit) > 0);
+const used = Number(llm.used) || 0;
+const pc = k.pct(used, llm.limit);
+const unitKey = 'svcx.unit.' + (llm.unit || 'tokens');
+const unit = t(unitKey) === unitKey ? llm.unit : t(unitKey);
+const logs = result && result.data && result.data.logs;
+%>
+<div class="detail-grid">
+  <div>
+    <section class="panel">
+      <header>
+        <span class="svc-hgroup"><%= t('svcx.hermes.title') %><span class="svc-state" data-state="<%= state %>"><i aria-hidden="true"></i><%= t('svcx.state.' + state) %></span></span>
+        <% if (p.dashboardUrl && active) { %><a class="btn btn-sm ghost" href="<%= p.dashboardUrl %>" target="_blank" rel="noopener noreferrer"><%- icon('external') %><%= t('svcx.hermes.dashboard') %></a><% } %>
+      </header>
+      <div class="svc-body">
+        <div class="svc-meter">
+          <div class="svc-meter-top"><span><%- icon('activity') %><%= t('svcx.hermes.llm') %></span><b><%= k.compact(used) %> <small>/ <%= unl ? t('svcx.unlimited') : k.compact(llm.limit) %> <%= unit %></small></b></div>
+          <div class="svc-bar<%= unl ? ' unl' : pc >= 90 ? ' hot' : pc >= 75 ? ' warm' : '' %>" role="progressbar" aria-label="<%= t('svcx.hermes.llm') %>" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<%= unl ? 0 : pc %>"><i style="width:<%= unl ? 0 : pc %>%"></i></div>
+          <small class="svc-meter-sub"><%= unl ? t('svcx.noLimit') : t('svcx.pctUsed', { pct: pc }) %></small>
+        </div>
+      </div>
+      <dl class="kv svc-kv-top">
+        <div><dt><%= t('svcx.hermes.endpoint') %></dt><dd class="svc-copyable"><% if (p.endpoint) { %><span class="mono"><%= p.endpoint %></span><button type="button" class="svc-copy" data-copy="<%= p.endpoint %>" aria-label="<%= t('svcx.copyValue', { value: p.endpoint }) %>" hidden><%- icon('copy') %></button><% } else { %>—<% } %></dd></div>
+        <div><dt><%= t('svcx.hermes.brain') %></dt><dd><%= p.brain || '—' %></dd></div>
+        <div><dt><%= t('svcx.hermes.dashboard') %></dt><dd><% if (p.dashboardUrl) { %><a href="<%= p.dashboardUrl %>" target="_blank" rel="noopener noreferrer" class="mono"><%= p.dashboardUrl.replace(/^https?:\/\//, '') %></a><% } else { %>—<% } %></dd></div>
+      </dl>
+    </section>
+
+    <section class="panel" id="svc-actions">
+      <header><span><%= t('svcx.controls') %></span><a href="/services/<%= s.id %>" class="svc-head-link"><%- icon('refresh') %><%= t('svcx.refresh') %></a></header>
+      <div class="svc-body">
+        <% if (actions.length) { %>
+          <%- include('_actions', { list: actions, primary: 'restart' }) %>
+          <% if (!active) { %><p class="hint"><%= t('svcx.whenActive') %></p><% } %>
+        <% } else { %><p class="svc-muted"><%= t('svcx.noActions') %></p><% } %>
+        <%- include('_result', { logsPanel: true }) %>
+      </div>
+    </section>
+
+    <section class="panel">
+      <header><span><%= t('svcx.hermes.logs') %></span><small class="svc-head-note"><%= t('svcx.hermes.logsHint') %></small></header>
+      <div class="svc-body">
+        <p class="svc-muted" id="svc-logs-empty"<% if (logs) { %> hidden<% } %>><%= t('svcx.hermes.logsEmpty') %></p>
+        <pre class="svc-logs" id="svc-logs" tabindex="0" aria-label="<%= t('svcx.hermes.logs') %>"<% if (!logs) { %> hidden<% } %>><%= logs || '' %></pre>
+      </div>
+    </section>
+  </div>
+
+  <div class="detail-side">
+    <section class="panel">
+      <header><%= t('svcx.hermes.chatTitle') %></header>
+      <form method="post" action="/services/<%= s.id %>/manage" target="_blank" class="pad-form">
+        <p class="hint"><%= t('svcx.hermes.chatHint') %></p>
+        <button type="submit" class="btn svc-wide"<% if (!active) { %> disabled<% } %>><%- icon('terminal') %><%= t('svcx.hermes.chat') %></button>
+      </form>
+    </section>
+    <%- include('_plan') %>
+  </div>
+</div>
+<%- include('_script') %>
+<%- include('../_foot') %>

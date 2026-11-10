@@ -1,0 +1,10 @@
+node_modules/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+src/lib/mock.js.new
+.keycheck.js
+.perf.js
+data/

@@ -1,0 +1,45 @@
+<%- include('../_head') %>
+<%- include('_header') %>
+<% const s = service; const host = s.server && (s.server.hostname || s.server.name); %>
+<div class="detail-grid">
+  <div>
+    <section class="panel">
+      <header><%= t('svc.overview') %></header>
+      <dl class="kv">
+        <% if (s.groupname) { %><div><dt><%= t('svcx.product') %></dt><dd><%= s.groupname %></dd></div><% } %>
+        <div><dt><%= t('col.domain') %></dt><dd><%= s.domain || '—' %></dd></div>
+        <div><dt><%= t('col.status') %></dt><dd><span class="pill <%= s.status %>"><%= st(s.status) %></span></dd></div>
+        <div><dt><%= t('col.cycle') %></dt><dd><%= st(s.billingcycle) %></dd></div>
+        <div><dt><%= t('svc.nextDue') %></dt><dd><%= fmtDate(s.nextduedate) %></dd></div>
+        <div><dt><%= t('svc.since') %></dt><dd><%= fmtDate(s.regdate) %></dd></div>
+        <% if (s.username) { %><div><dt><%= t('svc.username') %></dt><dd class="mono"><%= s.username %></dd></div><% } %>
+        <% if (host) { %><div><dt><%= t('svc.server') %></dt><dd class="mono"><%= host %></dd></div><% } %>
+        <% if (s.dedicatedip) { %><div><dt><%= t('svc.ip') %></dt><dd class="mono"><%= s.dedicatedip %></dd></div><% } %>
+      </dl>
+    </section>
+
+    <% if (actions.length) { %>
+    <section class="panel" id="svc-actions">
+      <header><%= t('svcx.controls') %></header>
+      <div class="svc-body">
+        <%- include('_actions', { list: actions }) %>
+        <% if (!active) { %><p class="hint"><%= t('svcx.whenActive') %></p><% } %>
+        <%- include('_result') %>
+      </div>
+    </section>
+    <% } %>
+  </div>
+
+  <div class="detail-side">
+    <section class="panel">
+      <header><%= t('svcx.manageTitle') %></header>
+      <form method="post" action="/services/<%= s.id %>/manage" target="_blank" class="pad-form">
+        <p class="hint"><%= t('svcx.manageHint') %></p>
+        <button type="submit" class="btn svc-wide"><%- icon('external') %><%= t('common.manage') %></button>
+      </form>
+    </section>
+    <%- include('_plan') %>
+  </div>
+</div>
+<%- include('_script') %>
+<%- include('../_foot') %>

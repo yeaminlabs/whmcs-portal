@@ -1,0 +1,21 @@
+<%- include('_head') %>
+<% const bc = accountCurrency || displayCurrency; %>
+<div class="pagehead"><div><h1><%= t('svc.title') %></h1><p class="sub"><%= t('svc.sub') %></p></div><a class="btn ghost" href="/store"><%- icon('plus') %><%= t('top.newService') %></a></div>
+<% if (!services.length) { %><div class="ui-empty"><h3><%= t('dash.noServices') %></h3><p><a href="/store"><%= t('dash.orderFirst') %></a></p></div><% } else { %>
+<div class="panel"><div class="pad"><table>
+  <thead><tr><th><%= t('col.service') %></th><th><%= t('col.cycle') %></th><th><%= t('col.price') %></th><th><%= t('col.status') %></th><th><%= t('col.renews') %></th><th><span class="sr-only"><%= t('col.actions') %></span></th></tr></thead>
+  <tbody>
+  <% services.forEach(s => { %>
+    <tr>
+      <td><span class="cell-main"><%= s.name %></span><span class="cell-sub"><%= s.domain || t('dash.noDomain') %></span></td>
+      <td><%= st(s.billingcycle) %></td>
+      <td><%= price(s.recurringamount || s.amount) %></td>
+      <td><span class="pill <%= s.status %>"><%= st(s.status) %></span></td>
+      <td><%= fmtDate(s.nextduedate) %></td>
+      <td><a class="row-link" href="/services/<%= s.id %>"><%= t('common.manage') %></a></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table></div></div>
+<% } %>
+<%- include('_foot') %>

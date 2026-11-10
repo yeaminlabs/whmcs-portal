@@ -1,0 +1,9 @@
+<%- include('_head') %>
+<div class="pagehead"><div><h1><%= t('con.title') %></h1><p class="sub"><%= t('con.sub') %></p></div></div>
+<% if (!contacts.length) { %><div class="ui-empty"><h3><%= t('con.empty') %></h3></div><% } else { %>
+<div class="panel"><div class="pad"><table>
+  <thead><tr><th><%= t('con.name') %></th><th><%= t('prof.email') %></th></tr></thead>
+  <tbody><% contacts.forEach(c => { %><tr><td><%= c.firstname %> <%= c.lastname %></td><td><%= c.email %></td></tr><% }) %></tbody>
+</table></div></div>
+<% } %>
+<%- include('_foot') %>

@@ -1,0 +1,217 @@
+<%- include('_head') %>
+<%
+const tr = (k, fb) => { const v = t(k); return v === k ? fb : v; };
+const cycles = product.pricing.cycles;
+const selected = cycles.find(c => c.id === form.billingcycle) || cycles.find(c => c.id === 'monthly') || cycles[0];
+const domainoption = form.domainoption || 'register';
+const prefix = product.pricing.prefix;
+const methods = paymethods.length ? paymethods : [];
+const pm = form.paymentmethod || (methods[0] && methods[0].module);
+const gname = tr('group.' + group.slug, group.name);
+const js = (v) => JSON.stringify(v).replace(/</g, '\\u003c');
+let step = 0;
+%>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/store"><%= t('store.crumb') %></a><%- icon('chev') %><a href="/store/<%= group.slug %>"><%= gname %></a><%- icon('chev') %><span><%= product.name %></span></nav>
+<div class="pagehead"><div><h1><%= t('conf.title', { name: product.name }) %></h1><p class="sub"><%= t(product.kind === 'hosting' ? 'conf.subHosting' : product.kind === 'server' ? 'conf.subServer' : 'conf.subOther') %></p></div></div>
+
+<% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+
+<form method="post" action="/store/<%= group.slug %>/<%= product.slug %>" class="checkout" id="checkout" novalidate>
+  <div class="checkout-main">
+
+    <% if (product.kind === 'hosting') { step++; %>
+    <section class="panel step" aria-labelledby="s-domain">
+      <header><span id="s-domain"><span class="step-n"><%= step %></span><%= t('conf.domain') %></span></header>
+      <div class="step-body">
+        <div class="choice-row" role="radiogroup" aria-label="<%= t('conf.domain') %>">
+          <label class="choice"><input type="radio" name="domainoption" value="register" <%= domainoption === 'register' ? 'checked' : '' %>><span><b><%= t('conf.register') %></b><small><%= t('conf.registerHint') %></small></span></label>
+          <label class="choice"><input type="radio" name="domainoption" value="transfer" <%= domainoption === 'transfer' ? 'checked' : '' %>><span><b><%= t('conf.transfer') %></b><small><%= t('conf.transferHint') %></small></span></label>
+          <label class="choice"><input type="radio" name="domainoption" value="owndomain" <%= domainoption === 'owndomain' ? 'checked' : '' %>><span><b><%= t('conf.own') %></b><small><%= t('conf.ownHint') %></small></span></label>
+        </div>
+        <div class="domain-row">
+          <label for="domain" class="sr-only"><%= t('col.domain') %></label>
+          <input id="domain" name="domain" value="<%= form.domain || '' %>" placeholder="mybusiness.com" autocomplete="off" autocapitalize="off" spellcheck="false" required>
+          <button type="button" class="btn ghost" id="check-domain"><%= t('conf.check') %></button>
+        </div>
+        <p class="domain-status" id="domain-status" aria-live="polite"></p>
+        <label class="epp" id="epp-field"<% if (domainoption !== 'transfer') { %> hidden<% } %>><%= t('conf.epp') %> <span class="opt"><%= t('conf.eppHint') %></span>
+          <input name="eppcode" autocomplete="off">
+        </label>
+      </div>
+    </section>
+    <% } %>
+
+    <% step++; %>
+    <section class="panel step" aria-labelledby="s-cycle">
+      <header><span id="s-cycle"><span class="step-n"><%= step %></span><%= t('conf.cycle') %></span><small><%= t('conf.cycleHint') %></small></header>
+      <div class="step-body">
+        <div class="cycle-grid" role="radiogroup" aria-label="<%= t('conf.cycle') %>">
+          <% cycles.forEach(c => { %>
+          <label class="choice cycle">
+            <input type="radio" name="billingcycle" value="<%= c.id %>" data-price="<%= c.price %>" data-setup="<%= c.setup %>" data-label="<%= st(c.label) %>" <%= c.id === selected.id ? 'checked' : '' %>>
+            <span>
+              <b><%= st(c.label) %></b>
+              <strong><%= money(c.price, prefix) %></strong>
+              <% if (c.months > 1) { %><small><%= t('conf.perMonth', { amount: money(c.perMonth, prefix) }) %></small><% } else if (c.setup > 0) { %><small><%= t('store.setupFee', { amount: money(c.setup, prefix) }) %></small><% } else { %><small>&nbsp;</small><% } %>
+              <% if (c.save) { %><em class="save"><%= t('conf.save', { pct: c.save }) %></em><% } %>
+            </span>
+          </label>
+          <% }) %>
+        </div>
+      </div>
+    </section>
+
+    <% if (product.kind === 'server') { step++; %>
+    <section class="panel step" aria-labelledby="s-server">
+      <header><span id="s-server"><span class="step-n"><%= step %></span><%= t('conf.server') %></span></header>
+      <div class="step-body">
+        <div class="field-row">
+          <label><%= t('conf.hostname') %><input name="hostname" value="<%= form.hostname || '' %>" placeholder="server1.mybusiness.com" autocomplete="off" autocapitalize="off" spellcheck="false" required></label>
+          <label><%= t('conf.rootpw') %><input type="password" name="rootpw" minlength="8" maxlength="64" autocomplete="new-password" required><small class="hint"><%= t('conf.rootpwHint') %></small></label>
+        </div>
+        <div class="field-row">
+          <label><%= t('conf.ns1') %><input name="ns1prefix" value="<%= form.ns1prefix || 'ns1' %>" autocomplete="off"></label>
+          <label><%= t('conf.ns2') %><input name="ns2prefix" value="<%= form.ns2prefix || 'ns2' %>" autocomplete="off"></label>
+        </div>
+      </div>
+    </section>
+    <% } %>
+
+    <% step++; %>
+    <section class="panel step" aria-labelledby="s-pay">
+      <header><span id="s-pay"><span class="step-n"><%= step %></span><%= t('conf.payment') %></span></header>
+      <div class="step-body">
+        <div class="pay-list" role="radiogroup" aria-label="<%= t('conf.payment') %>">
+          <% methods.forEach(m => { %>
+          <label class="choice pay"><input type="radio" name="paymentmethod" value="<%= m.module %>" <%= m.module === pm ? 'checked' : '' %>><span><b><%= String(m.displayname || m.module).split('|')[0].trim() %></b><% if (String(m.displayname).includes('|')) { %><small><%= String(m.displayname).split('|').slice(1).join(' ').trim() %></small><% } %></span></label>
+          <% }) %>
+        </div>
+        <label class="promo"><%= t('conf.promo') %> <span class="opt"><%= t('common.optional') %></span><input name="promocode" value="<%= form.promocode || '' %>" autocomplete="off"></label>
+      </div>
+    </section>
+  </div>
+
+  <aside class="checkout-side">
+    <div class="panel summary-card">
+      <header><%= t('conf.summary') %></header>
+      <div class="sum-body">
+        <div class="sum-product"><b><%= product.name %></b><small><%= gname %></small></div>
+        <dl>
+          <div><dt id="sum-cycle"><%= st(selected.label) %></dt><dd id="sum-price"><%= money(selected.price, prefix) %></dd></div>
+          <div id="sum-setup-row"<% if (!selected.setup) { %> hidden<% } %>><dt><%= t('conf.setup') %></dt><dd id="sum-setup"><%= money(selected.setup, prefix) %></dd></div>
+          <% if (product.kind === 'hosting') { %><div id="sum-domain-row" hidden><dt id="sum-domain-label"><%= t('col.domain') %></dt><dd id="sum-domain">—</dd></div><% } %>
+        </dl>
+        <div class="sum-total"><span><%= t('conf.dueToday') %></span><strong id="sum-total"><%= money(selected.price + selected.setup, prefix) %></strong></div>
+        <% if (billing) { %>
+        <p class="sum-bill" id="sum-bill-row"><%= t('conf.billedAs', { code: billing.code }) %> <b id="sum-bill"></b></p>
+        <% } %>
+        <p class="sum-note"><%= t('conf.taxNote', { code: billing ? billing.code : product.pricing.code }) %></p>
+        <button type="submit" class="btn red sum-cta"><%= t('conf.complete') %> <%- icon('arrow') %></button>
+        <p class="sum-secure"><%- icon('lock') %><%= t('conf.secure') %></p>
+      </div>
+    </div>
+  </aside>
+</form>
+
+<script>
+(() => {
+  const I18N = <%- js({
+    reg: t('conf.sumRegister'), xfer: t('conf.sumTransfer'), atCheckout: t('conf.priceAtCheckout'),
+    checking: t('conf.checking'), available: t('conf.available'), firstYear: t('conf.firstYear'),
+    taken: t('conf.taken'), notRegistered: t('conf.notRegistered'), canTransfer: t('conf.canTransfer'),
+    pointNs: t('conf.pointNs'), checkFail: t('conf.checkFail'), placing: t('conf.placing'),
+  }) %>;
+  const fill = (s, v) => s.replace(/\{(\w+)\}/g, (m, k) => (v[k] == null ? m : v[k]));
+  const form = document.getElementById('checkout');
+  const prefix = <%- js(prefix) %>;
+  const tlds = <%- js(tlds || {}) %>;
+  const billing = <%- js(billing) %>;
+  const fmtWith = (p) => (n) => p + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmt = fmtWith(prefix);
+  const $ = (id) => document.getElementById(id);
+  const domainInput = $('domain');
+
+  const domainOption = () => { const r = form.querySelector('input[name="domainoption"]:checked'); return r ? r.value : null; };
+  const cleanDomain = (v) => String(v || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '');
+  function domainFee(map) {
+    if (!domainInput) return 0;
+    const opt = domainOption();
+    const d = cleanDomain(domainInput.value);
+    if (opt === 'owndomain' || !d.includes('.')) return 0;
+    const p = map[d.split('.').slice(1).join('.')];
+    const fee = p ? (opt === 'transfer' ? p.transfer : p.register) : null;
+    return fee == null ? null : fee;
+  }
+  function update() {
+    const c = form.querySelector('input[name="billingcycle"]:checked');
+    if (!c) return;
+    const price = Number(c.dataset.price), setup = Number(c.dataset.setup);
+    $('sum-cycle').textContent = c.dataset.label;
+    $('sum-price').textContent = fmt(price);
+    $('sum-setup-row').hidden = !setup;
+    $('sum-setup').textContent = fmt(setup);
+    let fee = 0;
+    const row = $('sum-domain-row');
+    if (row) {
+      const opt = domainOption();
+      const d = cleanDomain(domainInput.value);
+      row.hidden = opt === 'owndomain' || !d.includes('.');
+      fee = domainFee(tlds);
+      $('sum-domain-label').textContent = fill(opt === 'transfer' ? I18N.xfer : I18N.reg, { domain: d });
+      $('sum-domain').textContent = fee == null ? I18N.atCheckout : fmt(fee);
+    }
+    $('sum-total').textContent = fmt(price + setup + (fee || 0));
+    if (billing) {
+      const b = billing.cycles[c.value] || { price: 0, setup: 0 };
+      const bfee = domainFee(billing.tlds) || 0;
+      $('sum-bill').textContent = fmtWith(billing.prefix)(b.price + b.setup + bfee);
+    }
+  }
+  form.addEventListener('change', (e) => {
+    if (e.target.name === 'domainoption') {
+      const epp = $('epp-field');
+      if (epp) epp.hidden = e.target.value !== 'transfer';
+      $('domain-status').textContent = '';
+    }
+    update();
+  });
+  if (domainInput) {
+    domainInput.addEventListener('input', () => { $('domain-status').textContent = ''; $('domain-status').className = 'domain-status'; update(); });
+    $('check-domain').addEventListener('click', async () => {
+      const status = $('domain-status');
+      const d = cleanDomain(domainInput.value);
+      if (!d) { domainInput.focus(); return; }
+      status.className = 'domain-status';
+      status.textContent = fill(I18N.checking, { domain: d });
+      try {
+        const r = await fetch('/store/domain-check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ domain: d }) });
+        const j = await r.json();
+        if (!j.ok) throw new Error(j.error);
+        const opt = domainOption();
+        if (opt === 'register') {
+          status.className = 'domain-status ' + (j.available ? 'ok' : 'bad');
+          status.textContent = j.available
+            ? fill(I18N.available, { domain: d }) + (j.register != null ? ' · ' + fill(I18N.firstYear, { price: fmt(j.register) }) : '')
+            : fill(I18N.taken, { domain: d });
+        } else if (opt === 'transfer') {
+          status.className = 'domain-status ' + (j.available ? 'bad' : 'ok');
+          status.textContent = j.available ? fill(I18N.notRegistered, { domain: d }) : fill(I18N.canTransfer, { domain: d }) + (j.transfer != null ? ' · ' + fmt(j.transfer) : '');
+        } else {
+          status.className = 'domain-status ok';
+          status.textContent = fill(I18N.pointNs, { domain: d });
+        }
+      } catch (err) {
+        status.className = 'domain-status bad';
+        status.textContent = err.message || I18N.checkFail;
+      }
+    });
+  }
+  form.addEventListener('submit', () => {
+    const btn = form.querySelector('.sum-cta');
+    btn.setAttribute('aria-disabled', 'true');
+    btn.textContent = I18N.placing;
+  });
+  update();
+})();
+</script>
+<%- include('_foot') %>

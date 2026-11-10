@@ -1,0 +1,5 @@
+<%- include('_head') %>
+<div class="pagehead"><div><h1><%= t('kb.title') %></h1><p class="sub"><%= t('kb.sub') %></p></div></div>
+<% if (!items.length) { %><div class="ui-empty"><h3><%= t('kb.empty') %></h3><p><a href="/tickets/new"><%= t('dash.openTicket') %></a></p></div><% } %>
+<div class="group-grid"><% items.forEach(a => { %><article class="ui-card"><div class="ui-card-header"><span class="ui-badge outline"><%= a.category || t('kb.guide') %></span><h2 class="ui-card-title"><%= a.title %></h2></div><div class="ui-card-footer"><a class="ui-btn" data-variant="outline" href="/tickets/new"><%= t('kb.ask') %></a></div></article><% }) %></div>
+<%- include('_foot') %>

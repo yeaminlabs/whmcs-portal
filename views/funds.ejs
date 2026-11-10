@@ -1,0 +1,13 @@
+<%- include('_head') %>
+<% const bc = accountCurrency || displayCurrency; %>
+<div class="pagehead"><div><h1><%= t('funds.title') %></h1><p class="sub"><%= t('funds.sub') %></p></div></div>
+<% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+<div class="card funds-card">
+  <span class="funds-label"><%= t('funds.balance') %></span>
+  <strong class="funds-amount"><%= price(credit) %></strong>
+  <% const b = billedAs(credit); if (b) { %><small class="cell-sub"><%= t('cur.billed', { amount: b }) %></small><% } %>
+  <p class="sub"><%= t('funds.how') %></p>
+  <form method="post" action="/funds"><button type="submit" class="btn red"><%= t('funds.cta') %> <%- icon('arrow') %></button></form>
+  <p class="sum-secure"><%- icon('lock') %><%= t('pay.secureNote') %></p>
+</div>
+<%- include('_foot') %>

@@ -1,0 +1,9 @@
+<% const typed = service.domain || service.name; %>
+<div class="svc-actions">
+<% list.forEach(a => { %>
+  <form method="post" action="/services/<%= service.id %>/action" class="svc-act" data-label="<%= a.label %>"<% if (a.confirm || a.danger) { %> data-confirm="1"<% } %><% if (a.danger) { %> data-danger="1" data-typed="<%= typed %>"<% } %><% if (a.console) { %> data-console="1"<% } %>>
+    <input type="hidden" name="fn" value="<%= a.fn %>">
+    <button type="submit" class="btn <%= a.danger ? 'ghost danger' : (active && locals.primary === a.fn ? 'red' : 'ghost') %>"<% if (!active) { %> disabled<% } %>><%- icon(a.icon) %><span><%= a.label %></span></button>
+  </form>
+<% }) %>
+</div>

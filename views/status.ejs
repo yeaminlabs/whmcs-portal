@@ -1,0 +1,273 @@
+<%- include('_head') %>
+<%
+const model = locals.status || null;
+const NS_KEYS = [
+  'stat.title', 'ns.sub',
+  'ns.head.operational', 'ns.head.degraded', 'ns.head.outage', 'ns.head.maintenance', 'ns.head.unknown',
+  'ns.lede.operational', 'ns.lede.degraded', 'ns.lede.outage', 'ns.lede.maintenance', 'ns.lede.unknown',
+  'ns.updatedNow', 'ns.updatedAgo', 'ns.autoRefresh', 'ns.stale', 'ns.summaryAria',
+  'ns.cell.uptime', 'ns.cell.uptimeSub', 'ns.cell.up', 'ns.cell.of', 'ns.cell.down', 'ns.cell.downYes', 'ns.cell.downNo', 'ns.cell.paused', 'ns.cell.pausedSub',
+  'ns.s.up', 'ns.s.down', 'ns.s.paused', 'ns.s.pending', 'ns.s.unknown',
+  'ns.for.up', 'ns.for.down', 'ns.for.paused', 'ns.for.pending',
+  'ns.kind.server', 'ns.kind.website', 'ns.kind.service', 'ns.groupUp', 'ns.checkedFrom',
+  'ns.region.North America', 'ns.region.Europe', 'ns.region.Asia', 'ns.region.Oceania', 'ns.region.South America', 'ns.region.Africa',
+  'ns.col.response', 'ns.col.d1', 'ns.col.d7', 'ns.col.d30', 'ns.ms',
+  'ns.bars.aria', 'ns.bars.tip', 'ns.bars.none', 'ns.bars.start', 'ns.bars.end',
+  'ns.inc.title', 'ns.inc.range', 'ns.inc.empty', 'ns.inc.ongoing', 'ns.inc.resolved', 'ns.inc.started', 'ns.inc.duration', 'ns.inc.ended', 'ns.inc.notYet', 'ns.inc.noReason', 'ns.tz',
+  'ns.setup.title', 'ns.setup.text', 'ns.openTicket', 'ns.noMonitors', 'ns.noData',
+  'ns.dur.sec', 'ns.dur.min', 'ns.dur.hm', 'ns.dur.hour', 'ns.dur.hours', 'ns.dur.day', 'ns.dur.days',
+];
+const NS_L = { lang, locale: (langs.find((l) => l.code === lang) || langs[0]).locale, tz: 'Asia/Dhaka', s: {}, icons: {} };
+NS_KEYS.forEach((k) => { NS_L.s[k] = t(k); });
+['server', 'globe', 'bolt', 'activity', 'check', 'alert', 'stop', 'refresh'].forEach((n) => { NS_L.icons[n] = icon(n); });
+
+/* Shared by the server render and the in-page refresh (sent to the browser via toString), so it must stay self-contained. */
+const NS = function (L) {
+  const S = L.s;
+  const t = (k, v) => {
+    let s = S[k];
+    if (s == null) return k;
+    if (v) s = s.replace(/\{(\w+)\}/g, (m, n) => (v[n] == null ? m : String(v[n])));
+    return s;
+  };
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const ico = (n) => L.icons[n] || '';
+  const isNum = (n) => typeof n === 'number' && isFinite(n);
+  const nf = new Intl.NumberFormat(L.locale, { maximumFractionDigits: 2 });
+  const int = (n) => new Intl.NumberFormat(L.locale, { maximumFractionDigits: 0 }).format(isNum(n) ? n : 0);
+  const pct = (n) => (isNum(n) ? nf.format(n) + '%' : '—');
+  const dDay = new Intl.DateTimeFormat(L.locale, { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const dTime = new Intl.DateTimeFormat(L.locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: L.tz });
+  const ms = (v) => { const n = v ? Date.parse(v) : NaN; return isNaN(n) ? null : n; };
+  const day = (v) => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(v || ''));
+    return m ? dDay.format(new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]))) : '—';
+  };
+  const when = (v) => { const n = ms(v); return n == null ? '—' : dTime.format(new Date(n)); };
+  const dur = (sec) => {
+    const s = Math.max(0, Math.round(sec));
+    if (s < 60) return t('ns.dur.sec', { n: int(s) });
+    const m = Math.floor(s / 60);
+    if (m < 60) return t('ns.dur.min', { n: int(m) });
+    const h = Math.floor(m / 60);
+    if (h < 24) {
+      if (h < 10 && m % 60) return t('ns.dur.hm', { h: int(h), m: int(m % 60) });
+      return h === 1 ? t('ns.dur.hour') : t('ns.dur.hours', { n: int(h) });
+    }
+    const d = Math.floor(h / 24);
+    return d === 1 ? t('ns.dur.day') : t('ns.dur.days', { n: int(d) });
+  };
+  const rel = (kind, at, now) => {
+    const n = ms(at);
+    if (n == null) return '';
+    const sec = Math.max(0, (now - n) / 1000);
+    if (kind === 'updated') return sec < 45 ? t('ns.updatedNow') : t('ns.updatedAgo', { d: dur(sec) });
+    if (kind === 'dur') return dur(sec);
+    return t('ns.for.' + kind, { d: dur(sec) });
+  };
+  const relSpan = (kind, at, now) => {
+    const text = rel(kind, at, now);
+    return text ? `<span data-rel="${kind}" data-ts="${esc(at)}">${esc(text)}</span>` : '';
+  };
+
+  const STATES = ['operational', 'degraded', 'outage', 'maintenance', 'unknown'];
+  const MSTATES = ['up', 'down', 'paused', 'pending', 'unknown'];
+  const RANK = { down: 0, unknown: 1, pending: 2, up: 3, paused: 4 };
+  const KINDS = [['server', 'server'], ['website', 'globe'], ['service', 'bolt']];
+  const stateOf = (m) => (STATES.includes(m.overall) ? m.overall : 'unknown');
+  const mstate = (s) => (MSTATES.includes(s) ? s : 'unknown');
+  const kindOf = (k) => (KINDS.some((x) => x[0] === k) ? k : 'service');
+  const band = (u) => (!isNum(u) ? 'none' : u >= 100 ? 'ok' : u >= 99 ? 'hi' : u >= 95 ? 'warn' : 'bad');
+  const hasData = (m) => Array.isArray(m.monitors) && m.monitors.length > 0;
+
+  const hero = (m, now) => {
+    const state = stateOf(m);
+    const c = m.counts || {};
+    const n = (k) => (isNum(c[k]) ? c[k] : 0);
+    const total = isNum(c.total) ? c.total : n('up') + n('down') + n('paused');
+    const cell = (cls, icon, label, value, sub) => `<li${cls ? ` class="${cls}"` : ''}><span>${ico(icon)}${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(sub)}</small></li>`;
+    return `<section class="welcome ns-hero reveal" data-state="${state}" aria-labelledby="ns-title">
+  <div class="ns-hero-row">
+    <div class="ns-hero-main">
+      <h1 id="ns-title" class="ns-eyebrow">${esc(t('stat.title'))}</h1>
+      <p class="ns-headline"><span class="ns-dot" aria-hidden="true"></span><span data-ns-headline>${esc(t('ns.head.' + state))}</span></p>
+      <p class="ns-lede">${esc(t('ns.lede.' + state, { down: int(n('down')), total: int(total) }))}</p>
+    </div>
+    <p class="ns-meta">${ico('refresh')}<span>${m.updatedAt ? relSpan('updated', m.updatedAt, now) + '<span class="ns-sep" aria-hidden="true">·</span>' : ''}${esc(t('ns.autoRefresh'))}</span></p>
+  </div>
+  ${m.stale ? `<p class="ns-stale">${ico('alert')}${esc(t('ns.stale'))}</p>` : ''}
+  ${state === 'unknown' && !hasData(m) ? '' : `<ul class="ns-cells" aria-label="${esc(t('ns.summaryAria'))}">
+    ${cell('', 'activity', t('ns.cell.uptime'), pct(m.uptime30), t('ns.cell.uptimeSub'))}
+    ${cell('', 'check', t('ns.cell.up'), int(n('up')), t('ns.cell.of', { total: int(total) }))}
+    ${cell(n('down') ? 'down' : '', 'alert', t('ns.cell.down'), int(n('down')), t(n('down') ? 'ns.cell.downYes' : 'ns.cell.downNo'))}
+    ${cell('', 'stop', t('ns.cell.paused'), int(n('paused')), t('ns.cell.pausedSub'))}
+  </ul>`}
+</section>`;
+  };
+
+  const strip = (mo) => {
+    const list = Array.isArray(mo.bars) && mo.bars.length ? mo.bars : Array.from({ length: 30 }, () => ({ date: null, uptime: null }));
+    const tally = { ok: 0, issues: 0, none: 0 };
+    const bars = list.map((b, i) => {
+      const u = b && isNum(b.uptime) ? b.uptime : null;
+      const k = band(u);
+      tally[k === 'none' ? 'none' : k === 'ok' ? 'ok' : 'issues'] += 1;
+      const d = day(b && b.date);
+      const tip = u == null ? t('ns.bars.none', { date: d }) : t('ns.bars.tip', { date: d, pct: pct(u) });
+      return `<i class="ns-bar" data-u="${k}" data-tip="${esc(tip)}" style="--i:${i}"></i>`;
+    }).join('');
+    const label = t('ns.bars.aria', { name: mo.name || '', full: int(tally.ok), issues: int(tally.issues), none: int(tally.none) });
+    return `<div class="ns-strip-wrap">
+      <div class="ns-strip" role="img" aria-label="${esc(label)}">${bars}</div>
+      <div class="ns-axis" aria-hidden="true"><span>${esc(t('ns.bars.start'))}</span><span>${esc(t('ns.bars.end'))}</span></div>
+    </div>`;
+  };
+
+  const row = (mo, now) => {
+    const s = mstate(mo.status);
+    const icon = KINDS.find((x) => x[0] === kindOf(mo.kind))[1];
+    const since = ['up', 'down', 'paused'].includes(s) ? relSpan(s, mo.since, now) : s === 'pending' ? esc(t('ns.for.pending')) : '';
+    const regionKey = 'ns.region.' + mo.region;
+    const region = mo.region ? t('ns.checkedFrom', { region: S[regionKey] != null ? S[regionKey] : mo.region }) : '';
+    const reason = s === 'down' && mo.lastIncident && mo.lastIncident.reason ? mo.lastIncident.reason : '';
+    const u = mo.uptime || {};
+    const r = mo.responseMs || {};
+    const stat = (label, value) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`;
+    return `<li class="ns-mon" data-s="${s}">
+    <div class="ns-id">
+      <span class="ns-kind" aria-hidden="true">${ico(icon)}</span>
+      <div class="ns-idtext">
+        <strong class="ns-name">${esc(mo.name)}</strong>
+        <span class="ns-line"><span class="pill ns-pill" data-s="${s}">${esc(t('ns.s.' + s))}</span>${since ? `<span class="ns-since">${since}</span>` : ''}</span>
+        ${reason || region ? `<span class="ns-subline">${reason ? `<span class="ns-reason">${esc(reason)}</span>` : ''}${region ? `<span>${esc(region)}</span>` : ''}</span>` : ''}
+      </div>
+    </div>
+    <dl class="ns-stats">${stat(t('ns.col.response'), isNum(r.avg) ? t('ns.ms', { n: int(r.avg) }) : '—')}${stat(t('ns.col.d1'), pct(u.d1))}${stat(t('ns.col.d7'), pct(u.d7))}${stat(t('ns.col.d30'), pct(u.d30))}</dl>
+    ${strip(mo)}
+  </li>`;
+  };
+
+  const groups = (m, now) => {
+    if (!hasData(m)) {
+      return `<div class="ui-empty ns-empty">${ico('activity')}<p>${esc(t(stateOf(m) === 'unknown' ? 'ns.noData' : 'ns.noMonitors'))}</p></div>`;
+    }
+    const list = m.monitors.map((mo, i) => ({ mo, i }));
+    return KINDS.map(([k, icon]) => {
+      const items = list.filter((x) => kindOf(x.mo.kind) === k)
+        .sort((a, b) => RANK[mstate(a.mo.status)] - RANK[mstate(b.mo.status)] || a.i - b.i);
+      if (!items.length) return '';
+      const up = items.filter((x) => x.mo.status === 'up').length;
+      return `<section class="panel ns-group reveal reveal-2" aria-labelledby="ns-g-${k}">
+  <header><span id="ns-g-${k}" class="ns-group-title">${ico(icon)}${esc(t('ns.kind.' + k))}</span><small>${esc(t('ns.groupUp', { up: int(up), total: int(items.length) }))}</small></header>
+  <ul class="ns-list">${items.map((x) => row(x.mo, now)).join('')}</ul>
+</section>`;
+    }).join('');
+  };
+
+  const incidents = (m, now) => {
+    if (!hasData(m) && stateOf(m) === 'unknown') return '';
+    const list = (Array.isArray(m.incidents) ? m.incidents : []).map((x, i) => ({ x, i }))
+      .sort((a, b) => (a.x.status === 'ongoing' ? 0 : 1) - (b.x.status === 'ongoing' ? 0 : 1) || a.i - b.i)
+      .map((o) => o.x);
+    const head = `<header><span id="ns-inc-h">${esc(t('ns.inc.title'))}</span><small>${esc(t('ns.inc.range'))}</small></header>`;
+    if (!list.length) {
+      return `<section class="panel ns-inc reveal reveal-3" aria-labelledby="ns-inc-h">${head}<p class="ns-inc-empty"><span>${ico('check')}</span>${esc(t('ns.inc.empty'))}</p></section>`;
+    }
+    const time = (label, value) => `<div><dt>${esc(label)}</dt><dd>${value}</dd></div>`;
+    const item = (x) => {
+      const on = x.status === 'ongoing';
+      const length = on ? (relSpan('dur', x.startedAt, now) || '—') : esc(isNum(x.durationSec) ? dur(x.durationSec) : '—');
+      return `<li class="ns-inc-item" data-s="${on ? 'ongoing' : 'resolved'}">
+    <span class="pill ns-pill" data-s="${on ? 'down' : 'up'}">${esc(t(on ? 'ns.inc.ongoing' : 'ns.inc.resolved'))}</span>
+    <div class="ns-inc-main"><strong>${esc(x.monitorName)}</strong><span>${esc(x.reason || t('ns.inc.noReason'))}</span></div>
+    <dl class="ns-inc-times">${time(t('ns.inc.started'), esc(when(x.startedAt)))}${time(t('ns.inc.duration'), length)}${time(t('ns.inc.ended'), esc(on || !x.resolvedAt ? t('ns.inc.notYet') : when(x.resolvedAt)))}</dl>
+  </li>`;
+    };
+    return `<section class="panel ns-inc reveal reveal-3" aria-labelledby="ns-inc-h">${head}<ol class="ns-inc-list">${list.map(item).join('')}</ol><p class="ns-tz">${esc(t('ns.tz'))}</p></section>`;
+  };
+
+  const setup = () => `<div class="pagehead"><div><h1>${esc(t('stat.title'))}</h1><p class="sub">${esc(t('ns.sub'))}</p></div></div>
+<div class="ui-empty ns-setup reveal">${ico('activity')}<h3>${esc(t('ns.setup.title'))}</h3><p>${esc(t('ns.setup.text'))}</p><a class="btn ghost" href="/tickets/new">${esc(t('ns.openTicket'))}</a></div>`;
+
+  return {
+    page: (m, now) => {
+      const v = m || {};
+      return v.configured === false ? setup() : hero(v, now) + groups(v, now) + incidents(v, now);
+    },
+    headline: (m) => (m && m.configured === false ? t('ns.setup.title') : t('ns.head.' + stateOf(m || {}))),
+    tick: (root, now) => {
+      root.querySelectorAll('[data-rel]').forEach((el) => {
+        const text = rel(el.dataset.rel, el.dataset.ts, now);
+        if (text && el.textContent !== text) el.textContent = text;
+      });
+    },
+  };
+};
+const V = NS(NS_L);
+const json = (v) => JSON.stringify(v == null ? null : v).replace(/</g, '\\u003c');
+%>
+<div id="ns-root" class="ns"><%- V.page(model, Date.now()) %></div>
+<p id="ns-live" class="sr-only" aria-live="polite"></p>
+<script type="application/json" id="ns-l"><%- json(NS_L) %></script>
+<script type="application/json" id="ns-model"><%- json(model) %></script>
+<script>
+(() => {
+  const NS = <%- NS.toString() %>;
+  const root = document.getElementById('ns-root');
+  const live = document.getElementById('ns-live');
+  const V = NS(JSON.parse(document.getElementById('ns-l').textContent));
+  let model = JSON.parse(document.getElementById('ns-model').textContent);
+  const EVERY = 60000;
+  let lastPoll = Date.now();
+  let pollTimer = null;
+  let clock = null;
+  let busy = false;
+
+  const tick = () => V.tick(root, Date.now());
+  const render = (m) => {
+    const before = V.headline(model);
+    model = m;
+    root.dataset.live = '1';
+    root.innerHTML = V.page(m, Date.now());
+    const after = V.headline(m);
+    if (after !== before) live.textContent = after;
+  };
+  const schedule = (ms) => {
+    clearTimeout(pollTimer);
+    if (!document.hidden) pollTimer = setTimeout(poll, Math.max(0, ms));
+  };
+  async function poll() {
+    if (busy) return;
+    busy = true;
+    try {
+      const r = await fetch('/status.json', { headers: { Accept: 'application/json' }, credentials: 'same-origin', cache: 'no-store' });
+      if (!r.ok || r.redirected || !/json/i.test(r.headers.get('content-type') || '')) throw new Error('bad response');
+      const body = await r.json();
+      const m = body && typeof body === 'object' && !('overall' in body) && !('configured' in body) && body.status ? body.status : body;
+      if (!m || typeof m !== 'object') throw new Error('bad body');
+      render(m);
+    } catch (e) {
+      if (model && !model.stale) render(Object.assign({}, model, { stale: true }));
+    } finally {
+      busy = false;
+      lastPoll = Date.now();
+      schedule(EVERY);
+    }
+  }
+  const startClock = () => { clearInterval(clock); clock = setInterval(tick, 30000); };
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      clearTimeout(pollTimer);
+      clearInterval(clock);
+      return;
+    }
+    tick();
+    startClock();
+    schedule(EVERY - (Date.now() - lastPoll));
+  });
+  startClock();
+  schedule(EVERY);
+})();
+</script>
+<%- include('_foot') %>

@@ -1,0 +1,69 @@
+<%- include('../_head') %>
+<%- include('_header') %>
+<%
+const s = service;
+const ip = s.dedicatedip || (s.server && s.server.ip) || '';
+const host = s.server && (s.server.hostname || s.server.name);
+const TILES = [
+  { app: 'Email_Accounts', icon: 'mail' },
+  { app: 'FileManager_Home', icon: 'folder' },
+  { app: 'Database_MySQL', icon: 'database' },
+  { app: 'Database_phpMyAdmin', icon: 'disk' },
+  { app: 'Backups_Home', icon: 'archive' },
+  { app: 'SSL_TLS_Status', icon: 'lock' },
+  { app: 'Domains_Home', icon: 'globe' },
+  { app: 'WordPress_Manager', icon: 'book' },
+];
+const meter = (label, ic, used, limit) => {
+  const known = used != null;
+  const unl = !(Number(limit) > 0);
+  const p = k.pct(used, limit);
+%>
+<div class="svc-meter">
+  <div class="svc-meter-top"><span><%- icon(ic) %><%= label %></span><b><%= known ? k.sizeMB(used) : '—' %> <small>/ <%= unl ? t('svcx.unlimited') : k.sizeMB(limit) %></small></b></div>
+  <div class="svc-bar<%= unl ? ' unl' : p >= 90 ? ' hot' : p >= 75 ? ' warm' : '' %>" role="progressbar" aria-label="<%= label %>" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<%= unl ? 0 : p %>"><i style="width:<%= unl ? 0 : p %>%"></i></div>
+  <small class="svc-meter-sub"><%= unl ? t('svcx.noLimit') : t('svcx.pctUsed', { pct: p }) %></small>
+</div>
+<% } %>
+
+<div class="detail-grid">
+  <div>
+    <section class="panel">
+      <header><span><%= t('svcx.host.signOn') %></span><small class="svc-head-note"><%- icon('external') %><%= t('svcx.newTab') %></small></header>
+      <form method="post" action="/services/<%= s.id %>/sso" target="_blank" class="svc-body">
+        <div class="svc-row">
+          <button type="submit" name="app" value="" class="btn red"<% if (!active) { %> disabled<% } %>><%- icon('external') %><%= t('svcx.host.cpanel') %></button>
+          <button type="submit" name="app" value="Email_Webmail" class="btn ghost"<% if (!active) { %> disabled<% } %>><%- icon('mail') %><%= t('svcx.host.webmail') %></button>
+        </div>
+        <% if (!active) { %><p class="hint"><%= t('svcx.whenActive') %></p><% } %>
+        <p class="svc-label"><%= t('svcx.host.shortcuts') %></p>
+        <div class="svc-tiles">
+          <% TILES.forEach(x => { %><button type="submit" name="app" value="<%= x.app %>" class="svc-tile"<% if (!active) { %> disabled<% } %>><%- icon(x.icon) %><span><%= t('svcx.app.' + x.app) %></span></button><% }) %>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <header><span><%= t('svcx.host.usage') %></span><% if (s.lastupdate) { %><small class="svc-head-note"><%= t('svcx.host.updated', { date: fmtDate(s.lastupdate) }) %></small><% } %></header>
+      <div class="svc-body svc-meters">
+        <% meter(t('svcx.host.disk'), 'disk', s.diskusage, s.disklimit) %>
+        <% meter(t('svcx.host.bandwidth'), 'activity', s.bwusage, s.bwlimit) %>
+      </div>
+    </section>
+  </div>
+
+  <div class="detail-side">
+    <section class="panel">
+      <header><%= t('svcx.host.account') %></header>
+      <dl class="kv">
+        <div><dt><%= t('svc.username') %></dt><dd class="svc-copyable"><span class="mono"><%= s.username || '—' %></span><% if (s.username) { %><button type="button" class="svc-copy" data-copy="<%= s.username %>" aria-label="<%= t('svcx.copyValue', { value: s.username }) %>" hidden><%- icon('copy') %></button><% } %></dd></div>
+        <div><dt><%= t('svc.server') %></dt><dd class="mono"><%= host || '—' %></dd></div>
+        <div><dt><%= t('svcx.host.ip') %></dt><dd class="svc-copyable"><span class="mono"><%= ip || '—' %></span><% if (ip) { %><button type="button" class="svc-copy" data-copy="<%= ip %>" aria-label="<%= t('svcx.copyValue', { value: ip }) %>" hidden><%- icon('copy') %></button><% } %></dd></div>
+        <div><dt><%= t('svcx.host.nameservers') %></dt><dd class="mono svc-lines"><% if (s.nameservers && s.nameservers.length) { s.nameservers.forEach(n => { %><span><%= n %></span><% }) } else { %>—<% } %></dd></div>
+      </dl>
+    </section>
+    <%- include('_plan') %>
+  </div>
+</div>
+<%- include('_script') %>
+<%- include('../_foot') %>

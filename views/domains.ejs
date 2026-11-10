@@ -1,0 +1,19 @@
+<%- include('_head') %>
+<div class="pagehead"><div><h1><%= t('dom.title') %></h1><p class="sub"><%= t('dom.sub') %></p></div><a class="btn ghost" href="/order/domain"><%- icon('search') %><%= t('nav.registerDomain') %></a></div>
+<% if (!domains.length) { %><div class="ui-empty"><h3><%= t('dash.noDomains') %></h3><p><a href="/order/domain"><%= t('dash.searchDomain') %></a></p></div><% } else { %>
+<div class="panel"><div class="pad"><table>
+  <thead><tr><th><%= t('col.domain') %></th><th><%= t('col.status') %></th><th><%= t('col.expires') %></th><th><%= t('dom.autoRenew') %></th><th><span class="sr-only"><%= t('col.actions') %></span></th></tr></thead>
+  <tbody>
+  <% domains.forEach(d => { %>
+    <tr>
+      <td><%= d.domainname %></td>
+      <td><span class="pill <%= d.status %>"><%= st(d.status) %></span></td>
+      <td><%= fmtDate(d.expirydate) %></td>
+      <td><%= String(d.donotrenew) === '1' ? t('common.off') : t('common.on') %></td>
+      <td><a class="row-link" href="/domains/<%= d.id %>"><%= t('common.manage') %></a></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table></div></div>
+<% } %>
+<%- include('_foot') %>

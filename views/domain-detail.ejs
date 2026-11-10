@@ -1,0 +1,39 @@
+<%- include('_head') %>
+<% const ns = domain.nameservers || []; const locked = String(domain.lockstatus).toLowerCase() === 'locked'; %>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/domains"><%= t('nav.domains') %></a><%- icon('chev') %><span><%= domain.domainname %></span></nav>
+<div class="pagehead"><div><h1><%= domain.domainname %></h1><p class="sub"><span class="pill <%= domain.status %>"><%= st(domain.status) %></span> · <%= t('dom.expiresOn', { date: fmtDate(domain.expirydate) }) %></p></div>
+  <form method="post" action="/domains/<%= domain.id %>/renew"><button type="submit" class="btn red"><%= t('dom.renew') %></button></form></div>
+<% if (saved) { %><p class="alert ok" role="status"><%= t('common.saved') %></p><% } %>
+<% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+
+<div class="detail-grid">
+  <section class="panel">
+    <header><%= t('dom.nameservers') %></header>
+    <form method="post" action="/domains/<%= domain.id %>/ns" class="pad-form">
+      <% for (let n = 1; n <= 4; n++) { %>
+      <label><%= t('dom.ns', { n }) %><% if (n > 2) { %> <span class="opt"><%= t('common.optional') %></span><% } %><input name="ns<%= n %>" value="<%= ns[n - 1] || '' %>" placeholder="ns<%= n %>.snbdhost.com" autocomplete="off" autocapitalize="off" spellcheck="false" <%= n <= 2 ? 'required' : '' %>></label>
+      <% } %>
+      <button type="submit" class="btn"><%= t('dom.saveNs') %></button>
+    </form>
+  </section>
+  <div class="detail-side">
+    <section class="panel">
+      <header><%= t('dom.details') %></header>
+      <dl class="kv">
+        <div><dt><%= t('dom.registered') %></dt><dd><%= fmtDate(domain.regdate) %></dd></div>
+        <div><dt><%= t('col.expires') %></dt><dd><%= fmtDate(domain.expirydate) %></dd></div>
+        <div><dt><%= t('dom.autoRenew') %></dt><dd><%= String(domain.donotrenew) === '1' ? t('common.off') : t('common.on') %></dd></div>
+        <% if (domain.lockstatus) { %><div><dt><%= t('dom.lock') %></dt><dd><%= locked ? t('dom.locked') : t('dom.unlocked') %></dd></div><% } %>
+      </dl>
+    </section>
+    <section class="panel">
+      <header><%= t('dom.lock') %></header>
+      <form method="post" action="/domains/<%= domain.id %>/lock" class="pad-form">
+        <p class="hint"><%= t('dom.lockHint') %></p>
+        <input type="hidden" name="lock" value="<%= locked ? '0' : '1' %>">
+        <button type="submit" class="btn ghost"><%= locked ? t('dom.unlock') : t('dom.lockCta') %></button>
+      </form>
+    </section>
+  </div>
+</div>
+<%- include('_foot') %>

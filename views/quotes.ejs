@@ -1,0 +1,20 @@
+<%- include('_head') %>
+<% const bc = accountCurrency || displayCurrency; %>
+<div class="pagehead"><div><h1><%= t('quo.title') %></h1><p class="sub"><%= t('quo.sub') %></p></div></div>
+<% if (!quotes.length) { %><div class="ui-empty"><h3><%= t('quo.empty') %></h3></div><% } else { %>
+<div class="panel"><div class="pad"><table>
+  <thead><tr><th><%= t('tix.subject') %></th><th><%= t('quo.stage') %></th><th><%= t('quo.validUntil') %></th><th><%= t('col.total') %></th><th><span class="sr-only"><%= t('col.actions') %></span></th></tr></thead>
+  <tbody>
+  <% quotes.forEach(q => { %>
+    <tr>
+      <td><span class="cell-main"><%= q.subject %></span><span class="cell-sub">#<%= q.id %></span></td>
+      <td><%= st(q.stage) %></td>
+      <td><%= fmtDate(q.validuntil) %></td>
+      <td><%= price(q.total) %></td>
+      <td><% if (!['Accepted', 'Lost', 'Dead'].includes(q.stage)) { %><form method="post" action="/quotes/<%= q.id %>/accept"><button type="submit" class="btn btn-sm"><%= t('quo.accept') %></button></form><% } %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table></div></div>
+<% } %>
+<%- include('_foot') %>

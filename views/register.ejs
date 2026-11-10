@@ -1,0 +1,15 @@
+<%- include('_head') %>
+<h1><%= t('reg.title') %></h1>
+<p class="sub"><%= t('reg.sub') %></p>
+<% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+<form method="post" action="/register" class="card">
+  <div class="field-row">
+    <label><%= t('prof.first') %><input name="firstname" required autocomplete="given-name"></label>
+    <label><%= t('prof.last') %><input name="lastname" required autocomplete="family-name"></label>
+  </div>
+  <label><%= t('prof.email') %><input type="email" name="email" required autocomplete="email"></label>
+  <label><%= t('auth.password') %><input type="password" name="password" required minlength="8" autocomplete="new-password"></label>
+  <button type="submit" class="btn red" style="width:100%"><%= t('auth.create') %></button>
+  <p class="sub" style="margin:14px 0 0;text-align:center;font-size:14px"><%= t('reg.have') %> <a href="/login"><%= t('auth.login') %></a></p>
+</form>
+<%- include('_foot') %>

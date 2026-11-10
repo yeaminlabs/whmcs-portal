@@ -1,0 +1,185 @@
+<dialog class="ui-dialog svc-dialog" id="svc-dialog" aria-labelledby="svc-dialog-title">
+  <form method="dialog" class="ui-dialog-body">
+    <h2 id="svc-dialog-title"></h2>
+    <p id="svc-dialog-text"></p>
+    <label id="svc-dialog-typed" hidden><span></span><input type="text" autocomplete="off" spellcheck="false"></label>
+    <div class="svc-row svc-dialog-actions">
+      <button type="submit" value="cancel" class="btn ghost" formnovalidate><%= t('svcx.cancel') %></button>
+      <button type="submit" value="ok" class="btn red" id="svc-dialog-ok"></button>
+    </div>
+  </form>
+</dialog>
+<script type="application/json" id="svc-i18n"><%- JSON.stringify({
+  confirmTitle: t('svcx.confirmTitle'), confirmText: t('svcx.confirmText'), confirmDanger: t('svcx.confirmDanger'),
+  typeToConfirm: t('svcx.typeToConfirm'), working: t('svcx.working'), failed: t('svcx.err.internal'),
+  network: t('svcx.err.network'), tooMany: t('svcx.err.rate'), newPassword: t('svcx.newPassword'),
+  passwordOnce: t('svcx.passwordOnce'), copy: t('svcx.copy'), copied: t('svcx.copied'), openConsole: t('svcx.openConsole'),
+  opening: t('svcx.opening'), download: t('svcx.download'), refresh: t('svcx.refresh'),
+}).replace(/</g, '\\u003c') %></script>
+<template id="svc-ico-copy"><%- icon('copy') %></template>
+<template id="svc-ico-external"><%- icon('external') %></template>
+<template id="svc-ico-download"><%- icon('download') %></template>
+<script>
+(() => {
+  const L = JSON.parse(document.getElementById('svc-i18n').textContent);
+  const fill = (s, vars) => s.replace(/\{(\w+)\}/g, (m, k) => (vars[k] == null ? m : vars[k]));
+  const dlg = document.getElementById('svc-dialog');
+  const out = document.getElementById('svc-result');
+  const logsPre = document.getElementById('svc-logs');
+
+  const el = (tag, cls, text) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  };
+  const iconOf = (name) => {
+    const src = document.querySelector(`template#svc-ico-${name}`);
+    return src ? src.content.firstElementChild.cloneNode(true) : document.createTextNode('');
+  };
+
+  function bindCopy(b) {
+    b.hidden = false;
+    b.addEventListener('click', async () => {
+      const label = b.querySelector('span');
+      try {
+        await navigator.clipboard.writeText(b.dataset.copy);
+        if (label) { const was = label.textContent; label.textContent = L.copied; setTimeout(() => { label.textContent = was; }, 1500); }
+        b.classList.add('is-done');
+        setTimeout(() => b.classList.remove('is-done'), 1500);
+      } catch (e) { /* clipboard blocked: the value stays selectable */ }
+    });
+  }
+  document.querySelectorAll('[data-copy]').forEach(bindCopy);
+
+  function ask(form) {
+    const label = form.dataset.label;
+    const danger = Boolean(form.dataset.danger);
+    const typed = form.dataset.typed || '';
+    const box = document.getElementById('svc-dialog-typed');
+    const input = box.querySelector('input');
+    const ok = document.getElementById('svc-dialog-ok');
+    document.getElementById('svc-dialog-title').textContent = fill(L.confirmTitle, { action: label });
+    document.getElementById('svc-dialog-text').textContent = fill(danger ? L.confirmDanger : L.confirmText, { action: label });
+    ok.textContent = label;
+    ok.classList.toggle('red', danger);
+    box.hidden = !danger;
+    input.value = '';
+    ok.disabled = danger;
+    if (danger) {
+      box.querySelector('span').textContent = fill(L.typeToConfirm, { value: typed });
+      input.oninput = () => { ok.disabled = input.value.trim() !== typed; };
+      input.onkeydown = (e) => {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        if (!ok.disabled) dlg.close('ok');
+      };
+    }
+    dlg.returnValue = '';
+    dlg.showModal();
+    if (danger) input.focus();
+    return new Promise((resolve) => dlg.addEventListener('close', () => resolve(dlg.returnValue === 'ok'), { once: true }));
+  }
+
+  function show(res) {
+    out.replaceChildren();
+    const box = el('div', `alert ${res.ok ? 'ok' : 'err'} svc-msg`);
+    if (!res.ok) box.setAttribute('role', 'alert');
+    box.append(el('strong', null, res.message || L.failed));
+    if (res.detail) box.append(' ', el('span', null, res.detail));
+    const d = res.data || {};
+    if (res.ok && !d.url && !d.file && !d.password && !d.logs) {
+      const a = el('a', 'svc-refresh', L.refresh);
+      a.href = location.pathname;
+      box.append(' ', a);
+    }
+    out.append(box);
+    if (d.password) {
+      const s = el('div', 'svc-secret');
+      const b = el('button', 'btn ghost btn-sm svc-copy');
+      b.type = 'button';
+      b.dataset.copy = d.password;
+      b.append(iconOf('copy'), el('span', null, L.copy));
+      s.append(el('span', null, L.newPassword), el('code', 'mono', d.password), b, el('small', null, L.passwordOnce));
+      out.append(s);
+      bindCopy(b);
+    }
+    if (d.url) {
+      const a = el('a', 'btn');
+      a.href = d.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+      a.append(iconOf('external'), el('span', null, L.openConsole));
+      const p = el('p');
+      p.append(a);
+      out.append(p);
+    }
+    if (d.file) {
+      const a = el('a', 'btn ghost');
+      a.href = d.file.url; a.rel = 'noopener noreferrer'; a.setAttribute('download', '');
+      a.append(iconOf('download'), el('span', null, fill(L.download, { name: d.file.name })));
+      const p = el('p');
+      p.append(a);
+      out.append(p);
+    }
+    if (d.logs) {
+      if (logsPre) {
+        logsPre.textContent = d.logs;
+        logsPre.hidden = false;
+        const empty = document.getElementById('svc-logs-empty');
+        if (empty) empty.hidden = true;
+        logsPre.scrollTop = logsPre.scrollHeight;
+      } else {
+        const pre = el('pre', 'svc-logs', d.logs);
+        pre.tabIndex = 0;
+        out.append(pre);
+      }
+    }
+  }
+
+  async function run(form, confirmed) {
+    const btn = form.querySelector('button');
+    const span = btn.querySelector('span');
+    const was = span ? span.textContent : '';
+    let win = null;
+    if (form.dataset.console) {
+      win = window.open('', '_blank');
+      if (win) { try { win.opener = null; win.document.title = L.opening; win.document.body.textContent = L.opening; } catch (e) { /* cross-origin */ } }
+    }
+    form.dataset.busy = '1';
+    btn.disabled = true;
+    btn.setAttribute('aria-busy', 'true');
+    btn.classList.add('is-busy');
+    if (span) span.textContent = L.working;
+    let res;
+    try {
+      const body = new URLSearchParams(new FormData(form));
+      if (confirmed) body.set('confirm', '1');
+      const r = await fetch(form.action, { method: 'POST', headers: { Accept: 'application/json' }, body, credentials: 'same-origin' });
+      if (r.status === 429) res = { ok: false, message: L.tooMany };
+      else res = await r.json().catch(() => ({ ok: false, message: L.failed }));
+    } catch (e) {
+      res = { ok: false, message: L.network };
+    }
+    if (win) {
+      if (res.ok && res.data && res.data.url) win.location.href = res.data.url;
+      else win.close();
+    }
+    show(res);
+    delete form.dataset.busy;
+    btn.disabled = false;
+    btn.removeAttribute('aria-busy');
+    btn.classList.remove('is-busy');
+    if (span) span.textContent = was;
+  }
+
+  document.querySelectorAll('form.svc-act').forEach((form) => form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (form.dataset.busy) return;
+    let confirmed = false;
+    if (form.dataset.confirm) {
+      if (!(await ask(form))) return;
+      confirmed = true;
+    }
+    run(form, confirmed);
+  }));
+})();
+</script>

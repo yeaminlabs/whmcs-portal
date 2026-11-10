@@ -1,0 +1,31 @@
+<%- include('_head') %>
+<% const tr = (k, fb) => { const v = t(k); return v === k ? fb : v; }; %>
+<div class="pagehead">
+  <div><h1><%= t('store.title') %></h1><p class="sub"><%= t('store.sub') %></p></div>
+  <a class="btn ghost" href="/order/domain"><%- icon('search') %><%= t('nav.registerDomain') %></a>
+</div>
+
+<% families.forEach(f => { const list = groups.filter(g => g.family === f.id); if (!list.length) return; %>
+<section class="store-family reveal" aria-labelledby="fam-<%= f.id %>">
+  <h2 id="fam-<%= f.id %>"><%= tr('family.' + f.id, f.label) %></h2>
+  <div class="group-grid">
+    <% list.forEach(g => { const cheapest = g.products.find(p => p.from); %>
+    <a class="group-card" href="/store/<%= g.slug %>">
+      <span class="group-icon"><%- icon(f.id === 'vps' ? 'server' : f.id === 'automation' ? 'bolt' : 'globe') %></span>
+      <strong><%= tr('group.' + g.slug, g.name) %></strong>
+      <p><%= tr('groupBlurb.' + g.slug, g.blurb) %></p>
+      <span class="group-meta">
+        <span><%= t(g.products.length === 1 ? 'store.planOne' : 'store.planMany', { n: g.products.length }) %></span>
+        <% if (cheapest && cheapest.from) { %><span><%- t('store.from', { price: '<b>' + money(cheapest.from.perMonth, cheapest.pricing.prefix) + '</b>' }) %></span><% } %>
+      </span>
+      <span class="group-cta"><%= t('store.viewPlans') %> <%- icon('arrow') %></span>
+    </a>
+    <% }) %>
+  </div>
+</section>
+<% }) %>
+
+<% if (!groups.length) { %>
+<div class="ui-empty"><h3><%= t('store.emptyTitle') %></h3><p><%= t('store.emptyText') %> <a href="/tickets/new"><%= t('foot.support') %></a></p></div>
+<% } %>
+<%- include('_foot') %>

@@ -1,0 +1,27 @@
+<% if (upgrades && upgrades.length && service.status === 'Active') { %>
+<section class="panel">
+  <header><%= t('svc.changePlan') %></header>
+  <form method="post" action="/services/<%= service.id %>/upgrade" class="pad-form">
+    <label><%= t('svc.newPlan') %>
+      <select name="newpid" required>
+        <% upgrades.forEach(u => { %><option value="<%= u.pid %>"><%= u.name %><% if (u.from) { %> — <%= money(u.from.price, u.pricing.prefix) %>/<%= u.from.months === 1 ? t('store.month') : st(u.from.label) %><% } %></option><% }) %>
+      </select>
+    </label>
+    <p class="hint"><%= t('svc.upgradeHint') %></p>
+    <button type="submit" class="btn"><%= t('svc.upgradeCta') %></button>
+  </form>
+</section>
+<% } %>
+
+<% if (['Active', 'Suspended', 'Pending'].includes(service.status)) { %>
+<section class="panel">
+  <header><%= t('svc.cancel') %></header>
+  <form method="post" action="/services/<%= service.id %>/cancel" class="pad-form" onsubmit="return confirm(<%= JSON.stringify(t('svc.cancelConfirm')) %>)">
+    <label><%= t('svc.when') %>
+      <select name="type"><option value="End of Billing Period"><%= t('svc.endOfPeriod') %></option><option value="Immediate"><%= t('svc.immediate') %></option></select>
+    </label>
+    <label><%= t('svc.reason') %><textarea name="reason" rows="3" required></textarea></label>
+    <button type="submit" class="btn ghost danger"><%= t('svc.cancelCta') %></button>
+  </form>
+</section>
+<% } %>

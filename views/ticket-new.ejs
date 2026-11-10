@@ -1,0 +1,12 @@
+<%- include('_head') %>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/tickets"><%= t('nav.tickets') %></a><%- icon('chev') %><span><%= t('tix.new') %></span></nav>
+<div class="pagehead"><div><h1><%= t('tix.new') %></h1><p class="sub"><%= t('tix.newSub') %></p></div></div>
+<% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+<form method="post" action="/tickets/new" class="card narrow-card">
+  <% if (departments.length) { %><label><%= t('tix.department') %><select name="deptid"><% departments.forEach(d => { %><option value="<%= d.id %>"><%= d.name %></option><% }) %></select></label><% } %>
+  <label><%= t('tix.subject') %><input name="subject" required maxlength="200"></label>
+  <label><%= t('tix.priority') %><select name="priority"><option value="Low"><%= st('Low') %></option><option value="Medium" selected><%= st('Medium') %></option><option value="High"><%= st('High') %></option></select></label>
+  <label><%= t('tix.message') %><textarea name="message" required rows="7"></textarea></label>
+  <button type="submit" class="btn red"><%= t('tix.submit') %></button>
+</form>
+<%- include('_foot') %>

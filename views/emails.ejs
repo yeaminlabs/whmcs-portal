@@ -1,0 +1,9 @@
+<%- include('_head') %>
+<div class="pagehead"><div><h1><%= t('em.title') %></h1><p class="sub"><%= t('em.sub') %></p></div></div>
+<% if (!emails.length) { %><div class="ui-empty"><h3><%= t('em.empty') %></h3></div><% } else { %>
+<div class="panel"><div class="pad"><table>
+  <thead><tr><th><%= t('tix.subject') %></th><th><%= t('em.date') %></th></tr></thead>
+  <tbody><% emails.forEach(e => { %><tr><td><%= e.subject %></td><td><%= fmtDate(e.date) %></td></tr><% }) %></tbody>
+</table></div></div>
+<% } %>
+<%- include('_foot') %>

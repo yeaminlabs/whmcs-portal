@@ -1,0 +1,27 @@
+<%- include('_head') %>
+<section class="complete reveal" aria-labelledby="done-h">
+  <span class="complete-icon"><%- icon('check') %></span>
+  <h1 id="done-h"><%= t('done.title') %></h1>
+  <p class="sub"><%= t('done.sub', { order: order.orderid, product: order.product, invoice: order.invoiceid }) %><% if (order.domain) { %> (<%= order.domain %>)<% } %></p>
+
+  <div class="panel complete-card">
+    <dl>
+      <div><dt><%= t('done.plan') %></dt><dd><%= order.product %> · <%= order.group %></dd></div>
+      <div><dt><%= t('done.billing') %></dt><dd><%= st(order.cycle) %> · <%= price(order.price, order.code) %><% if (order.setup) { %> + <%= t('done.setup', { amount: price(order.setup, order.code) }) %><% } %></dd></div>
+      <% if (order.domainLine) { %><div><dt><%= t('col.domain') %></dt><dd><%= order.domainLine %></dd></div><% } %>
+      <div><dt><%= t('col.invoice') %></dt><dd>#<%= order.invoiceid %></dd></div>
+    </dl>
+  </div>
+
+  <ol class="next-steps">
+    <li><b><%= t('done.step1') %></b> <%= t('done.step1Text') %></li>
+    <li><b><%= t('done.step2') %></b> <%= t(order.kind === 'server' ? 'done.step2Server' : order.kind === 'hosting' ? 'done.step2Hosting' : 'done.step2Other') %></li>
+    <li><b><%= t('done.step3') %></b> <%= t('done.step3Text') %></li>
+  </ol>
+
+  <div class="complete-actions">
+    <a class="btn ghost" href="/invoices/<%= order.invoiceid %>"><%= t('done.viewInvoice') %></a>
+    <a class="btn red" href="/invoices/<%= order.invoiceid %>/pay"><%= t('done.payNow') %> <%- icon('arrow') %></a>
+  </div>
+</section>
+<%- include('_foot') %>

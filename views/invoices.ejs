@@ -1,0 +1,21 @@
+<%- include('_head') %>
+<div class="pagehead"><div><h1><%= t('inv.title') %></h1><p class="sub"><%= t('inv.sub') %></p></div></div>
+<% if (!invoices.length) { %><div class="ui-empty"><h3><%= t('inv.empty') %></h3></div><% } else { %>
+<div class="panel"><div class="pad"><table>
+  <thead><tr><th><%= t('col.invoice') %></th><th><%= t('col.issued') %></th><th><%= t('col.due') %></th><th><%= t('col.total') %></th><th><%= t('col.balance') %></th><th><%= t('col.status') %></th><th><span class="sr-only"><%= t('col.actions') %></span></th></tr></thead>
+  <tbody>
+  <% invoices.forEach(i => { const open = i.status === 'Unpaid'; const p = i.currencyprefix || ''; %>
+    <tr>
+      <td>#<%= i.invoicenum || i.id %></td>
+      <td><%= fmtDate(i.date) %></td>
+      <td><%= fmtDate(i.duedate) %></td>
+      <td><%= price(i.total, i.currencycode) %><% const b = billedAs(i.total, i.currencycode); if (b) { %><span class="cell-sub"><%= t('cur.billed', { amount: b }) %></span><% } %></td>
+      <td><%= price(i.balance, i.currencycode) %></td>
+      <td><span class="pill <%= i.status %>"><%= st(i.status) %></span></td>
+      <td class="row-actions"><a class="row-link" href="/invoices/<%= i.id %>"><%= t('common.view') %></a><% if (open) { %> <a class="btn red btn-sm" href="/invoices/<%= i.id %>/pay"><%= t('dash.payNow') %></a><% } %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table></div></div>
+<% } %>
+<%- include('_foot') %>

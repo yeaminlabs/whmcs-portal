@@ -1,0 +1,5 @@
+<%- include('_head') %>
+<div class="pagehead"><div><h1><%= t('dl.title') %></h1><p class="sub"><%= t('dl.sub') %></p></div></div>
+<% if (!items.length) { %><div class="ui-empty"><h3><%= t('dl.empty') %></h3></div><% } %>
+<div class="group-grid"><% items.forEach(d => { %><article class="ui-card"><div class="ui-card-header"><span class="ui-badge outline"><%= d.category || t('dl.file') %></span><h2 class="ui-card-title"><%= d.title %></h2><% if (d.description) { %><p class="ui-card-desc"><%= d.description %></p><% } %></div></article><% }) %></div>
+<%- include('_foot') %>

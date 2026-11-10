@@ -1,0 +1,46 @@
+<%- include('_head') %>
+<div class="pagehead"><div><h1><%= t('do.title') %></h1><p class="sub"><%= t('do.sub') %></p></div></div>
+<nav class="ui-tabs" aria-label="<%= t('store.categories') %>"><a href="/store"><%= t('do.tabServices') %></a><a href="/order/domain" aria-current="page"><%= t('do.tabDomains') %></a></nav>
+<% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+
+<section class="panel">
+  <form method="post" action="/order/domain/check" class="do-search">
+    <label for="do-q" class="sr-only"><%= t('col.domain') %></label>
+    <input id="do-q" name="domain" value="<%= query %>" placeholder="mybusiness.com" autocomplete="off" autocapitalize="off" spellcheck="false" required>
+    <button type="submit" class="btn red"><%- icon('search') %><%= t('do.search') %></button>
+  </form>
+</section>
+
+<% if (result) { %>
+<section class="panel do-result <%= result.available ? 'ok' : 'bad' %>" aria-live="polite">
+  <div class="do-result-head">
+    <span class="do-badge"><%- icon(result.available ? 'check' : 'alert') %></span>
+    <div><strong><%= result.domain %></strong><small><%= result.available ? t('do.available') : t('do.taken') %></small></div>
+    <% if (result.available && result.price && result.price.register != null) { %><span class="do-price"><%= money(result.price.register, prefix) %><small>/<%= t('do.year') %></small></span><% } %>
+  </div>
+  <% if (result.available) { %>
+  <form method="post" action="/order/domain" class="pad-form do-form">
+    <input type="hidden" name="domain" value="<%= result.domain %>">
+    <div class="field-row">
+      <label><%= t('do.period') %><select name="regperiod"><% [1, 2, 3, 5].forEach(y => { %><option value="<%= y %>"><%= t(y === 1 ? 'do.yearOne' : 'do.yearMany', { n: y }) %></option><% }) %></select></label>
+      <label><%= t('conf.payment') %><select name="paymentmethod"><% paymethods.forEach(m => { %><option value="<%= m.module %>"><%= String(m.displayname || m.module).split('|')[0].trim() %></option><% }) %></select></label>
+    </div>
+    <% if (billCode !== displayCurrency.code) { %><p class="hint"><%= t('conf.taxNote', { code: billCode }) %></p><% } %>
+    <button type="submit" class="btn red"><%= t('do.register', { domain: result.domain }) %> <%- icon('arrow') %></button>
+  </form>
+  <% } else { %>
+  <p class="pad-form hint"><%= t('do.takenHint') %></p>
+  <% } %>
+</section>
+<% } %>
+
+<% if (popular.length) { %>
+<section class="panel">
+  <header><%= t('do.pricing') %></header>
+  <div class="pad"><table>
+    <thead><tr><th><%= t('do.extension') %></th><th class="num"><%= t('do.registerCol') %></th><th class="num"><%= t('do.transferCol') %></th></tr></thead>
+    <tbody><% popular.forEach(x => { %><tr><td>.<%= x.tld %></td><td class="num"><%= money(x.register, prefix) %></td><td class="num"><%= x.transfer != null ? money(x.transfer, prefix) : '—' %></td></tr><% }) %></tbody>
+  </table></div>
+</section>
+<% } %>
+<%- include('_foot') %>

@@ -1,0 +1,56 @@
+<%- include('../_head') %>
+<%- include('_header') %>
+<%
+const s = service;
+const p = panel;
+const STATES = ['running', 'stopped', 'deploying', 'suspended', 'error', 'unknown'];
+const state = STATES.includes(p.state) ? p.state : 'unknown';
+const res = p.resources || {};
+const isClaw = view.module === 'openclaw_n8n';
+%>
+<div class="detail-grid">
+  <div>
+    <section class="panel">
+      <header>
+        <span class="svc-hgroup"><%= t(isClaw ? 'svcx.n8n.clawTitle' : 'svcx.n8n.title') %><span class="svc-state" data-state="<%= state %>"><i aria-hidden="true"></i><%= t('svcx.state.' + state) %></span></span>
+        <% if (p.url && active) { %><a class="btn btn-sm red" href="<%= p.url %>" target="_blank" rel="noopener noreferrer"><%- icon('external') %><%= t('svcx.openInstance') %></a><% } %>
+      </header>
+      <div class="svc-body">
+        <div class="svc-url">
+          <span class="svc-label"><%= t('svcx.n8n.url') %></span>
+          <% if (p.url) { %>
+          <span class="svc-copyable"><a class="mono" href="<%= p.url %>" target="_blank" rel="noopener noreferrer"><%= p.url %></a><button type="button" class="svc-copy" data-copy="<%= p.url %>" aria-label="<%= t('svcx.copyValue', { value: p.url }) %>" hidden><%- icon('copy') %></button></span>
+          <% } else { %><span class="svc-muted"><%= t('svcx.n8n.noUrl') %></span><% } %>
+        </div>
+        <div class="svc-specs">
+          <div><%- icon('cpu') %><span><%= t('svcx.cpu') %></span><b><%= res.cpu != null ? t('svcx.cores', { n: res.cpu }) : '—' %></b></div>
+          <div><%- icon('ram') %><span><%= t('svcx.ram') %></span><b><%= res.ram || '—' %></b></div>
+          <div><%- icon('disk') %><span><%= t('svcx.storage') %></span><b><%= res.disk || '—' %></b></div>
+        </div>
+      </div>
+      <dl class="kv svc-kv-top">
+        <div><dt><%= t('svcx.n8n.version') %></dt><dd><%= p.version || '—' %></dd></div>
+        <div><dt><%= t('svcx.n8n.database') %></dt><dd><%= p.database || '—' %></dd></div>
+        <% const modeKey = 'svcx.n8n.mode' + p.mode; %><div><dt><%= t('svcx.n8n.mode') %></dt><dd><%= p.mode ? (t(modeKey) === modeKey ? p.mode : t(modeKey)) : '—' %></dd></div>
+        <% if (p.workers != null) { %><div><dt><%= t('svcx.n8n.workers') %></dt><dd><%= p.workers %></dd></div><% } %>
+      </dl>
+    </section>
+
+    <section class="panel" id="svc-actions">
+      <header><span><%= t('svcx.controls') %></span><a href="/services/<%= s.id %>" class="svc-head-link"><%- icon('refresh') %><%= t('svcx.refresh') %></a></header>
+      <div class="svc-body">
+        <% if (actions.length) { %>
+          <%- include('_actions', { list: actions, primary: actions.some(a => /restart/i.test(a.fn)) ? actions.find(a => /restart/i.test(a.fn)).fn : null }) %>
+          <% if (!active) { %><p class="hint"><%= t('svcx.whenActive') %></p><% } %>
+        <% } else { %><p class="svc-muted"><%= t('svcx.noActions') %></p><% } %>
+        <%- include('_result') %>
+      </div>
+    </section>
+  </div>
+
+  <div class="detail-side">
+    <%- include('_plan') %>
+  </div>
+</div>
+<%- include('_script') %>
+<%- include('../_foot') %>

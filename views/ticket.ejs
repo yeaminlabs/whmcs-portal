@@ -1,0 +1,14 @@
+<%- include('_head') %>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/tickets"><%= t('nav.tickets') %></a><%- icon('chev') %><span>#<%= ticket.tid || ticket.ticketid %></span></nav>
+<div class="pagehead"><div><h1><%= ticket.subject %></h1><p class="sub"><span class="pill <%= String(ticket.status).replace(/\s+/g, '-') %>"><%= st(ticket.status) %></span></p></div>
+  <% if (ticket.status !== 'Closed') { %><form method="post" action="/tickets/<%= ticket.ticketid %>/close"><button type="submit" class="btn ghost"><%= t('tix.close') %></button></form><% } %></div>
+<div class="thread">
+  <% replies.forEach(r => { %><div class="msg<%= r.admin ? ' staff' : '' %>"><b><%= r.admin || r.name || t('tix.you') %></b><time><%= fmtDate(r.date) %></time><p><%= r.message %></p></div><% }) %>
+</div>
+<% if (ticket.status !== 'Closed') { %>
+<form method="post" action="/tickets/<%= ticket.ticketid %>/reply" class="card">
+  <label><%= t('tix.reply') %><textarea name="message" required rows="5"></textarea></label>
+  <button type="submit" class="btn red"><%= t('tix.send') %></button>
+</form>
+<% } %>
+<%- include('_foot') %>

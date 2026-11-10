@@ -1,0 +1,10 @@
+<%- include('_head') %>
+<div class="pagehead"><div><h1><%= t('ct.title') %></h1><p class="sub"><%= t('ct.sub') %></p></div></div>
+<% if (done) { %><p class="alert ok" role="status"><%= t('ct.done') %></p><% } %>
+<form method="post" action="/contact" class="card narrow-card">
+  <label><%= t('con.name') %><input name="name" required value="<%= session.clientName || '' %>"></label>
+  <label><%= t('prof.email') %><input type="email" name="email" required value="<%= session.clientEmail || '' %>"></label>
+  <label><%= t('tix.message') %><textarea name="message" required rows="6"></textarea></label>
+  <button type="submit" class="btn red"><%= t('ct.send') %></button>
+</form>
+<%- include('_foot') %>

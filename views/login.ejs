@@ -1,0 +1,54 @@
+<%- include('_head') %>
+<h1><%= t('auth.welcome') %></h1>
+<p class="sub"><%= t('auth.sub') %></p>
+
+<div class="google-wrap" id="google-wrap">
+  <div id="g_id_onload"
+       data-client_id="<%= googleClientId %>"
+       data-context="signin"
+       data-ux_mode="popup"
+       data-callback="handleGoogleCredential"
+       data-auto_prompt="false"
+       data-itp_support="true"></div>
+  <div class="g_id_signin" id="g-button"
+       data-type="standard"
+       data-shape="rectangular"
+       data-theme="outline"
+       data-text="signin_with"
+       data-locale="<%= lang %>"
+       data-size="large"
+       data-logo_alignment="center"
+       data-width="364"></div>
+  <p class="google-error alert err" id="google-error" role="alert" hidden></p>
+</div>
+
+<div class="or-divider" aria-hidden="true"><span><%= t('auth.or') %></span></div>
+
+<% if (mock) { %><p class="alert"><%= t('auth.demo') %> <code>demo@example.com / demo1234</code></p><% } %>
+<% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+<form method="post" action="/login" class="card" aria-label="Log in">
+  <label><%= t('prof.email') %> <input type="email" name="email" required autocomplete="email"></label>
+  <label><%= t('auth.password') %> <input type="password" name="password" required autocomplete="current-password"></label>
+  <button type="submit" class="btn red" style="width:100%"><%= t('auth.login') %></button>
+  <p class="sub" style="margin:14px 0 0;text-align:center;font-size:14px"><%= t('auth.new') %> <a href="/register"><%= t('auth.create') %></a></p>
+</form>
+<script>
+function showGoogleError(msg) {
+  const el = document.getElementById('google-error');
+  el.textContent = msg;
+  el.hidden = false;
+}
+function handleGoogleCredential(response) {
+  fetch('/auth/google', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id_token: response.credential }),
+  }).then(async (r) => {
+    const data = await r.json().catch(() => ({}));
+    if (r.ok && data.ok) { location.href = data.redirect || '/'; return; }
+    showGoogleError(data.error || <%- JSON.stringify(t('auth.googleFail')) %>);
+  }).catch(() => showGoogleError(<%- JSON.stringify(t('auth.googleNet')) %>));
+}
+</script>
+<script src="https://accounts.google.com/gsi/client?hl=<%= lang %>" async defer onerror="showGoogleError(<%= JSON.stringify(t('auth.googleLoad')) %>)"></script>
+<%- include('_foot') %>

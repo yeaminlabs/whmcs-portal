@@ -1,0 +1,11 @@
+<%- include('_head') %>
+<div class="pagehead"><div><h1><%= t('sec.title') %></h1><p class="sub"><%= t('sec.sub') %></p></div></div>
+<% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+<% if (done) { %><p class="alert ok" role="status"><%= t('sec.done') %></p><% } %>
+<form method="post" action="/security" class="card narrow-card">
+  <label><%= t('sec.current') %><input type="password" name="currentpw" required autocomplete="current-password"></label>
+  <label><%= t('sec.new') %><input type="password" name="newpw" required minlength="8" autocomplete="new-password"><small class="hint"><%= t('sec.rule') %></small></label>
+  <label><%= t('sec.confirm') %><input type="password" name="confirmpw" required minlength="8" autocomplete="new-password"></label>
+  <button type="submit" class="btn red"><%= t('sec.save') %></button>
+</form>
+<%- include('_foot') %>

@@ -1,0 +1,68 @@
+<%- include('_head') %>
+<%
+const GATEWAYS = {
+  bkashcheckouturl: { name: 'bKash', desc: 'Pay from your bKash wallet', icon: 'wallet' },
+  bkash: { name: 'bKash', desc: 'Pay from your bKash wallet', icon: 'wallet' },
+  stripe: { name: 'Credit / debit card', desc: 'Visa, Mastercard and Amex, processed by Stripe', icon: 'lock' },
+  paypal_ppcpv: { name: 'PayPal', desc: 'Pay with your PayPal account', icon: 'globe' },
+  paypal: { name: 'PayPal', desc: 'Pay with your PayPal account', icon: 'globe' },
+  paypal_acdc: { name: 'Card via PayPal', desc: 'Pay by card without a PayPal account', icon: 'lock' },
+  banktransfer: { name: 'Bank transfer', desc: 'Transfer to our bank account; we confirm manually', icon: 'receipt' },
+  mailin: { name: 'Bank transfer', desc: 'Transfer to our bank account; we confirm manually', icon: 'receipt' },
+};
+const cc = invoice.currencycode;
+const amt = (v) => price(v, cc);
+const balance = Number(invoice.balance) || 0;
+const selected = paymethods.some(m => m.module === invoice.paymentmethod) ? invoice.paymentmethod : (paymethods[0] && paymethods[0].module);
+const label = (m) => (GATEWAYS[String(m.module).toLowerCase()] || { name: String(m.displayname || m.module).split('|')[0].trim(), desc: String(m.displayname || '').split('|').slice(1).join(' ').trim(), icon: 'wallet' });
+%>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/invoices"><%= t('nav.invoices') %></a><%- icon('chev') %><a href="/invoices/<%= invoice.invoiceid %>">#<%= invoice.invoicenum || invoice.invoiceid %></a><%- icon('chev') %><span><%= t('pay.title') %></span></nav>
+<div class="pagehead"><div><h1><%= t('pay.heading', { n: invoice.invoicenum || invoice.invoiceid }) %></h1><p class="sub"><%= t('pay.due', { date: fmtDate(invoice.duedate) }) %></p></div></div>
+<% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+<% if (failed) { %><p class="alert err" role="alert"><%= t(failed === 'bkash-cancel' ? 'pay.bkashCancelled' : failed === 'bkash' ? 'pay.bkashFailed' : 'pay.cardFailed') %></p><% } %>
+
+<form method="post" action="/invoices/<%= invoice.invoiceid %>/pay" class="checkout" id="payform">
+  <div class="checkout-main">
+    <section class="panel step" aria-labelledby="pay-h">
+      <header><span id="pay-h"><%= t('pay.choose') %></span></header>
+      <div class="step-body">
+        <div class="pay-list" role="radiogroup" aria-labelledby="pay-h">
+          <% if (credit > 0) { %>
+          <label class="choice pay gw"><input type="radio" name="paymentmethod" value="credit"><span><span class="gw-mark"><%- icon('wallet') %></span><b><%= t('pay.credit') %></b><small><%= t('pay.creditDesc', { amount: amt(credit) }) %><% if (credit < balance) { %> · <%= t('pay.creditPartial') %><% } %></small></span></label>
+          <% } %>
+          <% paymethods.forEach(m => { const g = label(m); %>
+          <% const ch = charges[m.module]; const isBkash = /^bkash/i.test(m.module); %>
+          <label class="choice pay gw"><input type="radio" name="paymentmethod" value="<%= m.module %>" <%= m.module === selected ? 'checked' : '' %>><span><span class="gw-mark<%= isBkash ? ' gw-logo' : '' %>"><% if (isBkash) { %><img src="/img/bkash.png" alt="bKash" width="72" height="40"><% } else { %><%- icon(g.icon) %><% } %></span><b><%= g.name %></b><small><%= g.desc %><% if (!inApp.includes(m.module)) { %><%= g.desc ? ' · ' : '' %><%= t('pay.continuesBilling') %><% } %></small><% if (ch) { %><em class="gw-charge"><%= fmt(ch.amount, ch.code) %><small><%= ch.feePercent ? t('pay.inclFee', { pct: ch.feePercent }) : (ch.code !== cc ? t('pay.chargedIn', { code: ch.code }) : '') %></small></em><% } %></span></label>
+          <% }) %>
+        </div>
+      </div>
+    </section>
+  </div>
+  <aside class="checkout-side">
+    <div class="panel summary-card">
+      <header><%= t('pay.summary') %></header>
+      <div class="sum-body">
+        <dl>
+          <div><dt><%= t('pay.subtotal') %></dt><dd><%= amt(invoice.subtotal) %></dd></div>
+          <% if (Number(invoice.tax) > 0) { %><div><dt><%= t('pay.tax') %></dt><dd><%= amt(invoice.tax) %></dd></div><% } %>
+          <% if (Number(invoice.credit) > 0) { %><div><dt><%= t('pay.creditApplied') %></dt><dd>−<%= amt(invoice.credit) %></dd></div><% } %>
+          <% if (Number(invoice.total) - balance > 0.001) { %><div><dt><%= t('pay.paid') %></dt><dd>−<%= amt(Number(invoice.total) - balance) %></dd></div><% } %>
+        </dl>
+        <div class="sum-total"><span><%= t('pay.balance') %></span><strong><%= amt(balance) %></strong></div>
+        <% const billedBal = billedAs(balance, cc); if (billedBal) { %>
+          <p class="sum-note"><%= t('cur.billed', { amount: billedBal }) %></p>
+        <% } %>
+        <button type="submit" class="btn red sum-cta"><%= t('pay.continue') %> <%- icon('arrow') %></button>
+        <p class="sum-secure"><%- icon('lock') %><%= t('pay.secureInApp') %></p>
+      </div>
+    </div>
+  </aside>
+</form>
+<script>
+document.getElementById('payform').addEventListener('submit', (e) => {
+  const btn = e.target.querySelector('.sum-cta');
+  btn.setAttribute('aria-disabled', 'true');
+  btn.textContent = <%- JSON.stringify(t('pay.opening')) %>;
+});
+</script>
+<%- include('_foot') %>

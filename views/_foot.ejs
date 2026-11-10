@@ -1,0 +1,71 @@
+<% if (session && session.clientId) { %>
+    </main>
+    <footer class="foot"><span>© <%= new Date().getFullYear() %> SNBD HOST · <%= t('foot.tagline') %></span><span><a href="/kb"><%= t('nav.help') %></a> · <a href="/tickets/new"><%= t('foot.support') %></a></span></footer>
+  </div>
+</div>
+<% } else { %>
+  </main>
+</div>
+<% } %>
+<script>
+(() => {
+  // Dropdowns (language/currency, user menu): one open at a time, close on outside click / Escape.
+  const dropdowns = () => document.querySelectorAll('details.dd[open]');
+  document.addEventListener('click', (e) => {
+    dropdowns().forEach((d) => { if (!d.contains(e.target)) d.removeAttribute('open'); });
+  });
+  document.querySelectorAll('details.dd').forEach((d) => d.addEventListener('toggle', () => {
+    if (d.open) dropdowns().forEach((o) => { if (o !== d) o.removeAttribute('open'); });
+  }));
+
+  // Sidebar groups: the group holding the current page opens; the rest remember the user's choice.
+  const KEY = 'snbd.nav.open';
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { saved = {}; }
+  document.querySelectorAll('.snav-group').forEach((g) => {
+    const btn = g.querySelector('.snav-toggle');
+    const set = (open) => { g.dataset.open = String(open); btn.setAttribute('aria-expanded', String(open)); };
+    if (!g.hasAttribute('data-active') && saved[g.dataset.group]) set(true);
+    btn.addEventListener('click', () => {
+      const open = g.dataset.open !== 'true';
+      set(open);
+      saved[g.dataset.group] = open;
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) { /* storage unavailable */ }
+    });
+  });
+
+  // Mobile drawer.
+  const body = document.body;
+  const side = document.getElementById('sidebar');
+  const opener = document.querySelector('[data-nav-open]');
+  const scrim = document.querySelector('.scrim');
+  if (side && opener) {
+    const open = () => {
+      body.classList.add('nav-open');
+      opener.setAttribute('aria-expanded', 'true');
+      if (scrim) scrim.hidden = false;
+      setTimeout(() => (side.querySelector('.snav-link.active, .snav-link') || side).focus(), 50);
+    };
+    const close = () => {
+      if (!body.classList.contains('nav-open')) return;
+      body.classList.remove('nav-open');
+      body.classList.add('nav-closing');
+      opener.setAttribute('aria-expanded', 'false');
+      setTimeout(() => { body.classList.remove('nav-closing'); if (scrim) scrim.hidden = true; }, 320);
+      opener.focus();
+    };
+    opener.addEventListener('click', open);
+    document.querySelectorAll('[data-nav-close]').forEach((el) => el.addEventListener('click', close));
+    side.querySelectorAll('.snav-link').forEach((a) => a.addEventListener('click', close));
+    window.matchMedia('(min-width: 921px)').addEventListener('change', (m) => { if (m.matches) close(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    dropdowns().forEach((d) => { d.removeAttribute('open'); d.querySelector('summary').focus(); });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<%- include('_head') %>
+<% const bc = accountCurrency || displayCurrency; %>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/services"><%= t('nav.services') %></a><%- icon('chev') %><span><%= service.name %></span></nav>
+<div class="pagehead"><div><h1><%= service.name %></h1><p class="sub"><span class="pill <%= service.status %>"><%= st(service.status) %></span> · <%= service.domain || t('dash.noDomain') %></p></div></div>
+<% if (ordered) { %><p class="alert ok" role="status"><%= t('svc.upgradeOrdered', { order: ordered.orderid }) %> <% if (ordered.invoiceid) { %><a href="/invoices/<%= ordered.invoiceid %>/pay"><%= t('dash.payNow') %></a><% } %></p><% } %>
+<% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+
+<div class="detail-grid">
+  <section class="panel">
+    <header><%= t('svc.overview') %></header>
+    <dl class="kv">
+      <div><dt><%= t('col.price') %></dt><dd><%= price(service.recurringamount || service.amount) %> · <%= st(service.billingcycle) %><% const b = billedAs(service.recurringamount || service.amount); if (b) { %><span class="cell-sub"><%= t('cur.billed', { amount: b }) %></span><% } %></dd></div>
+      <div><dt><%= t('svc.nextDue') %></dt><dd><%= fmtDate(service.nextduedate) %></dd></div>
+      <div><dt><%= t('svc.since') %></dt><dd><%= fmtDate(service.regdate) %></dd></div>
+      <% if (service.paymentmethodname) { %><div><dt><%= t('conf.payment') %></dt><dd><%= String(service.paymentmethodname).split('|')[0].trim() %></dd></div><% } %>
+      <% if (service.username) { %><div><dt><%= t('svc.username') %></dt><dd class="mono"><%= service.username %></dd></div><% } %>
+      <% if (service.serverhostname || service.servername) { %><div><dt><%= t('svc.server') %></dt><dd class="mono"><%= service.serverhostname || service.servername %></dd></div><% } %>
+      <% if (service.dedicatedip) { %><div><dt><%= t('svc.ip') %></dt><dd class="mono"><%= service.dedicatedip %></dd></div><% } %>
+    </dl>
+  </section>
+
+  <div class="detail-side">
+    <% if (upgrades && upgrades.length && service.status === 'Active') { %>
+    <section class="panel">
+      <header><%= t('svc.changePlan') %></header>
+      <form method="post" action="/services/<%= service.id %>/upgrade" class="pad-form">
+        <label><%= t('svc.newPlan') %>
+          <select name="newpid" required>
+            <% upgrades.forEach(u => { %><option value="<%= u.pid %>"><%= u.name %><% if (u.from) { %> — <%= money(u.from.price, u.pricing.prefix) %>/<%= u.from.months === 1 ? t('store.month') : st(u.from.label) %><% } %></option><% }) %>
+          </select>
+        </label>
+        <p class="hint"><%= t('svc.upgradeHint') %></p>
+        <button type="submit" class="btn"><%= t('svc.upgradeCta') %></button>
+      </form>
+    </section>
+    <% } %>
+
+    <% if (['Active', 'Suspended', 'Pending'].includes(service.status)) { %>
+    <section class="panel">
+      <header><%= t('svc.cancel') %></header>
+      <form method="post" action="/services/<%= service.id %>/cancel" class="pad-form" onsubmit="return confirm(<%= JSON.stringify(t('svc.cancelConfirm')) %>)">
+        <label><%= t('svc.when') %>
+          <select name="type"><option value="End of Billing Period"><%= t('svc.endOfPeriod') %></option><option value="Immediate"><%= t('svc.immediate') %></option></select>
+        </label>
+        <label><%= t('svc.reason') %><textarea name="reason" rows="3" required></textarea></label>
+        <button type="submit" class="btn ghost danger"><%= t('svc.cancelCta') %></button>
+      </form>
+    </section>
+    <% } %>
+  </div>
+</div>
+<%- include('_foot') %>

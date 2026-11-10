@@ -1,0 +1,5 @@
+<%- include('_head') %>
+<div class="pagehead"><div><h1><%= T(title) %></h1><p class="sub"><%= t('err.sub') %></p></div></div>
+<p class="alert err" role="alert"><%= message === 'We could not find that in your account.' ? t('err.notFound') : message %></p>
+<p><a class="btn ghost" href="<%= back %>"><%= t('common.back') %></a></p>
+<%- include('_foot') %>

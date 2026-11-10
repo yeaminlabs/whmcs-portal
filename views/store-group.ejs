@@ -1,0 +1,35 @@
+<%- include('_head') %>
+<% const tr = (k, fb) => { const v = t(k); return v === k ? fb : v; }; %>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/store"><%= t('store.crumb') %></a><%- icon('chev') %><span><%= tr('group.' + group.slug, group.name) %></span></nav>
+<div class="pagehead">
+  <div><h1><%= tr('group.' + group.slug, group.name) %></h1><p class="sub"><%= tr('groupBlurb.' + group.slug, group.blurb) %></p></div>
+</div>
+
+<nav class="ui-tabs store-tabs" aria-label="<%= t('store.categories') %>">
+  <% groups.forEach(g => { %><a href="/store/<%= g.slug %>"<% if (g.slug === group.slug) { %> aria-current="page"<% } %>><%= tr('group.' + g.slug, g.name) %></a><% }) %>
+</nav>
+
+<div class="plan-grid">
+  <% group.products.forEach((p, i) => {
+       const longest = p.pricing.cycles.filter(c => c.save > 0).sort((a, b) => b.save - a.save)[0]; %>
+  <article class="plan reveal" style="animation-delay:<%= Math.min(i, 8) * 40 %>ms">
+    <header>
+      <h2><%= p.name %></h2>
+      <% if (p.lead) { %><span class="plan-lead"><%- icon('bolt') %><%= p.lead %></span><% } %>
+    </header>
+    <div class="plan-price">
+      <% if (p.from) { %>
+        <strong><%= money(p.from.price, p.pricing.prefix) %></strong><span>/ <%= p.from.months === 1 ? t('store.month') : st(p.from.label) %></span>
+        <% if (p.from.setup > 0) { %><small><%= t('store.setupFee', { amount: money(p.from.setup, p.pricing.prefix) }) %></small><% } %>
+        <% if (longest) { %><small class="plan-save"><%= t('store.saveWhen', { pct: longest.save, cycle: st(longest.label).toLowerCase() }) %></small><% } %>
+      <% } %>
+    </div>
+    <ul class="plan-features">
+      <% p.features.forEach(f => { %><li><%- icon('check') %><span><b><%= f.main %></b><% if (f.note) { %> <%= f.note %><% } %></span></li><% }) %>
+    </ul>
+    <% if (p.tagline) { %><p class="plan-tagline"><%= p.tagline %></p><% } %>
+    <a class="btn plan-cta" href="<%= p.url %>"><%= t('store.orderNow') %> <%- icon('arrow') %></a>
+  </article>
+  <% }) %>
+</div>
+<%- include('_foot') %>
