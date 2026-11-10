@@ -102,30 +102,43 @@ router.get('/data/:tool', requireLogin, async (req, res) => {
   if (expired(token)) {
     return res.status(409).json({ error: 'expired', message: 'Token for ' + tool + ' expired; reconnect.' });
   }
+  const authHeader = { Authorization: 'Bearer ' + token.access_token };
   try {
     let data;
     if (tool === 'analytics') {
-      const viewId = req.query.viewId || process.env.GOOGLE_ANALYTICS_VIEW_ID;
-      if (!viewId) {
-        return res.status(409).json({ error: 'missing_view_id', message: 'Set GOOGLE_ANALYTICS_VIEW_ID or pass ?viewId=' });
+      let propertyId = req.query.viewId;
+      if (!propertyId) {
+        const acctRes = await axios.get('https://analyticsadmin.googleapis.com/v1beta/accounts', { headers: authHeader });
+        const accounts = acctRes.data.accounts || [];
+        if (!accounts.length) return res.status(409).json({ error: 'no_ga4_account', message: 'No GA4 accounts found for this Google account.' });
+        const propRes = await axios.get(
+          'https://analyticsadmin.googleapis.com/v1beta/properties?filter=parent:' + accounts[0].name,
+          { headers: authHeader }
+        );
+        const props = propRes.data.properties || [];
+        if (!props.length) return res.status(409).json({ error: 'no_ga4_property', message: 'No GA4 properties found in ' + accounts[0].displayName + '.' });
+        propertyId = props[0].name.split('/')[1];
       }
-      const r = await axios.post(ANALYTICS_API + viewId + ':runReport', {
+      const r = await axios.post(ANALYTICS_API + propertyId + ':runReport', {
         dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
         metrics: [{ name: 'sessions' }, { name: 'screenPageViews' }],
         dimensions: [{ name: 'date' }],
-      }, { headers: { Authorization: 'Bearer ' + token.access_token } });
+      }, { headers: authHeader });
       data = r.data;
     } else {
-      const siteUrl = req.query.siteUrl || process.env.GOOGLE_SEARCHCONSOLE_SITE_URL;
+      let siteUrl = req.query.siteUrl;
       if (!siteUrl) {
-        return res.status(409).json({ error: 'missing_site_url', message: 'Set GOOGLE_SEARCHCONSOLE_SITE_URL or pass ?siteUrl=' });
+        const sitesRes = await axios.get('https://www.googleapis.com/webmasters/v3/sites', { headers: authHeader });
+        const sites = sitesRes.data.siteEntry || [];
+        if (!sites.length) return res.status(409).json({ error: 'no_sc_site', message: 'No verified Search Console sites found. Add and verify a site at search.google.com/search-console.' });
+        siteUrl = sites[0].siteUrl;
       }
       const r = await axios.post(searchConsoleApi(siteUrl), {
         startDate: '7daysAgo',
         endDate: 'today',
         dimensions: ['date'],
         rowLimit: 10,
-      }, { headers: { Authorization: 'Bearer ' + token.access_token } });
+      }, { headers: authHeader });
       data = r.data;
     }
     res.json(data);

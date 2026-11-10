@@ -1,4 +1,4 @@
-jest.mock('axios', () => ({ post: jest.fn() }));
+jest.mock('axios', () => ({ post: jest.fn(), get: jest.fn() }));
 jest.mock('../../src/lib/google-tokens', () => ({
   get: jest.fn(),
   del: jest.fn(),
@@ -78,18 +78,34 @@ describe('google routes', () => {
     expect(res._json.error).toBe('expired');
   });
 
-  test('data route 409 when analytics view id missing', async () => {
+  test('data route auto-discovers GA4 property when no viewId provided', async () => {
     const h = handlerFor('/data/:tool');
     gtokens.get.mockReturnValue({ analytics: { access_token: 'tok', obtained_at: Date.now(), expires_in: 3600 } });
+    axios.get
+      .mockResolvedValueOnce({ data: { accounts: [{ name: 'accounts/999', displayName: 'Test' }] } })
+      .mockResolvedValueOnce({ data: { properties: [{ name: 'properties/777' }] } });
+    axios.post.mockResolvedValue({ data: { rowCount: 3 } });
+    const r = req({ params: { tool: 'analytics' }, query: {} });
+    const res = mockRes();
+    await h(r, res);
+    expect(res._status).toBe(undefined);
+    expect(res._json).toEqual({ rowCount: 3 });
+    const [url] = axios.post.mock.calls[0];
+    expect(url).toContain('777:runReport');
+  });
+
+  test('data route 409 when no GA4 accounts found', async () => {
+    const h = handlerFor('/data/:tool');
+    gtokens.get.mockReturnValue({ analytics: { access_token: 'tok', obtained_at: Date.now(), expires_in: 3600 } });
+    axios.get.mockResolvedValueOnce({ data: { accounts: [] } });
     const r = req({ params: { tool: 'analytics' }, query: {} });
     const res = mockRes();
     await h(r, res);
     expect(res._status).toBe(409);
-    expect(res._json.error).toBe('missing_view_id');
-    expect(axios.post).not.toHaveBeenCalled();
+    expect(res._json.error).toBe('no_ga4_account');
   });
 
-  test('data route fetches analytics read-only report with bearer token', async () => {
+  test('data route fetches analytics read-only report with explicit viewId', async () => {
     const h = handlerFor('/data/:tool');
     gtokens.get.mockReturnValue({ analytics: { access_token: 'tok', obtained_at: Date.now(), expires_in: 3600 } });
     axios.post.mockResolvedValue({ data: { reports: [{ data: { totals: [] } }] } });
@@ -106,7 +122,7 @@ describe('google routes', () => {
     expect(cfg.headers.Authorization).toBe('Bearer tok');
   });
 
-  test('data route fetches searchconsole read-only query with bearer token', async () => {
+  test('data route fetches searchconsole read-only query with explicit siteUrl', async () => {
     const h = handlerFor('/data/:tool');
     gtokens.get.mockReturnValue({ searchconsole: { access_token: 'tok', obtained_at: Date.now(), expires_in: 3600 } });
     axios.post.mockResolvedValue({ data: { rows: [] } });
@@ -118,5 +134,29 @@ describe('google routes', () => {
     expect(url).toContain('webmasters/v3/sites/');
     expect(body.dimensions).toEqual(['date']);
     expect(cfg.headers.Authorization).toBe('Bearer tok');
+  });
+
+  test('data route auto-discovers Search Console site when no siteUrl provided', async () => {
+    const h = handlerFor('/data/:tool');
+    gtokens.get.mockReturnValue({ searchconsole: { access_token: 'tok', obtained_at: Date.now(), expires_in: 3600 } });
+    axios.get.mockResolvedValueOnce({ data: { siteEntry: [{ siteUrl: 'https://mysite.com/', permissionLevel: 'siteOwner' }] } });
+    axios.post.mockResolvedValue({ data: { rows: [{ keys: ['2026-11-10'], clicks: 5 }] } });
+    const r = req({ params: { tool: 'searchconsole' }, query: {} });
+    const res = mockRes();
+    await h(r, res);
+    expect(res._status).toBe(undefined);
+    const [url] = axios.post.mock.calls[0];
+    expect(url).toContain(encodeURIComponent('https://mysite.com/'));
+  });
+
+  test('data route 409 when no Search Console sites found', async () => {
+    const h = handlerFor('/data/:tool');
+    gtokens.get.mockReturnValue({ searchconsole: { access_token: 'tok', obtained_at: Date.now(), expires_in: 3600 } });
+    axios.get.mockResolvedValueOnce({ data: { siteEntry: [] } });
+    const r = req({ params: { tool: 'searchconsole' }, query: {} });
+    const res = mockRes();
+    await h(r, res);
+    expect(res._status).toBe(409);
+    expect(res._json.error).toBe('no_sc_site');
   });
 });
