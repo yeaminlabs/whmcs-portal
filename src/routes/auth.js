@@ -4,6 +4,7 @@ const express = require('express');
 const whmcs = require('../lib/whmcs');
 const { isEmail, cleanStr } = require('../lib/validators');
 const avatars = require('../lib/avatars');
+const { nextParam, safeNext, signIn } = require('../lib/signin');
 
 const router = express.Router();
 
@@ -37,20 +38,23 @@ async function ownedClientFor(userId, email) {
   };
 }
 
+const renderLogin = (res, status, error, next) => res.status(status).render('login', {
+  title: 'Log in', error, next, mock: require('../config').useMock,
+});
+
 router.get('/login', (req, res) => {
-  if (req.session.clientId) return res.redirect('/');
-  res.render('login', { title: 'Log in', error: null, mock: require('../config').useMock });
+  if (req.session.clientId) return res.redirect(safeNext(req.query.next));
+  renderLogin(res, 200, null, nextParam(req.query.next));
 });
 
 router.post('/login', async (req, res) => {
+  const next = nextParam(req.body.next);
+  const fail = (status, msg) => renderLogin(res, status, msg, next);
   try {
     const email = cleanStr(req.body.email || '', 190).toLowerCase();
     const password = String(req.body.password || '').slice(0, 512);
-    if (!isEmail(email) || !password) {
-      return res.status(400).render('login', { title: 'Log in', error: 'Enter a valid email and password.', mock: require('../config').useMock });
-    }
+    if (!isEmail(email) || !password) return fail(400, 'Enter a valid email and password.');
     const t = res.locals.t;
-    const fail = (status, msg) => res.status(status).render('login', { title: 'Log in', error: msg, mock: require('../config').useMock });
     const data = await whmcs.call('ValidateLogin', { email, password2: password });
     if (data.result !== 'success') return fail(401, data.message || 'Login failed.');
     if (String(data.twoFactorEnabled) === 'true') return fail(403, t('authx.twoFactor'));
@@ -58,17 +62,20 @@ router.post('/login', async (req, res) => {
     // ValidateLogin returns the WHMCS *user* id; the portal works with the *client* the user owns.
     const owner = await ownedClientFor(data.userid, email);
     if (!owner) return fail(403, t('authx.notOwner'));
-    req.session.regenerate((err) => {
-      if (err) return renderError(res, 'Could not start session.');
-      req.session.clientId = owner.clientId;
-      req.session.userId = Number(data.userid);
-      req.session.clientName = owner.name || email;
-      req.session.clientEmail = owner.email || email;
-      req.session.clientPicture = avatars.get(owner.clientId);
-      res.redirect('/');
-    });
+    try {
+      await signIn(req, {
+        clientId: owner.clientId,
+        userId: Number(data.userid),
+        clientName: owner.name || email,
+        clientEmail: owner.email || email,
+        clientPicture: avatars.get(owner.clientId),
+      });
+    } catch (err) {
+      return renderError(res, 'Could not start session.');
+    }
+    res.redirect(303, safeNext(next));
   } catch (e) {
-    res.status(500).render('login', { title: 'Log in', error: 'Login service unavailable. Try again.', mock: require('../config').useMock });
+    fail(500, 'Login service unavailable. Try again.');
   }
 });
 

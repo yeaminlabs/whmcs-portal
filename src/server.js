@@ -12,8 +12,7 @@ const config = require('./config');
 const { icon } = require('./lib/icons');
 const whmcs = require('./lib/whmcs');
 const currency = require('./lib/currency');
-const { switchAccountCurrency } = require('./lib/account-currency');
-const { invalidateClient } = require('./lib/client');
+const { applyPrefs } = require('./lib/prefs');
 const { warmup } = require('./lib/warmup');
 const { LANGS, isLang, translator, dateFormatter } = require('./lib/i18n');
 
@@ -122,34 +121,8 @@ app.use(async (req, res, next) => {
 
 app.post('/prefs', async (req, res) => {
   const back = typeof req.body.back === 'string' && /^\/(?![\/\\])/.test(req.body.back) ? req.body.back : '/';
-  const opts = { maxAge: 365 * 24 * 3600 * 1000, sameSite: 'lax', secure: req.secure, httpOnly: true, path: '/' };
   try {
-    if (isLang(req.body.lang)) res.cookie('lang', req.body.lang, opts);
-    if (req.body.cur) {
-      const list = await currency.listCurrencies();
-      const cur = list.find((c) => c.code === req.body.cur);
-      if (cur) {
-        res.cookie('cur', cur.code, opts);
-        if (req.session.clientId) {
-          const account = await currency.accountCurrency(req);
-          if (account && account.code !== cur.code) {
-            try {
-              const r = await switchAccountCurrency(req.session.clientId, cur);
-              invalidateClient(req.session.clientId);
-              if (r.switched) {
-                req.session.currency = { id: cur.id, code: cur.code, prefix: cur.prefix };
-                req.session.flash = { type: 'ok', key: 'cur.switched', vars: { code: cur.code } };
-              } else if (r.reason !== 'same') {
-                req.session.flash = { type: 'info', key: r.reason === 'credit' ? 'cur.keptCredit' : 'cur.keptHistory', vars: { code: cur.code, bill: account.code } };
-              }
-            } catch (err) {
-              console.error('[prefs] account currency switch failed:', err.message);
-              req.session.flash = { type: 'err', key: 'cur.switchFailed', vars: { code: cur.code, bill: account.code } };
-            }
-          }
-        }
-      }
-    }
+    await applyPrefs(req, res, { lang: req.body.lang, cur: req.body.cur }, { switchAccount: true });
   } catch (e) {
     console.warn('[prefs]', e.message);
   }

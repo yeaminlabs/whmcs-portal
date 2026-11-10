@@ -17,6 +17,35 @@ const { ownedService } = require('../lib/ownership');
 
 const router = express.Router();
 
+/** In-memory sliding-window rate limiter: 10 req/min per client IP. */
+const actionRateLimiter = (() => {
+  const windowMs = 60000;
+  const maxRequests = 10;
+  const hits = new Map();
+
+  return (req, res, next) => {
+    const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+    const now = Date.now();
+    const arr = hits.get(ip) || [];
+    const recent = arr.filter((t) => now - t < windowMs);
+    if (recent.length >= maxRequests) {
+      const oldest = recent[0];
+      const retryAfter = Math.ceil((oldest + windowMs - now) / 1000);
+      res.set('Retry-After', String(retryAfter));
+      return res.status(429).json({ ok: false, code: 'rate_limited', message: 'Too many actions, please wait.' });
+    }
+    recent.push(now);
+    hits.set(ip, recent);
+    if (hits.size > 10000) {
+      for (const [k, v] of hits) {
+        const r = v.filter((t) => now - t < windowMs);
+        r.length ? hits.set(k, r) : hits.delete(k);
+      }
+    }
+    next();
+  };
+})();
+
 const useBridge = () => config.bridge.enabled || config.useMock;
 const notFound = (res, back) => res.status(404).render('error', { title: 'Not found', message: 'We could not find that in your account.', back });
 const serviceId = (req) => (/^\d{1,10}$/.test(req.params.id) ? Number(req.params.id) : 0);
@@ -92,7 +121,7 @@ router.get('/services/:id', requireLogin, async (req, res, next) => {
   }
 });
 
-router.post('/services/:id/action', requireLogin, async (req, res, next) => {
+router.post('/services/:id/action', requireLogin, actionRateLimiter, async (req, res, next) => {
   const id = serviceId(req);
   if (!id) return next();
   const t = res.locals.t;

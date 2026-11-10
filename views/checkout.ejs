@@ -1,0 +1,82 @@
+<%- include('_head') %>
+<%
+const tr = (k, fb) => { const v = t(k); return v === k ? fb : v; };
+const o = order;
+const gname = tr('group.' + o.group.slug, o.group.name);
+const nextVal = (typeof next === 'string' && next) ? next : '/checkout';
+const pmName = String(o.paymentmethod.name || o.paymentmethod.module).split('|')[0].trim();
+%>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/store"><%= t('store.crumb') %></a><%- icon('chev') %><a href="/store/<%= o.group.slug %>"><%= gname %></a><%- icon('chev') %><span><%= t('pub.checkoutTitle') %></span></nav>
+<div class="pagehead"><div><h1><%= t('pub.checkoutTitle') %></h1><p class="sub"><%= t(loggedIn ? 'pub.checkoutSubIn' : 'pub.checkoutSub') %></p></div></div>
+
+<% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+
+<div class="co">
+  <section class="panel co-sum" aria-labelledby="co-sum-h">
+    <header><span id="co-sum-h"><%= t('pub.summary') %></span><a href="<%= o.editUrl %>"><%= t('pub.editOrder') %></a></header>
+    <div class="sum-body">
+      <div class="sum-product"><b><%= o.product.name %></b><small><%= gname %></small></div>
+      <dl>
+        <div><dt><%= st(o.cycle.label) %></dt><dd><%= money(o.cycle.price, o.prefix) %></dd></div>
+        <% if (o.cycle.setup > 0) { %><div><dt><%= t('pub.setupFee') %></dt><dd><%= money(o.cycle.setup, o.prefix) %></dd></div><% } %>
+        <% if (o.domainLine) { %><div><dt><%= t('pub.domain') %></dt><dd class="co-wrap"><%= o.domainLine %></dd></div><% } %>
+        <% if (o.hostname) { %><div><dt><%= t('pub.hostname') %></dt><dd class="co-wrap"><%= o.hostname %></dd></div><% } %>
+        <div><dt><%= t('pub.payment') %></dt><dd class="co-wrap"><%= pmName %></dd></div>
+      </dl>
+      <div class="sum-total"><span><%= t('pub.total') %></span><strong><%= money(o.total, o.prefix) %></strong></div>
+      <% if (billedNote) { %><p class="sum-bill"><%= billedNote %></p><% } %>
+      <p class="sum-note"><%= t('pub.totalNote') %></p>
+    </div>
+  </section>
+
+  <div class="co-act">
+    <% if (!loggedIn) { %>
+    <section class="panel co-box" aria-labelledby="co-login-h">
+      <header><span id="co-login-h"><%= t('pub.haveAccount') %></span></header>
+      <form method="post" action="/login" class="co-form">
+        <p class="co-sub"><%= t('pub.haveAccountSub') %></p>
+        <input type="hidden" name="next" value="<%= nextVal %>">
+        <label><%= t('pub.email') %><input type="email" name="email" required autocomplete="email"></label>
+        <label><%= t('pub.password') %><input type="password" name="password" required autocomplete="current-password"></label>
+        <button type="submit" class="btn red co-btn"><%= t('pub.logInContinue') %> <%- icon('arrow') %></button>
+      </form>
+    </section>
+    <section class="panel co-box" aria-labelledby="co-reg-h">
+      <header><span id="co-reg-h"><%= t('pub.newHere') %></span></header>
+      <form method="post" action="/register" class="co-form">
+        <p class="co-sub"><%= t('pub.newHereSub') %></p>
+        <input type="hidden" name="next" value="<%= nextVal %>">
+        <div class="field-row">
+          <label><%= t('pub.firstName') %><input name="firstname" required autocomplete="given-name"></label>
+          <label><%= t('pub.lastName') %><input name="lastname" required autocomplete="family-name"></label>
+        </div>
+        <label><%= t('pub.email') %><input type="email" name="email" required autocomplete="email"></label>
+        <label><%= t('pub.password') %><input type="password" name="password" required minlength="8" autocomplete="new-password"><small class="hint"><%= t('pub.passwordHint') %></small></label>
+        <button type="submit" class="btn red co-btn"><%= t('pub.createContinue') %> <%- icon('arrow') %></button>
+      </form>
+    </section>
+    <p class="co-trust"><%- icon('lock') %><span><%= t('pub.trust') %></span></p>
+    <% } else { %>
+    <section class="panel co-box" aria-labelledby="co-in-h">
+      <header><span id="co-in-h"><%= t('pub.signedInAs', { name: session.clientName || session.clientEmail || '' }) %></span></header>
+      <form method="post" action="/checkout" class="co-form" id="co-place">
+        <p class="co-sub"><%= t('pub.placeNote') %></p>
+        <button type="submit" class="btn red co-btn"><%= t('pub.placeOrder') %> <%- icon('arrow') %></button>
+      </form>
+    </section>
+    <p class="co-trust"><%- icon('lock') %><span><%= t('conf.secure') %></span></p>
+    <script>
+    (() => {
+      const f = document.getElementById('co-place');
+      if (!f) return;
+      f.addEventListener('submit', () => {
+        const b = f.querySelector('button');
+        b.setAttribute('aria-disabled', 'true');
+        b.textContent = <%- JSON.stringify(t('pub.placing')).replace(/</g, '\\u003c') %>;
+      });
+    })();
+    </script>
+    <% } %>
+  </div>
+</div>
+<%- include('_foot') %>

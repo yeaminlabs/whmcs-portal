@@ -106,7 +106,7 @@ let step = 0;
         <p class="sum-bill" id="sum-bill-row"><%= t('conf.billedAs', { code: billing.code }) %> <b id="sum-bill"></b></p>
         <% } %>
         <p class="sum-note"><%= t('conf.taxNote', { code: billing ? billing.code : product.pricing.code }) %></p>
-        <button type="submit" class="btn red sum-cta"><%= t('conf.complete') %> <%- icon('arrow') %></button>
+        <button type="submit" class="btn red sum-cta"><%= t(session && session.clientId ? 'conf.complete' : 'pub.continueCheckout') %> <%- icon('arrow') %></button>
         <p class="sum-secure"><%- icon('lock') %><%= t('conf.secure') %></p>
       </div>
     </div>

@@ -1,8 +1,8 @@
 'use strict';
 
 const DICTS = {
-  en: { ...require('../i18n/en'), ...require('../i18n/services.en') },
-  bn: { ...require('../i18n/bn'), ...require('../i18n/services.bn') },
+  en: { ...require('../i18n/en'), ...require('../i18n/services.en'), ...require('../i18n/store.en'), ...require('../i18n/checkout.en') },
+  bn: { ...require('../i18n/bn'), ...require('../i18n/services.bn'), ...require('../i18n/store.bn'), ...require('../i18n/checkout.bn') },
 };
 
 const LANGS = [

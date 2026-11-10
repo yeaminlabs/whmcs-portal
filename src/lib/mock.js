@@ -279,4 +279,47 @@ Object.assign(handlers, {
   },
 });
 
+// Sign-ups become the second demo client (clientid 2) in the currency they chose.
+// Store orders get their own unpaid invoice owned by the ordering client.
+const SETUP_KEY = { monthly: 'msetupfee', quarterly: 'qsetupfee', semiannually: 'ssetupfee', annually: 'asetupfee', biennially: 'bsetupfee', triennially: 'tsetupfee' };
+const placed = new Map();
+let nextOrderId = 505;
+let nextInvoiceId = 309;
+const layered = { ...handlers };
+Object.assign(handlers, {
+  async AddClient(params) {
+    const email = String(params.email || '').toLowerCase();
+    if (['demo@example.com', 'new@example.com'].includes(email)) return { result: 'error', message: 'A user already exists with that email address' };
+    if (!email || !params.password2) return { result: 'error', message: 'Missing fields' };
+    if (Number(params.currency) === 1 || Number(params.currency) === 2) fresh.currency = Number(params.currency);
+    return ok({ clientid: 2, owner_id: 2 });
+  },
+  async AddOrder(params) {
+    if (!params || !params['pid[0]']) return layered.AddOrder(params);
+    const p = products.find((x) => String(x.pid) === String(params['pid[0]']));
+    if (!p) return { result: 'error', message: 'Invalid Product ID' };
+    const usd = is2(params.clientid) && fresh.currency === 2;
+    const row = p.pricing[usd ? 'USD' : 'BDT'];
+    const cycle = params['billingcycle[0]'];
+    const items = [{ id: 9100 + nextInvoiceId, type: 'Hosting', description: `${p.name}${params['domain[0]'] || params['hostname[0]'] ? ` - ${params['domain[0]'] || params['hostname[0]']}` : ''} (${cycle})`, amount: Number(row[cycle] || 0).toFixed(2), taxed: '0' }];
+    const setup = Number(row[SETUP_KEY[cycle]] || 0);
+    if (setup > 0) items.push({ id: 9200 + nextInvoiceId, type: 'Setup', description: `${p.name} setup fee`, amount: setup.toFixed(2), taxed: '0' });
+    const invoiceid = nextInvoiceId++;
+    const orderid = nextOrderId++;
+    placed.set(String(invoiceid), { userid: Number(params.clientid), usd, items, paymentmethod: params.paymentmethod });
+    return ok({ orderid, invoiceid, serviceids: '103', domainids: params['domaintype[0]'] ? '202' : '' });
+  },
+  async GetInvoice(params) {
+    const inv = placed.get(String(params.invoiceid));
+    if (!inv) return layered.GetInvoice(params);
+    const total = inv.items.reduce((n, it) => n + Number(it.amount), 0).toFixed(2);
+    return ok({
+      invoiceid: Number(params.invoiceid), invoicenum: String(1700 + Number(params.invoiceid)), userid: inv.userid,
+      currencycode: inv.usd ? 'USD' : 'BDT', currencyprefix: inv.usd ? '$' : '৳', paymentmethod: inv.paymentmethod, credit: '0.00',
+      date: '2026-11-10', duedate: '2026-11-17', status: 'Unpaid', subtotal: total, tax: '0.00', total, balance: total,
+      items: { item: inv.items },
+    });
+  },
+});
+
 module.exports = handlers;

@@ -6,7 +6,8 @@ const https = require('https');
 const whmcs = require('../lib/whmcs');
 const config = require('../config');
 const { requireLogin } = require('../middleware/auth');
-const { cleanStr, cleanInt } = require('../lib/validators');
+const { cleanStr, cleanInt, isEmail } = require('../lib/validators');
+const { nextParam, safeNext, signIn } = require('../lib/signin');
 const catalog = require('../lib/catalog');
 const pay = require('./pay');
 const avatars = require('../lib/avatars');
@@ -32,17 +33,35 @@ router.get('/health', async (req, res) => {
 });
 
 // Public register (parity with register.php) — must be before requireLogin
-router.get('/register', (req, res) => res.render('register', { title: 'Register', error: null }));
+router.get('/register', (req, res) => res.render('register', { title: 'Register', error: null, next: nextParam(req.query.next) }));
 router.post('/register', async (req, res) => {
+  const t = res.locals.t;
+  const next = nextParam(req.body.next);
+  const firstname = cleanStr(req.body.firstname, 100);
+  const lastname = cleanStr(req.body.lastname, 100);
+  const email = cleanStr(req.body.email, 190).toLowerCase();
+  const password = String(req.body.password || '');
+  const fail = (status, error) => res.status(status).render('register', { title: 'Register', error, next });
+  if (!firstname || !lastname || !isEmail(email) || password.length < 8 || password.length > 512) return fail(422, t('checkout.regInvalid'));
   try {
+    // New accounts are billed in the currency the visitor was shopping in, as WHMCS's own cart does.
     const data = await whmcs.call('AddClient', {
-      firstname: cleanStr(req.body.firstname, 100), lastname: cleanStr(req.body.lastname, 100),
-      email: cleanStr(req.body.email, 190), password2: String(req.body.password || ''),
+      firstname, lastname, email, password2: password,
       address1: 'NA', city: 'NA', state: 'NA', postcode: '0000', country: 'US', phonenumber: '000',
+      ...(req.displayCurrency ? { currency: String(req.displayCurrency.id) } : {}),
     });
-    if (data.result !== 'success') throw new Error(data.message || 'Registration failed');
-    res.redirect('/login');
-  } catch (e) { res.render('register', { title: 'Register', error: e.message }); }
+    if (data.result !== 'success') return fail(422, data.message || t('checkout.regFailed'));
+    const clientId = Number(data.clientid);
+    if (!clientId) return fail(502, t('checkout.regFailed'));
+    await signIn(req, {
+      clientId,
+      ...(Number(data.owner_id) ? { userId: Number(data.owner_id) } : {}),
+      clientName: `${firstname} ${lastname}`.trim(),
+      clientEmail: email,
+      clientPicture: avatars.get(clientId),
+    });
+    res.redirect(303, safeNext(next));
+  } catch (e) { fail(500, t('checkout.regFailed')); }
 });
 
 /** Google profile photo URL from the ID token, accepted only from Google's image host. */
@@ -97,15 +116,18 @@ router.post('/auth/google', async (req, res) => {
     const clientId = client.id || client.clientid || client.userid;
     if (!clientId) throw new Error('WHMCS did not return a client id.');
 
-    req.session.regenerate((err) => {
-      if (err) return res.status(500).json({ error: 'Could not start session.' });
-      req.session.clientId = Number(clientId);
-      req.session.clientName = `${client.firstname || ''} ${client.lastname || ''}`.trim() || email;
-      req.session.clientEmail = client.email || email;
-      req.session.clientPicture = googlePicture(payload.picture) || avatars.get(clientId);
-      avatars.set(clientId, googlePicture(payload.picture));
-      res.json({ ok: true, redirect: '/' });
-    });
+    try {
+      await signIn(req, {
+        clientId: Number(clientId),
+        clientName: `${client.firstname || ''} ${client.lastname || ''}`.trim() || email,
+        clientEmail: client.email || email,
+        clientPicture: googlePicture(payload.picture) || avatars.get(clientId),
+      });
+    } catch (err) {
+      return res.status(500).json({ error: 'Could not start session.' });
+    }
+    avatars.set(clientId, googlePicture(payload.picture));
+    res.json({ ok: true, redirect: safeNext(req.body.next) });
   } catch (e) {
     res.status(400).json({ error: e.message || 'Google sign in failed' });
   }

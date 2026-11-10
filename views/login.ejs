@@ -27,6 +27,7 @@
 <% if (mock) { %><p class="alert"><%= t('auth.demo') %> <code>demo@example.com / demo1234</code></p><% } %>
 <% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
 <form method="post" action="/login" class="card" aria-label="Log in">
+  <input type="hidden" name="next" value="<%= next || '' %>">
   <label><%= t('prof.email') %> <input type="email" name="email" required autocomplete="email"></label>
   <label><%= t('auth.password') %> <input type="password" name="password" required autocomplete="current-password"></label>
   <button type="submit" class="btn red" style="width:100%"><%= t('auth.login') %></button>
@@ -42,7 +43,7 @@ function handleGoogleCredential(response) {
   fetch('/auth/google', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id_token: response.credential }),
+    body: JSON.stringify({ id_token: response.credential, next: (document.querySelector('form[action="/login"] input[name="next"]') || {}).value || '' }),
   }).then(async (r) => {
     const data = await r.json().catch(() => ({}));
     if (r.ok && data.ok) { location.href = data.redirect || '/'; return; }

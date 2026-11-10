@@ -3,6 +3,7 @@
 <p class="sub"><%= t('reg.sub') %></p>
 <% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
 <form method="post" action="/register" class="card">
+  <input type="hidden" name="next" value="<%= next || '' %>">
   <div class="field-row">
     <label><%= t('prof.first') %><input name="firstname" required autocomplete="given-name"></label>
     <label><%= t('prof.last') %><input name="lastname" required autocomplete="family-name"></label>

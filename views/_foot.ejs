@@ -3,6 +3,14 @@
     <footer class="foot"><span>© <%= new Date().getFullYear() %> SNBD HOST · <%= t('foot.tagline') %></span><span><a href="/kb"><%= t('nav.help') %></a> · <a href="/tickets/new"><%= t('foot.support') %></a></span></footer>
   </div>
 </div>
+<% } else if (typeof publicPage !== 'undefined' && publicPage) { %>
+</main>
+<footer class="pubfoot">
+  <div class="pubfoot-in">
+    <span>© <%= new Date().getFullYear() %> SNBD HOST · <%= t('foot.tagline') %></span>
+    <nav aria-label="<%= t('pub.footLinks') %>"><a href="/store"><%= t('pub.footStore') %></a><a href="/login"><%= t('pub.login') %></a><a href="/register"><%= t('pub.create') %></a></nav>
+  </div>
+</footer>
 <% } else { %>
   </main>
 </div>
