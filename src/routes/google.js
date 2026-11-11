@@ -27,6 +27,12 @@ function expired(token) {
   return Date.now() >= ((token.obtained_at || 0) + ((token.expires_in || 0) * 1000));
 }
 
+function isoDateDaysAgo(days) {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() - days);
+  return d.toISOString().slice(0, 10);
+}
+
 function portalUrl() {
   return process.env.PORTAL_URL || 'https://app.snbdhost.com';
 }
@@ -139,8 +145,8 @@ router.get('/data/:tool', requireLogin, async (req, res) => {
         siteUrl = sites[0].siteUrl;
       }
       const r = await axios.post(searchConsoleApi(siteUrl), {
-        startDate: '7daysAgo',
-        endDate: 'today',
+        startDate: isoDateDaysAgo(7),
+        endDate: isoDateDaysAgo(1),
         dimensions: ['date'],
         rowLimit: 10,
       }, { headers: authHeader });
