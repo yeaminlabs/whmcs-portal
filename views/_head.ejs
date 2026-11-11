@@ -1,9 +1,10 @@
 <%
 const ti = (typeof title === 'string' ? title : '');
 const tl = ti.toLowerCase();
-const HOME = { href: '/', icon: 'home', text: t('nav.dashboard'), on: ti === 'Dashboard' };
+const HOME = { href: '/dashboard', icon: 'layout', text: t('nav.dashboard'), on: ti === 'Dashboard' };
 const NAV = [
   { id: 'manage', icon: 'server', label: t('nav.groupManage'), items: [
+    { href: '/dashboard', icon: 'layout', text: t('nav.dashboard'), on: ti === 'Dashboard' },
     { href: '/services', icon: 'server', text: t('nav.services'), on: ti === 'My Services' || tl.startsWith('service') },
     { href: '/domains', icon: 'globe', text: t('nav.domains'), on: ti === 'My Domains' || (tl.startsWith('domain') && ti !== 'Order Domain') },
     { href: '/invoices', icon: 'receipt', text: t('nav.invoices'), on: tl.includes('invoice') },
@@ -39,7 +40,7 @@ const isPublic = !(session && session.clientId) && typeof publicPage !== 'undefi
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
-<meta name="theme-color" content="#d0021b">
+<meta name="theme-color" content="#2563eb">
 <title><%= T(ti) %> · <%= t('brand.clientArea') %></title>
 <link rel="icon" type="image/webp" href="/img/favicon.webp">
 <link rel="preload" href="/fonts/inter-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -50,7 +51,7 @@ const isPublic = !(session && session.clientId) && typeof publicPage !== 'undefi
 <a class="skip" href="#main"><%= t('a11y.skip') %></a>
 <% const prefsMenu = () => { %>
 <details class="prefs dd">
-  <summary aria-label="<%= t('prefs.aria') %>"><%- icon('globe') %><span><%= curLang.short %></span><span class="prefs-sep" aria-hidden="true">·</span><span class="prefs-cur"><%= displayCurrency.prefix %> <%= displayCurrency.code %></span><%- icon('chev', 'prefs-chev') %></summary>
+  <summary aria-label="<%= t('prefs.aria') %>" class="prefs-summary"><%- icon('globe') %><span><%= curLang.short %></span><span class="prefs-sep" aria-hidden="true">·</span><span class="prefs-cur"><%= displayCurrency.prefix %> <%= displayCurrency.code %></span><%- icon('chev', 'prefs-chev') %></summary>
   <form class="prefs-menu dd-menu" method="post" action="/prefs">
     <input type="hidden" name="back" value="<%= currentPath %>">
     <p class="prefs-label"><%= t('prefs.language') %></p>
@@ -59,21 +60,21 @@ const isPublic = !(session && session.clientId) && typeof publicPage !== 'undefi
     </div>
     <p class="prefs-label"><%= t('prefs.currency') %></p>
     <div class="seg">
-      <% currencies.forEach(c => { %><button type="submit" name="cur" value="<%= c.code %>" aria-pressed="<%= c.code === displayCurrency.code %>"><%= c.prefix %> <%= c.code %></button><% }) %>
+      <% currencies.forEach(c => { %><button type="submit" name="cur" value="<%= c.code %>" aria-pressed="<%= c.code === displayCurrency.code %>" lang="<%= l.code %>"><%= c.prefix %> <%= c.code %></button><% }) %>
     </div>
     <% if (accountCurrency) { %><p class="prefs-note"><%= billedDiffers ? t('prefs.billedDiffers', { bill: accountCurrency.code, shown: displayCurrency.code }) : t('prefs.billedIn', { code: accountCurrency.code }) %></p><% } %>
   </form>
 </details>
 <% } %>
 <% if (session && session.clientId) { %>
-<%
+<% 
 const initials = String(session.clientName || session.clientEmail || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
 const avatar = (size) => `<span class="avatar" style="--av:${size}px" aria-hidden="true">${initials.replace(/[<>&"]/g, '')}${session.clientPicture ? `<img src="${String(session.clientPicture).replace(/"/g, '&quot;')}" alt="" width="${size}" height="${size}" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}</span>`;
 %>
 <div class="shell">
   <aside class="side" id="sidebar" aria-label="<%= t('a11y.primary') %>">
     <div class="side-head">
-      <a class="brand" href="/" aria-label="<%= t('brand.home') %>"><img src="/img/snbd-logo.png" alt="SNBD HOST" width="136" height="34"></a>
+      <a class="brand" href="/" aria-label="<%= t('brand.home') %>"><div class="brand-mark"><%- icon('home') %></div><span class="brand-name">Shop</span></a>
       <button type="button" class="icon-btn side-close" data-nav-close aria-label="<%= t('top.closeMenu') %>"><%- icon('close') %></button>
     </div>
     <nav class="snav" aria-label="<%= t('brand.clientArea') %>">
@@ -102,6 +103,7 @@ const avatar = (size) => `<span class="avatar" style="--av:${size}px" aria-hidde
         <span><strong><%= t('dash.needHelp') %></strong><small><%= t('side.helpText') %></small></span>
       </a>
       <% if (mock) { %><span class="badge"><%= t('top.demo') %></span><% } %>
+      <a class="side-logout" href="/logout"><%- icon('logout') %><span><%= t('top.signOut') %></span></a>
     </div>
   </aside>
   <div class="scrim" data-nav-close hidden></div>
@@ -109,16 +111,20 @@ const avatar = (size) => `<span class="avatar" style="--av:${size}px" aria-hidde
     <header class="top">
       <div class="top-left">
         <button type="button" class="icon-btn menu-btn" data-nav-open aria-controls="sidebar" aria-expanded="false" aria-label="<%= t('top.menu') %>"><%- icon('menu') %></button>
-        <span class="crumb"><span class="crumb-root"><%= t('top.clientArea') %> <%- icon('chev') %></span> <b><%= T(ti) %></b></span>
+        <h1 class="page-title"><%= T(ti) %></h1>
       </div>
       <div class="top-actions">
+        <div class="top-search">
+          <input type="text" placeholder="Search…" class="top-search-input" aria-label="Search">
+          <button class="icon-btn" aria-label="Search"><%- icon('search') %></button>
+        </div>
         <a class="live" href="/status"><i aria-hidden="true"></i><%= t('nav.status') %></a>
         <% prefsMenu() %>
         <a class="btn ghost top-new" href="/store"><%- icon('plus') %><span><%= t('top.newService') %></span></a>
         <details class="usermenu dd">
-          <summary aria-label="<%= t('top.account') %>">
+          <summary aria-label="<%= t('top.account') %>" class="prefs-summary">
             <%- avatar(36) %>
-            <span class="um-name"><%= String(session.clientName || '').split(' ')[0] %></span>
+            <span class="um-name"><%= session.clientName %></span>
             <%- icon('chev', 'prefs-chev') %>
           </summary>
           <div class="um-menu dd-menu" role="menu">
@@ -138,48 +144,3 @@ const avatar = (size) => `<span class="avatar" style="--av:${size}px" aria-hidde
     </header>
     <main id="main" class="content" tabindex="-1">
     <% if (flash) { %><p class="alert <%= flash.type === 'ok' ? 'ok' : flash.type === 'err' ? 'err' : '' %> flash" role="status"><%= flash.text || t(flash.key, flash.vars) %></p><% } %>
-<% } else if (isPublic) { %>
-<%
-const cp = String(currentPath || '/store');
-const PUB = [
-  { href: '/store/usa-shared-hosting', text: t('pub.navShared'), on: /^\/store\/(usa|bdix)-shared-hosting/.test(cp) },
-  { href: '/store/bdix-vps', text: t('pub.navVps'), on: /^\/store\/(bdix|usa|sg|eu)-vps/.test(cp) },
-  { href: '/store/n8n', text: t('pub.navN8n'), on: cp.startsWith('/store/n8n') },
-  { href: '/login?next=' + encodeURIComponent('/order/domain'), text: t('pub.navDomains'), on: false },
-];
-const nextQ = encodeURIComponent(cp);
-%>
-<header class="pubtop">
-  <div class="pubtop-in">
-    <a class="pub-brand" href="/store" aria-label="SNBD HOST"><img src="/img/snbd-logo.png" alt="SNBD HOST" width="136" height="34"></a>
-    <nav class="pub-nav" aria-label="<%= t('pub.navLabel') %>">
-      <% PUB.forEach(i => { %><a href="<%= i.href %>"<% if (i.on) { %> class="active" aria-current="page"<% } %>><%= i.text %></a><% }) %>
-    </nav>
-    <div class="pub-actions">
-      <% prefsMenu() %>
-      <a class="btn ghost pub-login" href="/login?next=<%= nextQ %>"><%= t('pub.login') %></a>
-      <a class="btn red pub-create" href="/register?next=<%= nextQ %>"><%= t('pub.create') %></a>
-      <details class="pub-burger">
-        <summary aria-label="<%= t('pub.menu') %>"><%- icon('menu', 'pub-b-open') %><%- icon('close', 'pub-b-close') %></summary>
-        <div class="pub-sheet">
-          <% PUB.forEach(i => { %><a href="<%= i.href %>"<% if (i.on) { %> class="active" aria-current="page"<% } %>><%= i.text %></a><% }) %>
-          <div class="pub-sheet-btns">
-            <a class="btn ghost" href="/login?next=<%= nextQ %>"><%= t('pub.login') %></a>
-            <a class="btn red" href="/register?next=<%= nextQ %>"><%= t('pub.create') %></a>
-          </div>
-        </div>
-      </details>
-    </div>
-  </div>
-</header>
-<main id="main" class="pubmain" tabindex="-1">
-<% if (flash) { %><p class="alert <%= flash.type === 'ok' ? 'ok' : flash.type === 'err' ? 'err' : '' %> flash" role="status"><%= flash.text || t(flash.key, flash.vars) %></p><% } %>
-<% } else { %>
-<div class="authwrap">
-  <div class="auth-prefs">
-    <% if (ti === 'Register') { %><a class="auth-switch" href="/login"><%- icon('user') %><%= t('auth.login') %></a><% } else { %><a class="auth-switch" href="/register"><%- icon('plus') %><%= t('auth.create') %></a><% } %>
-    <% prefsMenu() %>
-  </div>
-  <main id="main" class="auth" tabindex="-1">
-    <img class="auth-logo" src="/img/snbd-logo.png" alt="SNBD HOST" width="144" height="36">
-<% } %>
