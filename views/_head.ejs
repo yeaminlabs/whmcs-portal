@@ -60,7 +60,7 @@ const isPublic = !(session && session.clientId) && typeof publicPage !== 'undefi
     </div>
     <p class="prefs-label"><%= t('prefs.currency') %></p>
     <div class="seg">
-      <% currencies.forEach(c => { %><button type="submit" name="cur" value="<%= c.code %>" aria-pressed="<%= c.code === displayCurrency.code %>" lang="<%= l.code %>"><%= c.prefix %> <%= c.code %></button><% }) %>
+      <% currencies.forEach(c => { %><button type="submit" name="cur" value="<%= c.code %>" aria-pressed="<%= c.code === displayCurrency.code %>" lang="<%= lang %>"><%= c.prefix %> <%= c.code %></button><% }) %>
     </div>
     <% if (accountCurrency) { %><p class="prefs-note"><%= billedDiffers ? t('prefs.billedDiffers', { bill: accountCurrency.code, shown: displayCurrency.code }) : t('prefs.billedIn', { code: accountCurrency.code }) %></p><% } %>
   </form>
@@ -140,3 +140,48 @@ const avatar = (size) => `<span class="avatar" style="--av:${size}px" aria-hidde
     </header>
     <main id="main" class="content" tabindex="-1">
     <% if (flash) { %><p class="alert <%= flash.type === 'ok' ? 'ok' : flash.type === 'err' ? 'err' : '' %> flash" role="status"><%= flash.text || t(flash.key, flash.vars) %></p><% } %>
+<% } else if (isPublic) { %>
+<%
+const cp = String(currentPath || '/store');
+const PUB = [
+  { href: '/store/usa-shared-hosting', text: t('pub.navShared'), on: /^\/store\/(usa|bdix)-shared-hosting/.test(cp) },
+  { href: '/store/bdix-vps', text: t('pub.navVps'), on: /^\/store\/(bdix|usa|sg|eu)-vps/.test(cp) },
+  { href: '/store/n8n', text: t('pub.navN8n'), on: cp.startsWith('/store/n8n') },
+  { href: '/login?next=' + encodeURIComponent('/order/domain'), text: t('pub.navDomains'), on: false },
+];
+const nextQ = encodeURIComponent(cp);
+%>
+<header class="pubtop">
+  <div class="pubtop-in">
+    <a class="pub-brand" href="/store" aria-label="SNBD HOST"><img src="/img/snbd-logo.png" alt="SNBD HOST" width="136" height="34"></a>
+    <nav class="pub-nav" aria-label="<%= t('pub.navLabel') %>">
+      <% PUB.forEach(i => { %><a href="<%= i.href %>"<% if (i.on) { %> class="active" aria-current="page"<% } %>><%= i.text %></a><% }) %>
+    </nav>
+    <div class="pub-actions">
+      <% prefsMenu() %>
+      <a class="btn ghost pub-login" href="/login?next=<%= nextQ %>"><%= t('pub.login') %></a>
+      <a class="btn red pub-create" href="/register?next=<%= nextQ %>"><%= t('pub.create') %></a>
+      <details class="pub-burger">
+        <summary aria-label="<%= t('pub.menu') %>"><%- icon('menu', 'pub-b-open') %><%- icon('close', 'pub-b-close') %></summary>
+        <div class="pub-sheet">
+          <% PUB.forEach(i => { %><a href="<%= i.href %>"<% if (i.on) { %> class="active" aria-current="page"<% } %>><%= i.text %></a><% }) %>
+          <div class="pub-sheet-btns">
+            <a class="btn ghost" href="/login?next=<%= nextQ %>"><%= t('pub.login') %></a>
+            <a class="btn red" href="/register?next=<%= nextQ %>"><%= t('pub.create') %></a>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+</header>
+<main id="main" class="pubmain" tabindex="-1">
+<% if (flash) { %><p class="alert <%= flash.type === 'ok' ? 'ok' : flash.type === 'err' ? 'err' : '' %> flash" role="status"><%= flash.text || t(flash.key, flash.vars) %></p><% } %>
+<% } else { %>
+<div class="authwrap">
+  <div class="auth-prefs">
+    <% if (ti === 'Register') { %><a class="auth-switch" href="/login"><%- icon('user') %><%= t('auth.login') %></a><% } else { %><a class="auth-switch" href="/register"><%- icon('plus') %><%= t('auth.create') %></a><% } %>
+    <% prefsMenu() %>
+  </div>
+  <main id="main" class="auth" tabindex="-1">
+    <img class="auth-logo" src="/img/snbd-logo.png" alt="SNBD HOST" width="144" height="36">
+<% } %>
