@@ -818,4 +818,13 @@ body.nav-open .scrim{opacity:1;pointer-events:auto}
   .pubmain{padding:20px 16px 8px}
   .pubfoot-in{padding:20px 16px}
   .co .field-row{grid-template-columns:1fr}
+
+  /* Search Console dashboard panel */
+  .sc-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0}
+  .sc-head label{font-size:13px;font-weight:600;color:var(--g600);margin:0}
+  .sc-head select{min-width:220px;padding:8px 12px;border:1px solid var(--line);border-radius:var(--r);background:#fff}
+  .sc-head button{margin-left:auto}
+  .sc-grid{grid-template-columns:repeat(4,1fr);gap:12px}
+  .sc-chart{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+  .sc-empty{margin-top:12px}
 }

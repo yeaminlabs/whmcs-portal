@@ -5,6 +5,7 @@ const axios = require('axios');
 const { requireLogin } = require('../middleware/auth');
 const config = require('../config');
 const gtokens = require('../lib/google-tokens');
+const { cached } = require('../lib/cache');
 
 const router = express.Router();
 
@@ -96,6 +97,31 @@ router.get('/disconnect/:tool', requireLogin, (req, res) => {
   res.redirect('/google/tools');
 });
 
+router.get('/data/searchconsole/sites', requireLogin, async (req, res) => {
+  const clientId = req.session.clientId;
+  const token = tokenFor(clientId, 'searchconsole');
+  if (!token) {
+    return res.status(409).json({ error: 'not_connected', message: 'Connect Search Console first.' });
+  }
+  if (expired(token)) {
+    return res.status(409).json({ error: 'expired', message: 'Token for searchconsole expired; reconnect.' });
+  }
+  const authHeader = { Authorization: 'Bearer ' + token.access_token };
+  try {
+    const key = `sc:sites:${clientId}`;
+    const sites = await cached(key, 60 * 60 * 1000, async () => {
+      const r = await axios.get('https://www.googleapis.com/webmasters/v3/sites', { headers: authHeader });
+      return (r.data.siteEntry || []).map((s) => ({ siteUrl: s.siteUrl, permissionLevel: s.permissionLevel }));
+    });
+    res.json({ sites });
+  } catch (e) {
+    if (e.response && (e.response.status === 403 || e.response.status === 401)) {
+      return res.status(409).json({ error: 'no_sc_access', message: 'No access to Search Console sites. Reconnect Search Console.' });
+    }
+    res.status(502).json({ error: 'google_api_error', message: e.message });
+  }
+});
+
 router.get('/data/:tool', requireLogin, async (req, res) => {
   const tool = req.params.tool;
   if (!['analytics', 'searchconsole'].includes(tool)) {
@@ -133,6 +159,9 @@ router.get('/data/:tool', requireLogin, async (req, res) => {
       data = r.data;
     } else {
       let siteUrl = req.query.siteUrl;
+      const days = Math.min(Math.max(parseInt(req.query.days || '7', 10), 1), 90);
+      const endDate = isoDateDaysAgo(1);
+      const startDate = isoDateDaysAgo(days);
       if (!siteUrl) {
         let sites;
         try {
@@ -144,13 +173,39 @@ router.get('/data/:tool', requireLogin, async (req, res) => {
         if (!sites.length) return res.status(409).json({ error: 'no_sc_site', message: 'No verified Search Console sites found. Add and verify a site at search.google.com/search-console.' });
         siteUrl = sites[0].siteUrl;
       }
-      const r = await axios.post(searchConsoleApi(siteUrl), {
-        startDate: isoDateDaysAgo(7),
-        endDate: isoDateDaysAgo(1),
-        dimensions: ['date'],
-        rowLimit: 10,
-      }, { headers: authHeader });
-      data = r.data;
+      const cacheKey = `sc:data:${req.session.clientId}:${encodeURIComponent(siteUrl)}:${days}`;
+      data = await cached(cacheKey, 60 * 60 * 1000, async () => {
+        const r = await axios.post(searchConsoleApi(siteUrl), {
+          startDate,
+          endDate,
+          dimensions: ['date'],
+          rowLimit: 250,
+        }, { headers: authHeader });
+        const rows = r.data.rows || [];
+        let totalClicks = 0, totalImpressions = 0;
+        const series = rows.map((row) => {
+          const c = Number(row.clicks || 0);
+          const i = Number(row.impressions || 0);
+          totalClicks += c;
+          totalImpressions += i;
+          return { date: row.keys[0], clicks: c, impressions: i };
+        });
+        const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0;
+        const position = rows.length > 0
+          ? rows.reduce((s, row) => s + Number(row.position || 0), 0) / rows.length
+          : 0;
+        return {
+          siteUrl,
+          days,
+          summary: {
+            clicks: totalClicks,
+            impressions: totalImpressions,
+            ctr,
+            position,
+          },
+          series: series.reverse(),
+        };
+      });
     }
     res.json(data);
   } catch (e) {

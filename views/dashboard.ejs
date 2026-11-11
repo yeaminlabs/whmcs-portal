@@ -117,6 +117,31 @@ const credit = Number(customer.credit) || 0;
         </tbody>
       </table></div>
     </section>
+
+    <section class="panel reveal reveal-3" aria-labelledby="sc-h">
+      <header><span id="sc-h"><%= t('sc.title') %></span><a href="/google/tools"><%= t('common.viewAll') %></a></header>
+      <div class="pad">
+        <% if (!gtools.includes('searchconsole')) { %>
+          <p><%= t('sc.connectFirst') %> <a href="/google/tools"><%= t('nav.googleTools') %></a></p>
+        <% } else { %>
+          <div class="sc-head">
+            <label><%= t('sc.domain') %></label>
+            <select id="sc-domain" class="snbd-input form-control"><option value=""><%= t('common.all') %></option></select>
+            <button class="btn" id="sc-refresh"><%- icon('refresh') %><%= t('sc.refresh') %></button>
+          </div>
+          <div class="sc-grid grid">
+            <div class="stat"><span><%= t('sc.clicks') %></span><strong id="sc-clicks">–</strong><small><%= t('sc.lastUpdate') %></small></div>
+            <div class="stat"><span><%= t('sc.impressions') %></span><strong id="sc-impressions">–</strong><small><%= t('sc.lastUpdate') %></small></div>
+            <div class="stat"><span><%= t('sc.ctr') %></span><strong id="sc-ctr">–</strong><small><%= t('sc.lastUpdate') %></small></div>
+            <div class="stat"><span><%= t('sc.position') %></span><strong id="sc-position">–</strong><small><%= t('sc.lastUpdate') %></small></div>
+          </div>
+          <div class="sc-chart" style="margin-top:16px;">
+            <canvas id="sc-chart" height="140"></canvas>
+          </div>
+          <p id="sc-empty" style="color:var(--g500);display:none;"><%= t('sc.noData') %></p>
+        <% } %>
+      </div>
+    </section>
   </div>
 
   <aside aria-label="<%= t('dash.sideAria') %>">
@@ -152,4 +177,120 @@ const credit = Number(customer.credit) || 0;
     </section>
   </aside>
 </div>
+<script>
+(function () {
+  const domainSel = document.getElementById('sc-domain');
+  const refreshBtn = document.getElementById('sc-refresh');
+  const clicksEl = document.getElementById('sc-clicks');
+  const impressionsEl = document.getElementById('sc-impressions');
+  const ctrEl = document.getElementById('sc-ctr');
+  const positionEl = document.getElementById('sc-position');
+  const emptyEl = document.getElementById('sc-empty');
+  const chartEl = document.getElementById('sc-chart');
+
+  if (!domainSel || !refreshBtn) return;
+
+  let allSites = [];
+
+  async function loadSites() {
+    try {
+      const r = await fetch('/google/data/searchconsole/sites');
+      const j = await r.json();
+      allSites = j.sites || [];
+      domainSel.innerHTML = '<option value=""><%= t("common.all") %></option>' +
+        allSites.map((s) => '<option value="' + encodeURIComponent(s.siteUrl) + '">' + s.siteUrl + '</option>').join('');
+      if (allSites.length && !domainSel.value) domainSel.value = allSites[0].siteUrl;
+      loadData();
+    } catch (e) {
+      console.warn('[sc] sites load failed', e.message);
+    }
+  }
+
+  function fmtPct(n, digits = 1) {
+    return (n * 100).toFixed(digits) + '%';
+  }
+
+  function fmtPos(n) {
+    return n.toFixed(1);
+  }
+
+  async function loadData() {
+    const siteUrl = domainSel.value || (allSites[0] && allSites[0].siteUrl);
+    if (!siteUrl) {
+      emptyEl.style.display = 'block';
+      [clicksEl, impressionsEl, ctrEl, positionEl].forEach((el) => (el.textContent = '–'));
+      return;
+    }
+    emptyEl.style.display = 'none';
+    try {
+      const r = await fetch('/google/data/searchconsole?siteUrl=' + encodeURIComponent(siteUrl) + '&days=7');
+      const j = await r.json();
+      if (j.error) {
+        emptyEl.textContent = j.message || 'No data.';
+        emptyEl.style.display = 'block';
+        [clicksEl, impressionsEl, ctrEl, positionEl].forEach((el) => (el.textContent = '–'));
+        return;
+      }
+      clicksEl.textContent = j.summary.clicks.toLocaleString();
+      impressionsEl.textContent = j.summary.impressions.toLocaleString();
+      ctrEl.textContent = fmtPct(j.summary.ctr);
+      positionEl.textContent = fmtPos(j.summary.position);
+      drawChart(j.series);
+    } catch (e) {
+      console.warn('[sc] data load failed', e.message);
+    }
+  }
+
+  function drawChart(series) {
+    const canvas = chartEl;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    const w = rect.width;
+    const h = rect.height;
+    ctx.clearRect(0, 0, w, h);
+
+    const clicks = series.map((s) => s.clicks);
+    const impressions = series.map((s) => s.impressions);
+    const maxVal = Math.max(...clicks, ...impressions, 1);
+    const pad = 32;
+
+    ctx.strokeStyle = '#d0021b';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    clicks.forEach((v, i) => {
+      const x = (i / (series.length - 1 || 1)) * (w - pad * 2) + pad;
+      const y = h - pad - (v / maxVal) * (h - pad * 2);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    ctx.strokeStyle = '#667085';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    impressions.forEach((v, i) => {
+      const x = (i / (series.length - 1 || 1)) * (w - pad * 2) + pad;
+      const y = h - pad - (v / maxVal) * (h - pad * 2);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    series.forEach((s, i) => {
+      const x = (i / (series.length - 1 || 1)) * (w - pad * 2) + pad;
+      ctx.fillStyle = '#344054';
+      ctx.font = '10px var(--sans)';
+      ctx.textAlign = 'center';
+      ctx.fillText(s.date.slice(5), x, h - 6);
+    });
+  }
+
+  domainSel.addEventListener('change', loadData);
+  refreshBtn.addEventListener('click', loadData);
+  loadSites();
+  setInterval(loadData, 60 * 60 * 1000);
+})();
+</script>
 <%- include('_foot') %>

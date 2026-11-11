@@ -125,11 +125,16 @@ describe('google routes', () => {
   test('data route fetches searchconsole read-only query with explicit siteUrl', async () => {
     const h = handlerFor('/data/:tool');
     gtokens.get.mockReturnValue({ searchconsole: { access_token: 'tok', obtained_at: Date.now(), expires_in: 3600 } });
-    axios.post.mockResolvedValue({ data: { rows: [] } });
+    axios.post.mockResolvedValue({ data: { rows: [{ keys: ['2026-11-10'], clicks: 5, impressions: 50, ctr: 0.1, position: 3 }] } });
     const r = req({ params: { tool: 'searchconsole' }, query: { siteUrl: 'https://example.com/' } });
     const res = mockRes();
     await h(r, res);
-    expect(res._json).toEqual({ rows: [] });
+    expect(res._json).toEqual({
+      siteUrl: 'https://example.com/',
+      days: 7,
+      summary: { clicks: 5, impressions: 50, ctr: 0.1, position: 3 },
+      series: [{ date: '2026-11-10', clicks: 5, impressions: 50 }],
+    });
     const [url, body, cfg] = axios.post.mock.calls[0];
     expect(url).toContain('webmasters/v3/sites/');
     expect(body.dimensions).toEqual(['date']);
