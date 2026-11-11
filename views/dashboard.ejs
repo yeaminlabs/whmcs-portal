@@ -118,27 +118,52 @@ const credit = Number(customer.credit) || 0;
       </table></div>
     </section>
 
-    <section class="panel reveal reveal-3" aria-labelledby="sc-h">
-      <header><span id="sc-h"><%= t('sc.title') %></span><a href="/google/tools"><%= t('common.viewAll') %></a></header>
+    <section class="panel reveal reveal-3 sc-panel" aria-labelledby="sc-h">
+      <header><span id="sc-h" class="hd-title"><%- icon('activity') %><%= t('sc.title') %></span><a href="/google/tools"><%= t('common.viewAll') %></a></header>
       <div class="pad">
         <% if (!gtools.includes('searchconsole')) { %>
-          <p><%= t('sc.connectFirst') %> <a href="/google/tools"><%= t('nav.googleTools') %></a></p>
+          <p class="svc-muted" style="padding:20px;"><%= t('sc.connectFirst') %> <a href="/google/tools"><%= t('nav.googleTools') %></a></p>
         <% } else { %>
-          <div class="sc-head">
-            <label><%= t('sc.domain') %></label>
-            <select id="sc-domain" class="snbd-input form-control"><option value=""><%= t('common.all') %></option></select>
-            <button class="btn" id="sc-refresh"><%- icon('refresh') %><%= t('sc.refresh') %></button>
+          <div class="sc-toolbar">
+            <div class="sc-domain-picker">
+              <span class="sc-domain-ico"><%- icon('globe') %></span>
+              <select id="sc-domain" class="sc-domain-select"><option value=""><%= t('common.all') %></option></select>
+            </div>
+            <div class="sc-toolbar-right">
+              <span class="sc-live" id="sc-updated"><i></i><%= t('sc.lastUpdate') %></span>
+              <button class="btn-sm btn ghost" id="sc-refresh"><%- icon('refresh') %><%= t('sc.refresh') %></button>
+            </div>
           </div>
           <div class="sc-grid grid">
-            <div class="stat"><span><%= t('sc.clicks') %></span><strong id="sc-clicks">–</strong><small><%= t('sc.lastUpdate') %></small></div>
-            <div class="stat"><span><%= t('sc.impressions') %></span><strong id="sc-impressions">–</strong><small><%= t('sc.lastUpdate') %></small></div>
-            <div class="stat"><span><%= t('sc.ctr') %></span><strong id="sc-ctr">–</strong><small><%= t('sc.lastUpdate') %></small></div>
-            <div class="stat"><span><%= t('sc.position') %></span><strong id="sc-position">–</strong><small><%= t('sc.lastUpdate') %></small></div>
+            <div class="stat sc-stat">
+              <div class="sc-stat-top"><span class="sc-stat-ico sc-ico-clicks"><%- icon('bolt') %></span><span><%= t('sc.clicks') %></span></div>
+              <strong id="sc-clicks">–</strong>
+              <span class="sc-trend" id="sc-clicks-trend"></span>
+            </div>
+            <div class="stat sc-stat">
+              <div class="sc-stat-top"><span class="sc-stat-ico sc-ico-impr"><%- icon('globe') %></span><span><%= t('sc.impressions') %></span></div>
+              <strong id="sc-impressions">–</strong>
+              <span class="sc-trend" id="sc-impressions-trend"></span>
+            </div>
+            <div class="stat sc-stat">
+              <div class="sc-stat-top"><span class="sc-stat-ico sc-ico-ctr"><%- icon('search') %></span><span><%= t('sc.ctr') %></span></div>
+              <strong id="sc-ctr">–</strong>
+              <span class="sc-trend" id="sc-ctr-trend"></span>
+            </div>
+            <div class="stat sc-stat">
+              <div class="sc-stat-top"><span class="sc-stat-ico sc-ico-pos"><%- icon('star') %></span><span><%= t('sc.position') %></span></div>
+              <strong id="sc-position">–</strong>
+              <span class="sc-trend" id="sc-position-trend"></span>
+            </div>
           </div>
-          <div class="sc-chart" style="margin-top:16px;">
-            <canvas id="sc-chart" height="140"></canvas>
+          <div class="sc-chart-card">
+            <div class="sc-legend">
+              <span class="sc-legend-item"><i class="sc-dot sc-dot-clicks"></i><%= t('sc.clicks') %></span>
+              <span class="sc-legend-item"><i class="sc-dot sc-dot-impr"></i><%= t('sc.impressions') %></span>
+            </div>
+            <canvas id="sc-chart" height="160"></canvas>
           </div>
-          <p id="sc-empty" style="color:var(--g500);display:none;"><%= t('sc.noData') %></p>
+          <p id="sc-empty" class="sc-empty" style="display:none;"><%= t('sc.noData') %></p>
         <% } %>
       </div>
     </section>
@@ -187,10 +212,48 @@ const credit = Number(customer.credit) || 0;
   const positionEl = document.getElementById('sc-position');
   const emptyEl = document.getElementById('sc-empty');
   const chartEl = document.getElementById('sc-chart');
+  const updatedEl = document.getElementById('sc-updated');
+  const trendEls = {
+    clicks: document.getElementById('sc-clicks-trend'),
+    impressions: document.getElementById('sc-impressions-trend'),
+    ctr: document.getElementById('sc-ctr-trend'),
+    position: document.getElementById('sc-position-trend'),
+  };
 
   if (!domainSel || !refreshBtn) return;
 
   let allSites = [];
+
+  function setTrend(el, diff, opts) {
+    if (!el) return;
+    if (!isFinite(diff)) { el.textContent = ''; el.className = 'sc-trend'; return; }
+    const invert = !!(opts && opts.invert);
+    const up = diff >= 0;
+    const good = invert ? !up : up;
+    el.className = 'sc-trend ' + (good ? 'up' : 'down');
+    el.innerHTML = (up ? '&#9650; ' : '&#9660; ') + Math.abs(diff).toFixed(1) + '%';
+  }
+
+  function pctDelta(curr, prev) {
+    if (!prev) return NaN;
+    return ((curr - prev) / prev) * 100;
+  }
+
+  function applyTrends(series) {
+    if (!series || series.length < 2) {
+      Object.values(trendEls).forEach((el) => el && (el.textContent = ''));
+      return;
+    }
+    const mid = Math.max(1, Math.floor(series.length / 2));
+    const prev = series.slice(0, mid);
+    const curr = series.slice(mid);
+    const sum = (arr, key) => arr.reduce((a, s) => a + (s[key] || 0), 0);
+    const avg = (arr, key) => sum(arr, key) / (arr.length || 1);
+    setTrend(trendEls.clicks, pctDelta(sum(curr, 'clicks'), sum(prev, 'clicks')));
+    setTrend(trendEls.impressions, pctDelta(sum(curr, 'impressions'), sum(prev, 'impressions')));
+    setTrend(trendEls.ctr, pctDelta(avg(curr, 'ctr'), avg(prev, 'ctr')));
+    setTrend(trendEls.position, pctDelta(avg(curr, 'position'), avg(prev, 'position')), { invert: true });
+  }
 
   async function loadSites() {
     try {
@@ -228,19 +291,22 @@ const credit = Number(customer.credit) || 0;
     }
     emptyEl.style.display = 'none';
     try {
-      const r = await fetch('/google/data/searchconsole?siteUrl=' + encodeURIComponent(siteUrl) + '&days=7');
+      const r = await fetch('/google/data/searchconsole?siteUrl=' + encodeURIComponent(siteUrl) + '&days=14');
       const j = await r.json();
       if (j.error) {
         emptyEl.textContent = j.message || 'No data.';
         emptyEl.style.display = 'block';
         [clicksEl, impressionsEl, ctrEl, positionEl].forEach((el) => (el.textContent = '–'));
+        Object.values(trendEls).forEach((el) => el && (el.textContent = ''));
         return;
       }
       clicksEl.textContent = j.summary.clicks.toLocaleString();
       impressionsEl.textContent = j.summary.impressions.toLocaleString();
       ctrEl.textContent = fmtPct(j.summary.ctr);
       positionEl.textContent = fmtPos(j.summary.position);
+      applyTrends(j.series);
       drawChart(j.series);
+      if (updatedEl) updatedEl.innerHTML = '<i></i>' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } catch (e) {
       console.warn('[sc] data load failed', e.message);
     }
@@ -257,38 +323,75 @@ const credit = Number(customer.credit) || 0;
     const w = rect.width;
     const h = rect.height;
     ctx.clearRect(0, 0, w, h);
+    if (!series || !series.length) return;
 
     const clicks = series.map((s) => s.clicks);
     const impressions = series.map((s) => s.impressions);
     const maxVal = Math.max(...clicks, ...impressions, 1);
-    const pad = 32;
+    const padL = 8, padR = 8, padT = 12, padB = 24;
+    const plotW = w - padL - padR;
+    const plotH = h - padT - padB;
+    const xAt = (i) => (i / (series.length - 1 || 1)) * plotW + padL;
+    const yAt = (v) => padT + plotH - (v / maxVal) * plotH;
+
+    // horizontal gridlines
+    ctx.strokeStyle = '#eaecf0';
+    ctx.lineWidth = 1;
+    for (let g = 0; g <= 3; g++) {
+      const y = padT + (plotH / 3) * g;
+      ctx.beginPath();
+      ctx.moveTo(padL, y);
+      ctx.lineTo(w - padR, y);
+      ctx.stroke();
+    }
+
+    function linePath(values) {
+      ctx.beginPath();
+      values.forEach((v, i) => {
+        const x = xAt(i);
+        const y = yAt(v);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+    }
+
+    // impressions line (muted)
+    ctx.strokeStyle = '#98a2b3';
+    ctx.lineWidth = 1.5;
+    linePath(impressions);
+    ctx.stroke();
+
+    // clicks: filled area + bold brand line
+    const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
+    grad.addColorStop(0, 'rgba(208,2,27,.18)');
+    grad.addColorStop(1, 'rgba(208,2,27,0)');
+    linePath(clicks);
+    ctx.lineTo(xAt(clicks.length - 1), padT + plotH);
+    ctx.lineTo(xAt(0), padT + plotH);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
 
     ctx.strokeStyle = '#d0021b';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
+    ctx.lineWidth = 2.25;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    linePath(clicks);
+    ctx.stroke();
+
     clicks.forEach((v, i) => {
-      const x = (i / (series.length - 1 || 1)) * (w - pad * 2) + pad;
-      const y = h - pad - (v / maxVal) * (h - pad * 2);
-      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      ctx.beginPath();
+      ctx.arc(xAt(i), yAt(v), 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#d0021b';
+      ctx.fill();
     });
-    ctx.stroke();
 
-    ctx.strokeStyle = '#667085';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    impressions.forEach((v, i) => {
-      const x = (i / (series.length - 1 || 1)) * (w - pad * 2) + pad;
-      const y = h - pad - (v / maxVal) * (h - pad * 2);
-      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    });
-    ctx.stroke();
-
+    const step = Math.ceil(series.length / 6);
     series.forEach((s, i) => {
-      const x = (i / (series.length - 1 || 1)) * (w - pad * 2) + pad;
-      ctx.fillStyle = '#344054';
-      ctx.font = '10px var(--sans)';
+      if (i % step !== 0 && i !== series.length - 1) return;
+      ctx.fillStyle = '#667085';
+      ctx.font = '11px var(--sans)';
       ctx.textAlign = 'center';
-      ctx.fillText(s.date.slice(5), x, h - 6);
+      ctx.fillText(s.date.slice(5), xAt(i), h - 6);
     });
   }
 
