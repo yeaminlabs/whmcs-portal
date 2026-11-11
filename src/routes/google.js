@@ -148,6 +148,9 @@ router.get('/data/:tool', requireLogin, async (req, res) => {
     }
     res.json(data);
   } catch (e) {
+    if (e.response && (e.response.status === 403 || e.response.status === 401)) {
+      return res.status(409).json({ error: 'no_sc_access', message: 'No access to Search Console data for this site. Verify and authorize the site under this Google account at search.google.com/search-console, then reconnect.' });
+    }
     res.status(502).json({ error: 'google_api_error', message: e.message });
   }
 });
