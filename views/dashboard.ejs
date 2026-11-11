@@ -127,7 +127,7 @@ const invDuePct = pct(invDueN, invoices.length);
     </section>
   </div>
 
-  <div class="dash-side">
+  <aside aria-label="<%= t('dash.sideAria') %>">
     <section class="panel reveal reveal-3 sc-panel" aria-labelledby="sc-h">
       <header><span id="sc-h" class="hd-title"><%- icon('activity') %><%= t('sc.title') %></span><a href="/google/tools"><%= t('common.viewAll') %></a></header>
       <div class="pad">
@@ -180,11 +180,24 @@ const invDuePct = pct(invDueN, invoices.length);
         <% } %>
       </div>
     </section>
-  </div>
-</div>
 
-<aside aria-label="<%= t('dash.sideAria') %>">
-  <section class="panel reveal reveal-2" aria-labelledby="tix-h">
+    <section class="panel reveal reveal-2 donut-card" aria-labelledby="bill-h">
+      <header style="margin:-20px -20px 0;padding:16px 20px;"><span id="bill-h"><%= t('dash.billingOverview') %></span></header>
+      <% if (!invoices.length) { %>
+        <p style="color:var(--g500);margin:16px 0 0;"><%= t('dash.billingEmpty') %></p>
+      <% } else { %>
+        <div class="donut-wrap" style="--p1:<%= invPaidPct %>;--p2:<%= invDuePct %>">
+          <div class="donut-val"><strong><%= invPaidPct %>%</strong></div>
+        </div>
+        <div class="donut-legend">
+          <span class="donut-legend-item"><i style="background:var(--ok)"></i><%= t('dash.billingPaid') %><b><%= invPaidN %></b></span>
+          <span class="donut-legend-item"><i style="background:var(--red)"></i><%= t('dash.billingDue') %><b><%= invDueN %></b></span>
+          <span class="donut-legend-item"><i style="background:var(--g200)"></i><%= t('dash.billingOther') %><b><%= invOtherN %></b></span>
+        </div>
+      <% } %>
+    </section>
+
+    <section class="panel reveal reveal-2" aria-labelledby="tix-h">
     <header><span id="tix-h"><%= t('nav.tickets') %></span><a href="/tickets"><%= t('common.all') %></a></header>
     <% if (locals.ticketsUnavailable) { %>
       <p class="ticket-line" style="color:var(--g500)"><%= t('tix.unavailable') %> <a href="/contact"><%= t('nav.contact') %></a></p>
