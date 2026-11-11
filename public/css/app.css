@@ -12,9 +12,9 @@
   --bg:var(--g50); --surface:#fff; --surface2:var(--g50);
   --muted:var(--g600); --faint:var(--g500); --line:var(--g200); --line2:var(--g100);
   --navy:var(--ink); --navy2:var(--ink-2); --gold:var(--red); --gold2:var(--red);
-  --r:12px; --r2:8px;
+  --r:16px; --r2:8px; --r-lg:22px;
   --shadow:0 1px 2px rgba(16,24,40,.05);
-  --shadow-lg:0 12px 16px -4px rgba(16,24,40,.08),0 4px 6px -2px rgba(16,24,40,.03);
+  --shadow-lg:0 16px 32px -12px rgba(16,24,40,.12),0 4px 10px -4px rgba(16,24,40,.04);
   --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
   --serif:var(--sans);
   --ease:cubic-bezier(.16,1,.3,1);
@@ -552,12 +552,12 @@ body.lang-bn h1,body.lang-bn h2{letter-spacing:0}
 .icon-btn .ico{width:20px;height:20px}
 .side-close,.menu-btn{display:none}
 .snav{display:flex;flex-direction:column;gap:4px}
-.snav-link{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;color:var(--g700);font-size:14px;font-weight:500;transition:background .15s,color .15s,transform .2s var(--ease)}
+.snav-link{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:999px;color:var(--g700);font-size:14px;font-weight:500;transition:background .15s,color .15s,transform .2s var(--ease)}
 .snav-link .ico{color:var(--g500);transition:color .15s}
 .snav-link:hover{background:var(--g50);color:var(--ink)}
 .snav-link:hover .ico{color:var(--g700)}
-.snav-link.active{background:var(--red-50);color:var(--red-dark);font-weight:600}
-.snav-link.active .ico{color:var(--red)}
+.snav-link.active{background:var(--red);color:#fff;font-weight:600;box-shadow:0 8px 16px -6px rgba(208,2,27,.45)}
+.snav-link.active .ico{color:#fff}
 .snav-home{margin-bottom:6px}
 .snav-group{border-radius:10px;transition:background .2s}
 .snav-group[data-open="true"]{background:var(--g50)}
@@ -837,6 +837,27 @@ body.nav-open .scrim{opacity:1;pointer-events:auto}
 .sc-dot-impr{background:#98a2b3}
 .sc-empty{margin:12px 0 0;color:var(--g500);text-align:center}
 .sc-chart-card canvas{display:block;width:100%}
+.sc-chart-wrap{position:relative}
+.sc-tooltip{position:absolute;z-index:2;transform:translate(-50%,-100%);margin-top:-8px;background:var(--ink);color:#fff;font-size:12px;font-weight:600;padding:7px 11px;border-radius:9px;pointer-events:none;white-space:nowrap;box-shadow:var(--shadow-lg)}
+.sc-tooltip small{display:block;font-weight:400;opacity:.72;font-size:11px;margin-top:1px}
+.sc-tooltip[hidden]{display:none}
+
+/* mini ring stat (dashboard hero summary) */
+.ring{--pct:0;--ring-fg:var(--red);--ring-track:rgba(255,255,255,.16);--ring-bg:var(--night);width:40px;height:40px;border-radius:50%;flex:none;position:relative;background:conic-gradient(var(--ring-fg) calc(var(--pct) * 1%),var(--ring-track) 0)}
+.ring::before{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--ring-bg)}
+.ring-val{position:relative;z-index:1;display:grid;place-items:center;width:100%;height:100%;font-size:10px;font-weight:700;color:#fff}
+.summary a{position:relative}
+
+/* billing overview donut (sidebar) */
+.donut-card{padding:20px}
+.donut-wrap{--p1:0;--p2:0;width:150px;height:150px;margin:6px auto 4px;border-radius:50%;position:relative;background:conic-gradient(var(--ok) 0 calc(var(--p1) * 1%),var(--red) calc(var(--p1) * 1%) calc((var(--p1) + var(--p2)) * 1%),var(--g200) calc((var(--p1) + var(--p2)) * 1%) 100%)}
+.donut-wrap::before{content:"";position:absolute;inset:18px;border-radius:50%;background:#fff;box-shadow:var(--shadow)}
+.donut-val{position:absolute;inset:0;display:grid;place-items:center;z-index:1}
+.donut-val strong{font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--ink)}
+.donut-legend{display:grid;gap:8px;margin-top:14px}
+.donut-legend-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--g700)}
+.donut-legend-item i{width:9px;height:9px;border-radius:50%;flex:none}
+.donut-legend-item b{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--ink)}
 
 /* list toolbar — search + filter row above tables */
 .list-toolbar{display:flex;align-items:center;gap:10px;padding:14px 20px 0;flex-wrap:wrap}
