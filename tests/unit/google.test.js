@@ -132,6 +132,7 @@ describe('google routes', () => {
     expect(res._json).toEqual({
       siteUrl: 'https://example.com/',
       days: 7,
+      dimensions: 'date',
       summary: { clicks: 5, impressions: 50, ctr: 0.1, position: 3 },
       series: [{ date: '2026-11-10', clicks: 5, impressions: 50 }],
     });

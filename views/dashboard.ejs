@@ -365,18 +365,19 @@ const invOtherPct = pct(invOtherN, invoices.length);
       return;
     }
     try {
-      const r = await fetch('/google/data/searchconsole?siteUrl=' + encodeURIComponent(siteUrl) + '&days=' + state.range + '&dimensions=query,device,country');
-      const j = await r.json();
-      if (j.error) {
+      // 1) Date-series + summary (trend chart + KPIs) — isolated from breakdowns.
+      const r1 = await fetch('/google/data/searchconsole?siteUrl=' + encodeURIComponent(siteUrl) + '&days=' + state.range);
+      const j1 = await r1.json();
+      if (j1.error) {
         Object.values(kpiEls).forEach((el) => (el.textContent = '–'));
         Object.values(trendEls).forEach((el) => (el.textContent = ''));
         return;
       }
-      kpiEls.clicks.textContent = j.summary.clicks.toLocaleString();
-      kpiEls.impressions.textContent = j.summary.impressions.toLocaleString();
-      kpiEls.ctr.textContent = ((j.summary.ctr || 0) * 100).toFixed(2) + '%';
-      kpiEls.position.textContent = (j.summary.position || 0).toFixed(1);
-      const series = j.series || [];
+      kpiEls.clicks.textContent = j1.summary.clicks.toLocaleString();
+      kpiEls.impressions.textContent = j1.summary.impressions.toLocaleString();
+      kpiEls.ctr.textContent = ((j1.summary.ctr || 0) * 100).toFixed(2) + '%';
+      kpiEls.position.textContent = (j1.summary.position || 0).toFixed(1);
+      const series = j1.series || [];
       if (series.length > 0) {
         emptyEl.hidden = true;
         chartEl.hidden = false;
@@ -386,11 +387,29 @@ const invOtherPct = pct(invOtherN, invoices.length);
         chartEl.hidden = true;
       }
       if (lastUpdatedEl) lastUpdatedEl.innerHTML = '<span class="status-dot"></span> <%= t("sc.lastUpdate") %> ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      renderQueries(j.breakdowns && j.breakdowns.query ? j.breakdowns.query : []);
-      renderDevices(j.breakdowns && j.breakdowns.device ? j.breakdowns.device : []);
-      renderCountries(j.breakdowns && j.breakdowns.country ? j.breakdowns.country : []);
+
+      // 2) Breakdowns — separate single-dimension calls so keys[0] is the real value.
+      await Promise.all([
+        fetchBreakdown('query'),
+        fetchBreakdown('device'),
+        fetchBreakdown('country'),
+      ]);
     } catch (e) {
       console.warn('[sc] data load failed', e.message);
+    }
+  }
+
+  async function fetchBreakdown(dim) {
+    try {
+      const siteUrl = window.__scSelectedSite;
+      const r = await fetch('/google/data/searchconsole?siteUrl=' + encodeURIComponent(siteUrl) + '&days=' + state.range + '&dimensions=' + dim);
+      const j = await r.json();
+      if (j.error) return;
+      if (dim === 'query') renderQueries(j.breakdowns && j.breakdowns.query ? j.breakdowns.query : []);
+      if (dim === 'device') renderDevices(j.breakdowns && j.breakdowns.device ? j.breakdowns.device : []);
+      if (dim === 'country') renderCountries(j.breakdowns && j.breakdowns.country ? j.breakdowns.country : []);
+    } catch (e) {
+      console.warn('[sc] breakdown load failed', dim, e.message);
     }
   }
 
@@ -473,7 +492,7 @@ const invOtherPct = pct(invOtherN, invoices.length);
     queryTableBody.innerHTML = queries.length
       ? queries.map((q) =>
           '<tr class="sc-query-row">' +
-          '<td class="sc-query-term"><strong>' + escapeHtml(q.query) + '</strong><small>' + (q.change > 0 ? '↑ ' : '↓ ') + Math.abs(q.change) + ' ' + q.kind + '</small></td>' +
+          '<td class="sc-query-term"><strong>' + escapeHtml(q.query) + '</strong></td>' +
           '<td>' + number(q.clicks) + '</td>' +
           '<td>' + number(q.impressions) + '</td>' +
           '<td>' + (q.impressions ? (q.clicks / q.impressions * 100).toFixed(2) : 0) + '%</td>' +

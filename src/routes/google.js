@@ -159,7 +159,8 @@ router.get('/data/:tool', requireLogin, async (req, res) => {
       data = r.data;
     } else {
       let siteUrl = req.query.siteUrl;
-      const days = Math.min(Math.max(parseInt(req.query.days || '7', 10), 1), 90);
+      const days = Math.min(Math.max(parseInt(req.query.days || '7', 10), 1), 365);
+      const dimensions = req.query.dimensions || 'date';
       const endDate = isoDateDaysAgo(1);
       const startDate = isoDateDaysAgo(days);
       if (!siteUrl) {
@@ -173,37 +174,61 @@ router.get('/data/:tool', requireLogin, async (req, res) => {
         if (!sites.length) return res.status(409).json({ error: 'no_sc_site', message: 'No verified Search Console sites found. Add and verify a site at search.google.com/search-console.' });
         siteUrl = sites[0].siteUrl;
       }
-      const cacheKey = `sc:data:${req.session.clientId}:${encodeURIComponent(siteUrl)}:${days}`;
+      const cacheKey = `sc:data:${req.session.clientId}:${encodeURIComponent(siteUrl)}:${days}:${dimensions}`;
       data = await cached(cacheKey, 60 * 60 * 1000, async () => {
         const r = await axios.post(searchConsoleApi(siteUrl), {
           startDate,
           endDate,
-          dimensions: ['date'],
+          dimensions: [dimensions],
           rowLimit: 250,
         }, { headers: authHeader });
         const rows = r.data.rows || [];
-        let totalClicks = 0, totalImpressions = 0;
-        const series = rows.map((row) => {
-          const c = Number(row.clicks || 0);
-          const i = Number(row.impressions || 0);
-          totalClicks += c;
-          totalImpressions += i;
-          return { date: row.keys[0], clicks: c, impressions: i };
+
+        // Single-dimension date call -> series + summary (trend chart + KPIs).
+        // Isolated from breakdown dimensions so query/device/country never
+        // leak into date keys or silently undercount past rowLimit.
+        if (dimensions === 'date') {
+          let totalClicks = 0, totalImpressions = 0;
+          const series = rows.map((row) => {
+            const c = Number(row.clicks || 0);
+            const i = Number(row.impressions || 0);
+            totalClicks += c;
+            totalImpressions += i;
+            return { date: row.keys[0], clicks: c, impressions: i };
+          });
+          const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0;
+          const position = rows.length > 0
+            ? rows.reduce((s, row) => s + Number(row.position || 0), 0) / rows.length
+            : 0;
+          return {
+            siteUrl,
+            days,
+            dimensions: 'date',
+            summary: {
+              clicks: totalClicks,
+              impressions: totalImpressions,
+              ctr,
+              position,
+            },
+            series: series.reverse(),
+          };
+        }
+
+        // Single-dimension breakdown call -> breakdowns.[dimension].
+        // Each row's keys[0] is the actual value for the requested dimension.
+        const breakdown = rows.map((r) => {
+          const key = r.keys[0];
+          const clicks = Number(r.clicks || 0);
+          const impressions = Number(r.impressions || 0);
+          const ctr = impressions > 0 ? clicks / impressions : 0;
+          const position = Number(r.position || 0);
+          return { [dimensions]: key, clicks, impressions, ctr, position };
         });
-        const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0;
-        const position = rows.length > 0
-          ? rows.reduce((s, row) => s + Number(row.position || 0), 0) / rows.length
-          : 0;
         return {
           siteUrl,
           days,
-          summary: {
-            clicks: totalClicks,
-            impressions: totalImpressions,
-            ctr,
-            position,
-          },
-          series: series.reverse(),
+          dimensions,
+          breakdowns: { [dimensions]: breakdown },
         };
       });
     }
