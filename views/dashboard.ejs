@@ -9,6 +9,8 @@ const overdueServices = Number(stats.numoverdueservices) || 0;
 const unpaid = invoices.find(i => ['Unpaid', 'Overdue'].includes(i.status));
 const credit = Number(customer.credit) || 0;
 
+const first = (session.clientName || (customer && customer.fullname) || '').split(/\s+/).filter(Boolean)[0] || '';
+
 const pct = (n, d) => (d ? Math.round((n / d) * 100) : 100);
 const svcPct = pct(services.filter(s => s.status === 'Active').length, services.length);
 const domPct = pct(domains.filter(d => d.status === 'Active').length, domains.length);
@@ -28,15 +30,15 @@ const invDuePct = pct(invDueN, invoices.length);
         <h1 id="welcome-title"><%= t('dash.welcome') %> <em><%= first %></em></h1>
       </div>
       <% if (numDue > 0) { %>
-        <p><%= t(numDue === 1 ? 'dash.dueOne' : 'dash.dueMany', { n: numDue, amount: bill(dueBalance) }) %></p>
+        <p><%= t(numDue === 1 ? 'dash.dueOne' : 'dash.dueMany', { n: numDue, amount: money(dueBalance) }) %></p>
       <% } else { %>
-        <p><%= t('dash.allPaid') %><% if (credit > 0) { %> <%= t('dash.credit', { amount: bill(credit) }) %><% } %></p>
+        <p><%= t('dash.allPaid') %><% if (credit > 0) { %> <%= t('dash.credit', { amount: money(credit) }) %><% } %></p>
       <% } %>
     </div>
     <div class="welcome-actions">
       <% if (unpaid) { %>
         <a class="btn ghost" href="/invoices"><%= t('dash.viewInvoices') %></a>
-        <a class="btn red" href="/invoices/<%= unpaid.id %>/pay"><%= t('dash.pay', { amount: bill(unpaid.balance || unpaid.total) }) %></a>
+        <a class="btn red" href="/invoices/<%= unpaid.id %>/pay"><%= t('dash.pay', { amount: money(unpaid.balance || unpaid.total) }) %></a>
       <% } else { %>
         <a class="btn ghost" href="/order/domain"><%- icon('search') %><%= t('dash.findDomain') %></a>
         <a class="btn red" href="/store"><%= t('dash.orderHosting') %></a>
@@ -46,7 +48,7 @@ const invDuePct = pct(invDueN, invoices.length);
   <nav class="summary" aria-label="<%= t('dash.summary') %>">
     <a href="/services"><span><%- icon('server') %><%= t('dash.services') %></span><strong><%= numServices %></strong><small><%= t('dash.active') %></small><% if (services.length) { %><span class="ring" style="position:absolute;top:14px;right:16px;--pct:<%= svcPct %>"><span class="ring-val"><%= svcPct %>%</span></span><% } %></a>
     <a href="/domains"><span><%- icon('globe') %><%= t('dash.domains') %></span><strong><%= numDomains %></strong><small><%= t('dash.active') %></small><% if (domains.length) { %><span class="ring" style="position:absolute;top:14px;right:16px;--pct:<%= domPct %>"><span class="ring-val"><%= domPct %>%</span></span><% } %></a>
-    <a href="/invoices" class="<%= numDue > 0 ? 'due' : '' %>"><span><%- icon('receipt') %><%= t('dash.amountDue') %></span><strong><%= bill(numDue > 0 ? dueBalance : 0) %></strong><small><%= approx(dueBalance) || t(numDue === 1 ? 'dash.unpaidOne' : 'dash.unpaidMany', { n: numDue }) %></small><% if (invoices.length) { %><span class="ring" style="position:absolute;top:14px;right:16px;--pct:<%= invPaidPct %>;--ring-fg:var(--ok)"><span class="ring-val"><%= invPaidPct %>%</span></span><% } %></a>
+    <a href="/invoices" class="<%= numDue > 0 ? 'due' : '' %>"><span><%- icon('receipt') %><%= t('dash.amountDue') %></span><strong><%= money(numDue > 0 ? dueBalance : 0) %></strong><small><%= money(dueBalance) || t(numDue === 1 ? 'dash.unpaidOne' : 'dash.unpaidMany', { n: numDue }) %></small><% if (invoices.length) { %><span class="ring" style="position:absolute;top:14px;right:16px;--pct:<%= invPaidPct %>;--ring-fg:var(--ok)"><span class="ring-val"><%= invPaidPct %>%</span></span><% } %></a>
     <a href="/tickets"><span><%- icon('life') %><%= t('dash.support') %></span><strong><%= numTickets %></strong><small><%= t(numTickets === 1 ? 'dash.ticketOne' : 'dash.ticketMany') %></small><% if (tickets.length) { %><span class="ring" style="position:absolute;top:14px;right:16px;--pct:<%= tixPct %>"><span class="ring-val"><%= tixPct %>%</span></span><% } %></a>
   </nav>
 </section>
@@ -74,7 +76,7 @@ const invDuePct = pct(invDueN, invoices.length);
             <td><span class="cell-main"><%= s.name || s.groupname || t('col.service') %></span><span class="cell-sub"><%= s.domain || t('dash.noDomain') %></span></td>
             <td><span class="pill <%= s.status %>"><%= st(s.status) %></span></td>
             <td><%= fmtDate(s.nextduedate) %></td>
-            <td><%= bill(s.recurringamount || s.amount) %><% if (s.billingcycle) { %><span class="cell-sub"><%= st(s.billingcycle) %></span><% } %></td>
+            <td><%= money(s.recurringamount || s.amount) %><% if (s.billingcycle) { %><span class="cell-sub"><%= st(s.billingcycle) %></span><% } %></td>
             <td><a class="row-link" href="/services/<%= s.id %>"><%= t('common.manage') %></a></td>
           </tr>
         <% }) %>
@@ -95,7 +97,7 @@ const invDuePct = pct(invDueN, invoices.length);
             <td>#<%= i.invoicenum || i.id %></td>
             <td><%= fmtDate(i.date) %></td>
             <td><%= fmtDate(i.duedate) %></td>
-            <td><%= price(i.total, i.currencycode) %></td>
+            <td><%= money(i.total, i.currencycode) %></td>
             <td><span class="pill <%= i.status %>"><%= st(i.status) %></span></td>
             <td><a class="row-link" href="/invoices/<%= i.id %><%= open ? '/pay' : '' %>"><%= open ? t('dash.payNow') : t('common.view') %></a></td>
           </tr>
