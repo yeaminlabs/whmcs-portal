@@ -1,6 +1,60 @@
 <%- include('_head') %>
-<div class="pagehead"><div><h1><%= t('aff.title') %></h1><p class="sub"><%= t('aff.sub') %></p></div></div>
-<div class="card narrow-card">
-  <% if (info) { %><p><%= t('aff.active') %></p><% } else { %><p><%= t('aff.none') %></p><a class="btn ghost" href="/contact"><%= t('aff.ask') %></a><% } %>
+<div class="pagehead">
+  <div>
+    <div class="page-eyebrow"><span class="page-icon"><%- icon('star') %></span><span class="page-label"><%= t('nav.groupAccount') %></span></div>
+    <h1><%= t('aff.title') %></h1>
+    <p class="sub"><%= t('aff.sub') %></p>
+  </div>
 </div>
+<% if (info) { %>
+<%
+const affBalance = info.balance || info.earnings || 0;
+const affPaid = info.withdrawn || info.paidout || 0;
+const affClicks = info.visitors || info.clicks || 0;
+const affSignups = info.signups || info.referrals || 0;
+const affLink = info.link || info.referrallink || '';
+%>
+<div class="grid aff-stat">
+  <div class="stat"><span><%- icon('wallet') %> Balance</span><strong><%= affBalance %></strong><small>Available to withdraw</small></div>
+  <div class="stat"><span><%- icon('arrow') %> Paid Out</span><strong><%= affPaid %></strong><small>Lifetime earnings</small></div>
+  <div class="stat"><span><%- icon('activity') %> Clicks</span><strong><%= affClicks %></strong><small>Total referral visits</small></div>
+  <div class="stat"><span><%- icon('users') %> Sign-ups</span><strong><%= affSignups %></strong><small>Referred accounts</small></div>
+</div>
+<% if (affLink) { %>
+<div class="card">
+  <h2 style="margin-top:0">Your Referral Link</h2>
+  <p class="sub">Share this link to earn commissions on every referral who purchases a service.</p>
+  <div class="aff-link-box">
+    <input type="text" class="mono" value="<%= affLink %>" readonly id="aff-link" style="font-size:13px">
+    <button class="btn ghost" onclick="navigator.clipboard.writeText(document.getElementById('aff-link').value).then(()=>{this.textContent='Copied!'})"><%- icon('copy') %> Copy</button>
+  </div>
+  <p class="sum-secure" style="margin-top:12px"><%- icon('info') %>Commissions are credited when your referred clients complete a purchase.</p>
+</div>
+<% } %>
+<div class="card">
+  <h2 style="margin-top:0">How it works</h2>
+  <ol style="padding-left:20px;display:grid;gap:8px;color:var(--g600);font-size:14px;margin:0">
+    <li><strong style="color:var(--ink)">Share your link</strong> — post it in your content, website, or social media.</li>
+    <li><strong style="color:var(--ink)">Earn commissions</strong> — get credited when someone signs up and buys through your link.</li>
+    <li><strong style="color:var(--ink)">Withdraw anytime</strong> — request a payout once your balance meets the minimum threshold.</li>
+  </ol>
+</div>
+<% } else { %>
+<div class="ui-empty">
+  <div class="ui-empty-icon"><%- icon('star') %></div>
+  <h3><%= t('aff.none') %></h3>
+  <p>Earn commissions by referring new customers to SNBD HOST. Contact us to get started.</p>
+  <a class="btn red" href="/contact"><%= t('aff.ask') %></a>
+</div>
+<div class="card" style="max-width:620px;margin-top:16px">
+  <h2 style="margin-top:0">About the Affiliate Program</h2>
+  <div class="funds-methods">
+    <div class="funds-method"><%- icon('users') %><span>Refer clients</span></div>
+    <div class="funds-method"><%- icon('wallet') %><span>Earn commission</span></div>
+    <div class="funds-method"><%- icon('arrow') %><span>Get paid out</span></div>
+    <div class="funds-method"><%- icon('activity') %><span>Track referrals</span></div>
+  </div>
+  <p style="font-size:14px;color:var(--g600);margin:8px 0 0">Join our affiliate program to earn recurring commissions on every customer you refer. Contact support to activate your account.</p>
+</div>
+<% } %>
 <%- include('_foot') %>

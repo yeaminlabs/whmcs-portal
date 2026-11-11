@@ -40,7 +40,7 @@ const isPublic = !(session && session.clientId) && typeof publicPage !== 'undefi
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
-<meta name="theme-color" content="#2563eb">
+<meta name="theme-color" content="#d0021b">
 <title><%= T(ti) %> · <%= t('brand.clientArea') %></title>
 <link rel="icon" type="image/webp" href="/img/favicon.webp">
 <link rel="preload" href="/fonts/inter-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -67,14 +67,14 @@ const isPublic = !(session && session.clientId) && typeof publicPage !== 'undefi
 </details>
 <% } %>
 <% if (session && session.clientId) { %>
-<% 
+<%
 const initials = String(session.clientName || session.clientEmail || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
 const avatar = (size) => `<span class="avatar" style="--av:${size}px" aria-hidden="true">${initials.replace(/[<>&"]/g, '')}${session.clientPicture ? `<img src="${String(session.clientPicture).replace(/"/g, '&quot;')}" alt="" width="${size}" height="${size}" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}</span>`;
 %>
 <div class="shell">
   <aside class="side" id="sidebar" aria-label="<%= t('a11y.primary') %>">
     <div class="side-head">
-      <a class="brand" href="/" aria-label="<%= t('brand.home') %>"><div class="brand-mark"><%- icon('home') %></div><span class="brand-name">Shop</span></a>
+      <a class="brand" href="/" aria-label="<%= t('brand.home') %>"><img src="/img/snbd-logo.png" alt="SNBD HOST" width="136" height="34"></a>
       <button type="button" class="icon-btn side-close" data-nav-close aria-label="<%= t('top.closeMenu') %>"><%- icon('close') %></button>
     </div>
     <nav class="snav" aria-label="<%= t('brand.clientArea') %>">
@@ -114,10 +114,6 @@ const avatar = (size) => `<span class="avatar" style="--av:${size}px" aria-hidde
         <h1 class="page-title"><%= T(ti) %></h1>
       </div>
       <div class="top-actions">
-        <div class="top-search">
-          <input type="text" placeholder="Search…" class="top-search-input" aria-label="Search">
-          <button class="icon-btn" aria-label="Search"><%- icon('search') %></button>
-        </div>
         <a class="live" href="/status"><i aria-hidden="true"></i><%= t('nav.status') %></a>
         <% prefsMenu() %>
         <a class="btn ghost top-new" href="/store"><%- icon('plus') %><span><%= t('top.newService') %></span></a>

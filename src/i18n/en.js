@@ -667,6 +667,7 @@ module.exports = {
   'dash.30d': '30d',
   'dash.analytics': 'Analytics',
   'dash.status': 'Status',
+  'option': 'Option',
   '2.33k': '2.33k',
   '70%': '70%',
   '<%= t(': '<%= t(',

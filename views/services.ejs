@@ -1,21 +1,73 @@
 <%- include('_head') %>
 <% const bc = accountCurrency || displayCurrency; %>
-<div class="pagehead"><div><h1><%= t('svc.title') %></h1><p class="sub"><%= t('svc.sub') %></p></div><a class="btn ghost" href="/store"><%- icon('plus') %><%= t('top.newService') %></a></div>
-<% if (!services.length) { %><div class="ui-empty"><h3><%= t('dash.noServices') %></h3><p><a href="/store"><%= t('dash.orderFirst') %></a></p></div><% } else { %>
-<div class="panel"><div class="pad"><table>
-  <thead><tr><th><%= t('col.service') %></th><th><%= t('col.cycle') %></th><th><%= t('col.price') %></th><th><%= t('col.status') %></th><th><%= t('col.renews') %></th><th><span class="sr-only"><%= t('col.actions') %></span></th></tr></thead>
-  <tbody>
-  <% services.forEach(s => { %>
-    <tr>
-      <td><span class="cell-main"><%= s.name %></span><span class="cell-sub"><%= s.domain || t('dash.noDomain') %></span></td>
-      <td><%= st(s.billingcycle) %></td>
-      <td><%= price(s.recurringamount || s.amount) %></td>
-      <td><span class="pill <%= s.status %>"><%= st(s.status) %></span></td>
-      <td><%= fmtDate(s.nextduedate) %></td>
-      <td><a class="row-link" href="/services/<%= s.id %>"><%= t('common.manage') %></a></td>
-    </tr>
-  <% }) %>
-  </tbody>
-</table></div></div>
+<div class="pagehead">
+  <div>
+    <div class="page-eyebrow"><span class="page-icon"><%- icon('server') %></span><span class="page-label"><%= t('nav.groupManage') %></span></div>
+    <h1><%= t('svc.title') %></h1>
+    <p class="sub"><%= t('svc.sub') %></p>
+  </div>
+  <a class="btn ghost" href="/store"><%- icon('plus') %><%= t('top.newService') %></a>
+</div>
+<% if (!services.length) { %>
+<div class="ui-empty">
+  <div class="ui-empty-icon"><%- icon('server') %></div>
+  <h3><%= t('dash.noServices') %></h3>
+  <p><%= t('dash.orderFirst') %></p>
+  <a class="btn red" href="/store"><%- icon('plus') %><%= t('top.newService') %></a>
+</div>
+<% } else { %>
+<div class="panel">
+  <div class="list-toolbar">
+    <input class="list-search" type="search" placeholder="<%= t('common.search') %>…" aria-label="<%= t('common.search') %>" id="svc-search">
+    <div class="list-filter-btns">
+      <button class="filter-btn" aria-pressed="true" data-filter="all">All</button>
+      <button class="filter-btn" aria-pressed="false" data-filter="Active">Active</button>
+      <button class="filter-btn" aria-pressed="false" data-filter="Suspended">Suspended</button>
+    </div>
+    <span class="list-count" id="svc-count"><%= services.length %> <%= t('svc.title').toLowerCase() %></span>
+  </div>
+  <div class="pad"><table id="svc-table">
+    <thead><tr><th><%= t('col.service') %></th><th><%= t('col.cycle') %></th><th><%= t('col.price') %></th><th><%= t('col.status') %></th><th><%= t('col.renews') %></th><th><span class="sr-only"><%= t('col.actions') %></span></th></tr></thead>
+    <tbody>
+    <% services.forEach(s => { %>
+      <tr data-name="<%= String(s.name || '').toLowerCase() %> <%= String(s.domain || '').toLowerCase() %>" data-status="<%= s.status %>">
+        <td><span class="cell-main"><%= s.name %></span><span class="cell-sub"><%= s.domain || t('dash.noDomain') %></span></td>
+        <td><%= st(s.billingcycle) %></td>
+        <td><%= price(s.recurringamount || s.amount) %></td>
+        <td><span class="pill <%= s.status %>"><%= st(s.status) %></span></td>
+        <td><%= fmtDate(s.nextduedate) %></td>
+        <td><a class="row-link" href="/services/<%= s.id %>"><%= t('common.manage') %></a></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table></div>
+</div>
+<script>
+(function(){
+  const search = document.getElementById('svc-search');
+  const count = document.getElementById('svc-count');
+  const rows = document.querySelectorAll('#svc-table tbody tr');
+  const filters = document.querySelectorAll('[data-filter]');
+  let activeFilter = 'all';
+  function update() {
+    const q = search.value.toLowerCase();
+    let visible = 0;
+    rows.forEach(r => {
+      const matchSearch = !q || r.dataset.name.includes(q);
+      const matchFilter = activeFilter === 'all' || r.dataset.status === activeFilter;
+      const show = matchSearch && matchFilter;
+      r.toggleAttribute('data-hidden', !show);
+      if (show) visible++;
+    });
+    count.textContent = visible + ' <%= services.length > 0 ? t("svc.title").toLowerCase() : "" %>';
+  }
+  search.addEventListener('input', update);
+  filters.forEach(btn => btn.addEventListener('click', () => {
+    activeFilter = btn.dataset.filter;
+    filters.forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+    update();
+  }));
+})();
+</script>
 <% } %>
 <%- include('_foot') %>

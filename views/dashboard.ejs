@@ -3,215 +3,466 @@
 const numServices = Number(stats.numactiveservices != null ? stats.numactiveservices : services.length) || 0;
 const numDomains = Number(stats.numactivedomains != null ? stats.numactivedomains : domains.length) || 0;
 const numTickets = Number(stats.numactivetickets != null ? stats.numactivetickets : tickets.length) || 0;
+const numDue = Number(stats.numdueinvoices) || 0;
+const dueBalance = Number(String(stats.dueinvoicesbalance || '0').replace(/[^0-9.-]/g, '')) || 0;
+const overdueServices = Number(stats.numoverdueservices) || 0;
+const unpaid = invoices.find(i => ['Unpaid', 'Overdue'].includes(i.status));
+const credit = Number(customer.credit) || 0;
 
-const statCards = [
-  { icon: 'lock', label: t('sc.salesProducts'), value: numServices + '+', trend: '80%', trendColor: 'ok', iconBg: 'var(--g100)', iconColor: 'var(--ink)' },
-  { icon: 'flame', label: t('sc.stokProducts'), value: numDomains + '+', trend: '30%', trendColor: 'ok', iconBg: 'var(--ok-bg)', iconColor: 'var(--ok)' },
-  { icon: 'credit', label: t('sc.returnProducts'), value: numTickets + '+', trend: '20%', trendColor: 'bad', iconBg: 'var(--bad-bg)', iconColor: 'var(--bad)' },
-];
-
-const demoOrders = [
-  { id: '9812567', name: 'Air Vapomax', status: 'Complete', price: '22.78' },
-  { id: '9812411', name: 'Canon EOS 1500D 24.1MP', status: 'Pending', price: '122.80' },
-  { id: '9812556', name: 'MI Backpack Black', status: 'Canceled', price: '15.99' },
-  { id: '9812619', name: 'iPhone 12 128GB', status: 'Complete', price: '4022.00' },
-];
+const pct = (n, d) => (d ? Math.round((n / d) * 100) : 100);
+const svcPct = pct(services.filter(s => s.status === 'Active').length, services.length);
+const domPct = pct(domains.filter(d => d.status === 'Active').length, domains.length);
+const tixPct = pct(tickets.filter(tk => ['Closed', 'Resolved'].includes(tk.status)).length, tickets.length);
+const invPaidN = invoices.filter(i => i.status === 'Paid').length;
+const invDueN = invoices.filter(i => ['Unpaid', 'Overdue'].includes(i.status)).length;
+const invOtherN = Math.max(0, invoices.length - invPaidN - invDueN);
+const invPaidPct = pct(invPaidN, invoices.length);
+const invDuePct = pct(invDueN, invoices.length);
 %>
-<section class="dash-top">
-  <div class="dash-title-row">
-    <div class="dash-title">
-      <h1 class="dash-h1"><%= t('dash.title') %></h1>
-      <p class="dash-sub"><%= t('dash.sub') %></p>
-    </div>
-    <div class="dash-range">
-      <select class="dash-range-select" id="dash-range">
-        <option value="7d"><%= t('dash.weekly') %></option>
-        <option value="30d"><%= t('dash.monthly') %></option>
-      </select>
-      <button class="btn-sm btn ghost" id="dash-refresh"><%- icon('refresh') %></button>
-    </div>
-  </div>
-  <div class="statrow">
-    <% statCards.forEach(c => { %>
-    <div class="stat-card">
-      <div class="stat-card-head">
-        <div class="stat-icon" style="background:<%= c.iconBg %>;color:<%= c.iconColor %>"><%- icon(c.icon) %></div>
-        <div class="stat-card-meta">
-          <div class="stat-card-label"><%= c.label %></div>
-          <div class="stat-card-trend"><span class="stat-trend-dot <%= c.trendColor %>"></span><span><%= c.trend %></span></div>
-        </div>
+
+<section class="welcome reveal" aria-labelledby="welcome-title">
+  <div class="welcome-row">
+    <div>
+      <div class="welcome-who">
+        <span class="avatar welcome-avatar" aria-hidden="true"><%= String(session.clientName || first).split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() %><% if (session.clientPicture) { %><img src="<%= session.clientPicture %>" alt="" width="56" height="56" referrerpolicy="no-referrer" onerror="this.remove()"><% } %></span>
+        <h1 id="welcome-title"><%= t('dash.welcome') %> <em><%= first %></em></h1>
       </div>
-      <div class="stat-card-value"><%= c.value %></div>
+      <% if (numDue > 0) { %>
+        <p><%= t(numDue === 1 ? 'dash.dueOne' : 'dash.dueMany', { n: numDue, amount: bill(dueBalance) }) %></p>
+      <% } else { %>
+        <p><%= t('dash.allPaid') %><% if (credit > 0) { %> <%= t('dash.credit', { amount: bill(credit) }) %><% } %></p>
+      <% } %>
     </div>
-    <% }) %>
+    <div class="welcome-actions">
+      <% if (unpaid) { %>
+        <a class="btn ghost" href="/invoices"><%= t('dash.viewInvoices') %></a>
+        <a class="btn red" href="/invoices/<%= unpaid.id %>/pay"><%= t('dash.pay', { amount: bill(unpaid.balance || unpaid.total) }) %></a>
+      <% } else { %>
+        <a class="btn ghost" href="/order/domain"><%- icon('search') %><%= t('dash.findDomain') %></a>
+        <a class="btn red" href="/store"><%= t('dash.orderHosting') %></a>
+      <% } %>
+    </div>
   </div>
+  <nav class="summary" aria-label="<%= t('dash.summary') %>">
+    <a href="/services"><span><%- icon('server') %><%= t('dash.services') %></span><strong><%= numServices %></strong><small><%= t('dash.active') %></small><% if (services.length) { %><span class="ring" style="position:absolute;top:14px;right:16px;--pct:<%= svcPct %>"><span class="ring-val"><%= svcPct %>%</span></span><% } %></a>
+    <a href="/domains"><span><%- icon('globe') %><%= t('dash.domains') %></span><strong><%= numDomains %></strong><small><%= t('dash.active') %></small><% if (domains.length) { %><span class="ring" style="position:absolute;top:14px;right:16px;--pct:<%= domPct %>"><span class="ring-val"><%= domPct %>%</span></span><% } %></a>
+    <a href="/invoices" class="<%= numDue > 0 ? 'due' : '' %>"><span><%- icon('receipt') %><%= t('dash.amountDue') %></span><strong><%= bill(numDue > 0 ? dueBalance : 0) %></strong><small><%= approx(dueBalance) || t(numDue === 1 ? 'dash.unpaidOne' : 'dash.unpaidMany', { n: numDue }) %></small><% if (invoices.length) { %><span class="ring" style="position:absolute;top:14px;right:16px;--pct:<%= invPaidPct %>;--ring-fg:var(--ok)"><span class="ring-val"><%= invPaidPct %>%</span></span><% } %></a>
+    <a href="/tickets"><span><%- icon('life') %><%= t('dash.support') %></span><strong><%= numTickets %></strong><small><%= t(numTickets === 1 ? 'dash.ticketOne' : 'dash.ticketMany') %></small><% if (tickets.length) { %><span class="ring" style="position:absolute;top:14px;right:16px;--pct:<%= tixPct %>"><span class="ring-val"><%= tixPct %>%</span></span><% } %></a>
+  </nav>
 </section>
 
-<div class="dash-grid">
-  <div class="dash-main">
-    <section class="dash-panel">
-      <header class="dash-panel-head">
-        <div class="dash-panel-title"><%- icon('activity') %><span><%= t('dash.salesReports') %></span></div>
-        <div class="dash-panel-actions">
-          <select class="dash-period" id="dash-period">
-            <option value="24h"><%= t('dash.24h') %></option>
-            <option value="7d" selected><%= t('dash.7d') %></option>
-            <option value="30d"><%= t('dash.30d') %></option>
-          </select>
-        </div>
-      </header>
-      <div class="dash-panel-body">
-        <div class="dash-chart-wrap">
-          <canvas id="dash-area-chart" height="260"></canvas>
-        </div>
-      </div>
+<% if (overdueServices > 0) { %>
+<div class="attention reveal reveal-2" role="alert">
+  <span class="dot"><%- icon('alert') %></span>
+  <div><strong><%= t(overdueServices === 1 ? 'dash.overdueOne' : 'dash.overdueMany', { n: overdueServices }) %></strong><small><%= t('dash.overdueHint') %></small></div>
+  <a class="btn red" href="<%= unpaid ? '/invoices/' + unpaid.id + '/pay' : '/invoices' %>"><%= t('dash.payNow') %></a>
+</div>
+<% } %>
+
+<div class="dash-cols">
+  <div>
+    <section class="panel reveal reveal-2" aria-labelledby="svc-h">
+      <header><span id="svc-h"><%= t('dash.yourServices') %></span><a href="/services"><%= t('common.viewAll') %></a></header>
+      <div class="pad"><table>
+        <thead><tr><th><%= t('col.service') %></th><th><%= t('col.status') %></th><th><%= t('col.renews') %></th><th><%= t('col.price') %></th><th><span class="sr-only"><%= t('col.actions') %></span></th></tr></thead>
+        <tbody>
+        <% if (!services.length) { %>
+          <tr class="empty-row"><td colspan="5"><%= t('dash.noServices') %> <a href="/store"><%= t('dash.orderFirst') %></a></td></tr>
+        <% } %>
+        <% services.forEach(s => { %>
+          <tr>
+            <td><span class="cell-main"><%= s.name || s.groupname || t('col.service') %></span><span class="cell-sub"><%= s.domain || t('dash.noDomain') %></span></td>
+            <td><span class="pill <%= s.status %>"><%= st(s.status) %></span></td>
+            <td><%= fmtDate(s.nextduedate) %></td>
+            <td><%= bill(s.recurringamount || s.amount) %><% if (s.billingcycle) { %><span class="cell-sub"><%= st(s.billingcycle) %></span><% } %></td>
+            <td><a class="row-link" href="/services/<%= s.id %>"><%= t('common.manage') %></a></td>
+          </tr>
+        <% }) %>
+        </tbody>
+      </table></div>
     </section>
 
-    <section class="dash-panel dash-recent">
-      <header class="dash-panel-head dash-recent-head">
-        <div class="dash-panel-title"><%- icon('receipt') %><span><%= t('dash.recentOrder') %></span></div>
-        <a href="/invoices" class="btn-sm btn ghost"><%= t('dash.seeMore') %></a>
-      </header>
-      <div class="dash-panel-body">
-        <div class="table-wrap">
-          <table class="orders-table">
-            <thead>
-              <tr>
-                <th><%= t('dash.trackingId') %></th>
-                <th><%= t('dash.productName') %></th>
-                <th><%= t('dash.status') %></th>
-                <th><%= t('dash.price') %></th>
-              </tr>
-            </thead>
-            <tbody>
-              <% demoOrders.forEach(o => { %>
-              <tr>
-                <td class="order-id">#<%= o.id %></td>
-                <td class="order-name"><%= o.name %></td>
-                <td><span class="order-status status-<%= o.status.toLowerCase() %>"><%= o.status %></span></td>
-                <td class="order-price">$<%= o.price %></td>
-              </tr>
-              <% }) %>
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <section class="panel reveal reveal-3" aria-labelledby="inv-h">
+      <header><span id="inv-h"><%= t('dash.recentInvoices') %></span><a href="/invoices"><%= t('common.viewAll') %></a></header>
+      <div class="pad"><table>
+        <thead><tr><th><%= t('col.invoice') %></th><th><%= t('col.issued') %></th><th><%= t('col.due') %></th><th><%= t('col.total') %></th><th><%= t('col.status') %></th><th><span class="sr-only"><%= t('col.actions') %></span></th></tr></thead>
+        <tbody>
+        <% if (!invoices.length) { %>
+          <tr class="empty-row"><td colspan="6"><%= t('dash.noInvoices') %></td></tr>
+        <% } %>
+        <% invoices.forEach(i => { const open = ['Unpaid', 'Overdue'].includes(i.status); %>
+          <tr>
+            <td>#<%= i.invoicenum || i.id %></td>
+            <td><%= fmtDate(i.date) %></td>
+            <td><%= fmtDate(i.duedate) %></td>
+            <td><%= price(i.total, i.currencycode) %></td>
+            <td><span class="pill <%= i.status %>"><%= st(i.status) %></span></td>
+            <td><a class="row-link" href="/invoices/<%= i.id %><%= open ? '/pay' : '' %>"><%= open ? t('dash.payNow') : t('common.view') %></a></td>
+          </tr>
+        <% }) %>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section class="panel reveal reveal-3" aria-labelledby="dom-h">
+      <header><span id="dom-h"><%= t('dash.yourDomains') %></span><a href="/domains"><%= t('common.viewAll') %></a></header>
+      <div class="pad"><table>
+        <thead><tr><th><%= t('col.domain') %></th><th><%= t('col.status') %></th><th><%= t('col.expires') %></th><th><%= t('col.actions') %></th></tr></thead>
+        <tbody>
+        <% if (!domains.length) { %>
+          <tr class="empty-row"><td colspan="4"><%= t('dash.noDomains') %> <a href="/order/domain"><%= t('dash.searchDomain') %></a></td></tr>
+        <% } %>
+        <% domains.forEach(d => { %>
+          <tr>
+            <td><%= d.domainname || d.domain %></td>
+            <td><span class="pill <%= d.status %>"><%= st(d.status) %></span></td>
+            <td><%= fmtDate(d.expirydate || d.nextduedate) %></td>
+            <td><a class="row-link" href="/domains/<%= d.id %>"><%= t('common.manage') %></a></td>
+          </tr>
+        <% }) %>
+        </tbody>
+      </table></div>
     </section>
   </div>
 
   <div class="dash-side">
-    <section class="dash-panel dash-donut">
-      <header class="dash-panel-head">
-        <div class="dash-panel-title"><%- icon('pie') %><span><%= t('dash.salesReports') %></span></div>
-      </header>
-      <div class="dash-panel-body dash-donut-body">
-        <div class="donut-wrap">
-          <canvas id="dash-donut" height="180"></canvas>
-          <div class="donut-center">
-            <div class="donut-value">70%</div>
-            <div class="donut-label"><%= t('dash.conversionRate') %></div>
+    <section class="panel reveal reveal-3 sc-panel" aria-labelledby="sc-h">
+      <header><span id="sc-h" class="hd-title"><%- icon('activity') %><%= t('sc.title') %></span><a href="/google/tools"><%= t('common.viewAll') %></a></header>
+      <div class="pad">
+        <% if (!gtools.includes('searchconsole')) { %>
+          <p class="svc-muted" style="padding:20px;"><%= t('sc.connectFirst') %> <a href="/google/tools"><%= t('nav.googleTools') %></a></p>
+        <% } else { %>
+          <div class="sc-toolbar">
+            <div class="sc-domain-picker">
+              <span class="sc-domain-ico"><%- icon('globe') %></span>
+              <select id="sc-domain" class="sc-domain-select"><option value=""><%= t('common.all') %></option></select>
+            </div>
+            <div class="sc-toolbar-right">
+              <span class="sc-live" id="sc-updated"><i></i><%= t('sc.lastUpdate') %></span>
+              <button class="btn-sm btn ghost" id="sc-refresh"><%- icon('refresh') %><%= t('sc.refresh') %></button>
+            </div>
           </div>
-        </div>
-        <div class="donut-legend">
-          <% ['Sale','Distribute','Return'].forEach((name, i) => { %>
-          <div class="donut-legend-item">
-            <span class="donut-legend-dot" style="background:<%= i===0?'#2563eb':i===1?'#17b26a':'#d0021b' %>"></span>
-            <span><%= name %></span>
+          <div class="sc-grid grid">
+            <div class="stat sc-stat">
+              <div class="sc-stat-top"><span class="sc-stat-ico sc-ico-clicks"><%- icon('bolt') %></span><span><%= t('sc.clicks') %></span></div>
+              <strong id="sc-clicks">–</strong>
+              <span class="sc-trend" id="sc-clicks-trend"></span>
+            </div>
+            <div class="stat sc-stat">
+              <div class="sc-stat-top"><span class="sc-stat-ico sc-ico-impr"><%- icon('globe') %></span><span><%= t('sc.impressions') %></span></div>
+              <strong id="sc-impressions">–</strong>
+              <span class="sc-trend" id="sc-impressions-trend"></span>
+            </div>
+            <div class="stat sc-stat">
+              <div class="sc-stat-top"><span class="sc-stat-ico sc-ico-ctr"><%- icon('search') %></span><span><%= t('sc.ctr') %></span></div>
+              <strong id="sc-ctr">–</strong>
+              <span class="sc-trend" id="sc-ctr-trend"></span>
+            </div>
+            <div class="stat sc-stat">
+              <div class="sc-stat-top"><span class="sc-stat-ico sc-ico-pos"><%- icon('star') %></span><span><%= t('sc.position') %></span></div>
+              <strong id="sc-position">–</strong>
+              <span class="sc-trend" id="sc-position-trend"></span>
+            </div>
           </div>
-          <% }) %>
-        </div>
-      </div>
-    </section>
-
-    <section class="dash-panel dash-analytics">
-      <header class="dash-panel-head">
-        <div class="dash-panel-title"><%- icon('chart') %><span><%= t('dash.analytics') %></span></div>
-      </header>
-      <div class="dash-panel-body">
-        <div class="dash-chart-wrap" style="height:220px;">
-          <canvas id="dash-bar-chart" height="220"></canvas>
-        </div>
+          <div class="sc-chart-card">
+            <div class="sc-legend">
+              <span class="sc-legend-item"><i class="sc-dot sc-dot-clicks"></i><%= t('sc.clicks') %></span>
+              <span class="sc-legend-item"><i class="sc-dot sc-dot-impr"></i><%= t('sc.impressions') %></span>
+            </div>
+            <div class="sc-chart-wrap">
+              <canvas id="sc-chart" height="160"></canvas>
+              <div class="sc-tooltip" id="sc-tooltip" hidden></div>
+            </div>
+          </div>
+          <p id="sc-empty" class="sc-empty" style="display:none;"><%= t('sc.noData') %></p>
+        <% } %>
       </div>
     </section>
   </div>
 </div>
 
+<aside aria-label="<%= t('dash.sideAria') %>">
+  <section class="panel reveal reveal-2" aria-labelledby="tix-h">
+    <header><span id="tix-h"><%= t('nav.tickets') %></span><a href="/tickets"><%= t('common.all') %></a></header>
+    <% if (locals.ticketsUnavailable) { %>
+      <p class="ticket-line" style="color:var(--g500)"><%= t('tix.unavailable') %> <a href="/contact"><%= t('nav.contact') %></a></p>
+    <% } else if (!tickets.length) { %>
+      <p class="ticket-line" style="color:var(--g500)"><%= t('dash.noTickets') %></p>
+    <% } %>
+    <% tickets.forEach(tk => { %>
+      <a class="ticket-line" href="/tickets/<%= tk.id %>"><b><%= tk.subject %></b><small>#<%= tk.tid || tk.id %> · <%= st(tk.status) %> · <%= fmtDate(tk.lastreply || tk.date) %></small></a>
+    <% }) %>
+  </section>
+
+  <section class="panel reveal reveal-3">
+    <div class="help">
+      <strong><%= t('dash.needHelp') %></strong>
+      <p><%= t('dash.helpText') %></p>
+      <a class="btn" href="/tickets/new"><%- icon('chat') %><%= t('dash.openTicket') %></a>
+    </div>
+  </section>
+
+  <section class="panel reveal reveal-3" aria-label="<%= t('dash.shortcuts') %>">
+    <nav class="quick">
+      <a href="/funds"><%- icon('wallet') %><%= t('nav.funds') %><%- icon('chev', 'chev') %></a>
+      <a href="/order/domain"><%- icon('globe') %><%= t('dash.registerTransfer') %><%- icon('chev', 'chev') %></a>
+      <a href="/kb"><%- icon('book') %><%= t('nav.help') %><%- icon('chev', 'chev') %></a>
+      <a href="/status"><%- icon('activity') %><%= t('nav.status') %><%- icon('chev', 'chev') %></a>
+      <a href="/security"><%- icon('shield') %><%= t('dash.passwordSecurity') %><%- icon('chev', 'chev') %></a>
+      <a href="/google/tools"><%- icon('google') %><%= t('nav.googleTools') %><%- icon('chev', 'chev') %></a>
+    </nav>
+  </section>
+</aside>
+</div>
+
 <%- include('_foot') %>
 <script>
 (function () {
-  const ctxArea = document.getElementById('dash-area-chart');
-  const ctxDonut = document.getElementById('dash-donut');
-  const ctxBar = document.getElementById('dash-bar-chart');
-  if (!ctxArea || !ctxDonut || !ctxBar) return;
+  const domainSel = document.getElementById('sc-domain');
+  const refreshBtn = document.getElementById('sc-refresh');
+  const clicksEl = document.getElementById('sc-clicks');
+  const impressionsEl = document.getElementById('sc-impressions');
+  const ctrEl = document.getElementById('sc-ctr');
+  const positionEl = document.getElementById('sc-position');
+  const emptyEl = document.getElementById('sc-empty');
+  const chartEl = document.getElementById('sc-chart');
+  const tooltipEl = document.getElementById('sc-tooltip');
+  const updatedEl = document.getElementById('sc-updated');
+  let lastSeries = null;
+  let lastGeom = null;
+  const trendEls = {
+    clicks: document.getElementById('sc-clicks-trend'),
+    impressions: document.getElementById('sc-impressions-trend'),
+    ctr: document.getElementById('sc-ctr-trend'),
+    position: document.getElementById('sc-position-trend'),
+  };
 
-  const dpr = window.devicePixelRatio || 1;
-  function size(c) {
-    const r = c.getBoundingClientRect();
-    c.width = r.width * dpr; c.height = r.height * dpr;
-    c.style.width = r.width + 'px'; c.style.height = r.height + 'px';
-    const cx = c.getContext('2d'); cx.scale(dpr, dpr);
-    return cx;
+  if (!domainSel || !refreshBtn) return;
+
+  let allSites = [];
+
+  function setTrend(el, diff, opts) {
+    if (!el) return;
+    if (!isFinite(diff)) { el.textContent = ''; el.className = 'sc-trend'; return; }
+    const invert = !!(opts && opts.invert);
+    const up = diff >= 0;
+    const good = invert ? !up : up;
+    el.className = 'sc-trend ' + (good ? 'up' : 'down');
+    el.innerHTML = (up ? '&#9650; ' : '&#9660; ') + Math.abs(diff).toFixed(1) + '%';
   }
-  const CA = size(ctxArea), CD = size(ctxDonut), CB = size(ctxBar);
 
-  const labels = ['10am','11am','12am','01am','02am','03am','04am','05am','06am','07am'];
-  const clicks = [24,46,20,44,30,52,66,48,54,66];
-  const impr = [56,32,46,34,48,36,54,46,66,48];
-
-  const CAw = ctxArea.clientWidth, CAh = ctxArea.clientHeight;
-  const padL = 48, padR = 16, padT = 20, padB = 32;
-  const plotW = CAw - padL - padR, plotH = CAh - padT - padB;
-  const maxV = Math.max(...clicks, ...impr, 1);
-  const xAt = i => padL + (i / (labels.length - 1)) * plotW;
-  const yAt = v => padT + plotH - (v / maxV) * plotH;
-
-  CA.fillStyle = 'rgba(37,99,235,0.08)';
-  CA.beginPath();
-  clicks.forEach((v,i) => { const x=xAt(i), y=yAt(v); if(i===0) CA.moveTo(x,y); else CA.lineTo(x,y); });
-  CA.lineTo(xAt(clicks.length-1), padT+plotH); CA.lineTo(xAt(0), padT+plotH); CA.closePath(); CA.fill();
-
-  CA.strokeStyle = '#2563eb'; CA.lineWidth = 2.5; CA.lineJoin='round'; CA.lineCap='round';
-  CA.beginPath(); clicks.forEach((v,i) => { const x=xAt(i), y=yAt(v); if(i===0) CA.moveTo(x,y); else CA.lineTo(x,y); }); CA.stroke();
-  clicks.forEach((v,i) => { CA.beginPath(); CA.arc(xAt(i), yAt(v), 3.5, 0, Math.PI*2); CA.fillStyle='#2563eb'; CA.fill(); });
-
-  const CDw = ctxDonut.clientWidth, CDh = ctxDonut.clientHeight;
-  const centerX = CDw/2, centerY = CDh/2, radius = Math.min(CDw,CDh)/2 - 16;
-  CD.strokeStyle = '#eaecf0'; CD.lineWidth = 10; CD.lineCap='round';
-  CD.beginPath(); CD.arc(centerX, centerY, radius, 0, Math.PI*2); CD.stroke();
-  CD.strokeStyle = '#2563eb'; CD.beginPath(); CD.arc(centerX, centerY, radius, -Math.PI/2, -Math.PI/2 + (70/100)*2*Math.PI); CD.stroke();
-  CD.fillStyle = '#1f2937'; CD.font = 'bold 28px var(--sans)'; CA.textAlign='center'; CA.textBaseline='middle';
-  CD.fillText('70%', centerX, centerY+6);
-  CD.fillStyle = '#6b7280'; CD.font = '13px var(--sans)'; CD.fillText('<%= t('dash.conversionRate') %>', centerX, centerY+30);
-
-  const CBw = ctxBar.clientWidth, CBh = ctxBar.clientHeight;
-  const barDays = ['Sun','Mon','Tue','Wed','Thu','Fri'];
-  const barVals = [56,40,32,66,48,66];
-  const barMax = Math.max(...barVals,1);
-  const barPadL = 24, barPadR = 16, barPadT = 8, barPadB = 30;
-  const barPlotW = CBw - barPadL - barPadR, barPlotH = CBh - barPadT - barPadB;
-  const barCount = barDays.length;
-  const barWidth = (barPlotW / barCount) * 0.5;
-
-  CB.fillStyle = '#eaecf0';
-  for (let g=1; g<=3; g++) {
-    const y = barPadT + (barPlotH/3)*g;
-    CB.beginPath(); CB.moveTo(barPadL, y); CB.lineTo(CBw-barPadR, y); CB.stroke();
+  function pctDelta(curr, prev) {
+    if (!prev) return NaN;
+    return ((curr - prev) / prev) * 100;
   }
-  barDays.forEach((d,i) => {
-    const v = barVals[i];
-    const x = barPadL + (i/barCount)*barPlotW + (barPlotW/barCount - barWidth)/2;
-    const y = barPadT + barPlotH - (v/barMax)*barPlotH;
-    const grad = CB.createLinearGradient(0, y, 0, barPadT+barPlotH);
-    grad.addColorStop(0, 'rgba(37,99,235,0.9)'); grad.addColorStop(1, 'rgba(99,102,241,0.5)');
-    CB.fillStyle = grad; CB.fillRect(x, y, barWidth, barPlotH - (y - barPadT));
-    CB.fillStyle = '#6b7280'; CB.font = '11px var(--sans)'; CB.textAlign='center'; CB.fillText(d, x + barWidth/2, CBh - 20);
-    if (v === 66) {
-      CB.fillStyle = '#1f2937'; CB.font = '12px var(--sans)'; CB.textAlign='center';
-      CB.fillText('2.33k', x + barWidth/2, y - 8);
+
+  function applyTrends(series) {
+    if (!series || series.length < 2) {
+      Object.values(trendEls).forEach((el) => el && (el.textContent = ''));
+      return;
     }
-  });
+    const mid = Math.max(1, Math.floor(series.length / 2));
+    const prev = series.slice(0, mid);
+    const curr = series.slice(mid);
+    const sum = (arr, key) => arr.reduce((a, s) => a + (s[key] || 0), 0);
+    const avg = (arr, key) => sum(arr, key) / (arr.length || 1);
+    setTrend(trendEls.clicks, pctDelta(sum(curr, 'clicks'), sum(prev, 'clicks')));
+    setTrend(trendEls.impressions, pctDelta(sum(curr, 'impressions'), sum(prev, 'impressions')));
+    setTrend(trendEls.ctr, pctDelta(avg(curr, 'ctr'), avg(prev, 'ctr')));
+    setTrend(trendEls.position, pctDelta(avg(curr, 'position'), avg(prev, 'position')), { invert: true });
+  }
 
-  document.getElementById('dash-refresh')?.addEventListener('click', () => location.reload());
+  async function loadSites() {
+    try {
+      const r = await fetch('/google/data/searchconsole/sites');
+      const j = await r.json();
+      allSites = j.sites || [];
+      domainSel.innerHTML = '<option value=""><%= t("common.all") %></option>';
+      allSites.forEach((s) => {
+        const option = document.createElement('option');
+        option.value = s.siteUrl;
+        option.textContent = s.siteUrl;
+        domainSel.appendChild(option);
+      });
+      if (allSites.length && !domainSel.value) domainSel.value = allSites[0].siteUrl;
+      loadData();
+    } catch (e) {
+      console.warn('[sc] sites load failed', e.message);
+    }
+  }
+
+  function fmtPct(n, digits = 1) {
+    return (n * 100).toFixed(digits) + '%';
+  }
+
+  function fmtPos(n) {
+    return n.toFixed(1);
+  }
+
+  async function loadData() {
+    const siteUrl = domainSel.value || (allSites[0] && allSites[0].siteUrl);
+    if (!siteUrl) {
+      emptyEl.style.display = 'block';
+      [clicksEl, impressionsEl, ctrEl, positionEl].forEach((el) => (el.textContent = '–'));
+      return;
+    }
+    emptyEl.style.display = 'none';
+    try {
+      const r = await fetch('/google/data/searchconsole?siteUrl=' + encodeURIComponent(siteUrl) + '&days=14');
+      const j = await r.json();
+      if (j.error) {
+        emptyEl.textContent = j.message || 'No data.';
+        emptyEl.style.display = 'block';
+        [clicksEl, impressionsEl, ctrEl, positionEl].forEach((el) => (el.textContent = '–'));
+        Object.values(trendEls).forEach((el) => el && (el.textContent = ''));
+        return;
+      }
+      clicksEl.textContent = j.summary.clicks.toLocaleString();
+      impressionsEl.textContent = j.summary.impressions.toLocaleString();
+      ctrEl.textContent = fmtPct(j.summary.ctr);
+      positionEl.textContent = fmtPos(j.summary.position);
+      applyTrends(j.series);
+      lastSeries = j.series;
+      drawChart(j.series);
+      if (updatedEl) updatedEl.innerHTML = '<i></i>' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      console.warn('[sc] data load failed', e.message);
+    }
+  }
+
+  function drawChart(series, hoverIndex) {
+    const canvas = chartEl;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    const w = rect.width;
+    const h = rect.height;
+    ctx.clearRect(0, 0, w, h);
+    if (!series || !series.length) { lastGeom = null; return; }
+
+    const clicks = series.map((s) => s.clicks);
+    const impressions = series.map((s) => s.impressions);
+    const maxVal = Math.max(...clicks, ...impressions, 1);
+    const padL = 8, padR = 8, padT = 12, padB = 24;
+    const plotW = w - padL - padR;
+    const plotH = h - padT - padB;
+    const xAt = (i) => (i / (series.length - 1 || 1)) * plotW + padL;
+    const yAt = (v) => padT + plotH - (v / maxVal) * plotH;
+    lastGeom = { xAt, yAt, clicks, count: series.length };
+
+    ctx.strokeStyle = '#eaecf0';
+    ctx.lineWidth = 1;
+    for (let g = 0; g <= 3; g++) {
+      const y = padT + (plotH / 3) * g;
+      ctx.beginPath();
+      ctx.moveTo(padL, y);
+      ctx.lineTo(w - padR, y);
+      ctx.stroke();
+    }
+
+    function linePath(values) {
+      ctx.beginPath();
+      values.forEach((v, i) => {
+        const x = xAt(i);
+        const y = yAt(v);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+    }
+
+    ctx.strokeStyle = '#98a2b3';
+    ctx.lineWidth = 1.5;
+    linePath(impressions);
+    ctx.stroke();
+
+    const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
+    grad.addColorStop(0, 'rgba(208,2,27,.18)');
+    grad.addColorStop(1, 'rgba(208,2,27,0)');
+    linePath(clicks);
+    ctx.lineTo(xAt(clicks.length - 1), padT + plotH);
+    ctx.lineTo(xAt(0), padT + plotH);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    ctx.strokeStyle = '#d0021b';
+    ctx.lineWidth = 2.25;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    linePath(clicks);
+    ctx.stroke();
+
+    clicks.forEach((v, i) => {
+      ctx.beginPath();
+      ctx.arc(xAt(i), yAt(v), 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#d0021b';
+      ctx.fill();
+    });
+
+    if (hoverIndex != null && series[hoverIndex]) {
+      const hx = xAt(hoverIndex);
+      const hy = yAt(clicks[hoverIndex]);
+      ctx.save();
+      ctx.strokeStyle = 'rgba(16,24,40,.18)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(hx, padT);
+      ctx.lineTo(hx, padT + plotH);
+      ctx.stroke();
+      ctx.restore();
+      ctx.beginPath();
+      ctx.arc(hx, hy, 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+      ctx.lineWidth = 2.25;
+      ctx.strokeStyle = '#d0021b';
+      ctx.stroke();
+    }
+
+    const step = Math.ceil(series.length / 6);
+    series.forEach((s, i) => {
+      if (i % step !== 0 && i !== series.length - 1) return;
+      ctx.fillStyle = '#667085';
+      ctx.font = '11px var(--sans)';
+      ctx.textAlign = 'center';
+      ctx.fillText(s.date.slice(5), xAt(i), h - 6);
+    });
+  }
+
+  function hideTooltip() {
+    if (tooltipEl) tooltipEl.hidden = true;
+    if (lastSeries) drawChart(lastSeries);
+  }
+
+  function handleChartHover(evt) {
+    if (!lastSeries || !lastGeom || !tooltipEl) return;
+    const rect = chartEl.getBoundingClientRect();
+    const mx = evt.clientX - rect.left;
+    let nearest = 0;
+    let best = Infinity;
+    for (let i = 0; i < lastGeom.count; i++) {
+      const d = Math.abs(lastGeom.xAt(i) - mx);
+      if (d < best) { best = d; nearest = i; }
+    }
+    drawChart(lastSeries, nearest);
+    const point = lastSeries[nearest];
+    tooltipEl.innerHTML = '<%= t("sc.clicks") %><br>' + point.clicks.toLocaleString() + '<small>' + point.date + '</small>';
+    tooltipEl.style.left = lastGeom.xAt(nearest) + 'px';
+    tooltipEl.style.top = lastGeom.yAt(lastGeom.clicks[nearest]) + 'px';
+    tooltipEl.hidden = false;
+  }
+
+  if (chartEl) {
+    chartEl.addEventListener('mousemove', handleChartHover);
+    chartEl.addEventListener('mouseleave', hideTooltip);
+  }
+
+  domainSel.addEventListener('change', loadData);
+  refreshBtn.addEventListener('click', loadData);
+  loadSites();
+  setInterval(loadData, 60 * 60 * 1000);
 })();
 </script>
-<%- include('_foot') %>

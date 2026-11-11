@@ -1,13 +1,36 @@
 <%- include('_head') %>
 <% const bc = accountCurrency || displayCurrency; %>
-<div class="pagehead"><div><h1><%= t('funds.title') %></h1><p class="sub"><%= t('funds.sub') %></p></div></div>
+<div class="pagehead">
+  <div>
+    <div class="page-eyebrow"><span class="page-icon"><%- icon('wallet') %></span><span class="page-label"><%= t('nav.groupManage') %></span></div>
+    <h1><%= t('funds.title') %></h1>
+    <p class="sub"><%= t('funds.sub') %></p>
+  </div>
+</div>
 <% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
-<div class="card funds-card">
-  <span class="funds-label"><%= t('funds.balance') %></span>
-  <strong class="funds-amount"><%= price(credit) %></strong>
-  <% const b = billedAs(credit); if (b) { %><small class="cell-sub"><%= t('cur.billed', { amount: b }) %></small><% } %>
-  <p class="sub"><%= t('funds.how') %></p>
-  <form method="post" action="/funds"><button type="submit" class="btn red"><%= t('funds.cta') %> <%- icon('arrow') %></button></form>
-  <p class="sum-secure"><%- icon('lock') %><%= t('pay.secureNote') %></p>
+<div style="max-width:620px">
+  <div class="card funds-card">
+    <span class="funds-label"><%= t('funds.balance') %></span>
+    <strong class="funds-amount"><%= price(credit) %></strong>
+    <% const b = billedAs(credit); if (b) { %><small class="cell-sub"><%= t('cur.billed', { amount: b }) %></small><% } %>
+    <p class="sub"><%= t('funds.how') %></p>
+    <form method="post" action="/funds"><button type="submit" class="btn red"><%= t('funds.cta') %> <%- icon('arrow') %></button></form>
+    <p class="sum-secure"><%- icon('lock') %><%= t('pay.secureNote') %></p>
+  </div>
+  <div class="info-box" style="margin-top:4px">
+    <%- icon('info') %>
+    <div class="info-box-body">
+      <strong>How credit works</strong>
+      <p>Account credit is applied automatically to your next invoice. Any remaining balance stays on your account for future use. Funds are non-refundable.</p>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <h2 style="margin-top:0">Payment Methods</h2>
+    <div class="funds-methods">
+      <div class="funds-method"><%- icon('card') %><span>Card</span></div>
+      <div class="funds-method"><img src="/img/bkash.png" alt="bKash" style="width:32px;height:32px;object-fit:contain"><span>bKash</span></div>
+      <div class="funds-method"><%- icon('lock') %><span>Secure</span></div>
+    </div>
+  </div>
 </div>
 <%- include('_foot') %>

@@ -1,20 +1,40 @@
 <%- include('_head') %>
-<div class="pagehead"><div><h1><%= t('prof.title') %></h1><p class="sub"><%= t('prof.sub') %></p></div></div>
+<%
+const initials2 = String(customer.firstname || customer.fullname || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+%>
+<div class="pagehead">
+  <div>
+    <div class="page-eyebrow"><span class="page-icon"><%- icon('user') %></span><span class="page-label"><%= t('nav.groupAccount') %></span></div>
+    <h1><%= t('prof.title') %></h1>
+    <p class="sub"><%= t('prof.sub') %></p>
+  </div>
+</div>
 <% if (updated) { %><p class="alert ok" role="status"><%= t('common.saved') %></p><% } %>
 <% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+<div class="prof-head narrow-card">
+  <span class="avatar" style="--av:60px" aria-hidden="true"><%= initials2 %><% if (session.clientPicture) { %><img src="<%= session.clientPicture %>" alt="" width="60" height="60" referrerpolicy="no-referrer" onerror="this.remove()"><% } %></span>
+  <div class="prof-head-info">
+    <strong><%= customer.firstname %> <%= customer.lastname %></strong>
+    <span><%= customer.email %></span>
+    <% if (customer.phonenumber) { %><span style="color:var(--g500);font-size:13px"><%= customer.phonenumber %></span><% } %>
+  </div>
+</div>
 <form method="post" action="/profile" class="card narrow-card">
+  <h2 style="margin-top:0"><%= t('prof.personalInfo') || 'Personal Information' %></h2>
   <div class="field-row">
     <label><%= t('prof.first') %><input name="firstname" value="<%= customer.firstname || '' %>" autocomplete="given-name"></label>
     <label><%= t('prof.last') %><input name="lastname" value="<%= customer.lastname || '' %>" autocomplete="family-name"></label>
   </div>
   <label><%= t('prof.email') %><input type="email" name="email" value="<%= customer.email || '' %>" autocomplete="email"></label>
   <label><%= t('prof.phone') %><input name="phonenumber" value="<%= customer.phonenumber || '' %>" autocomplete="tel"></label>
+  <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+  <h2 style="margin-top:0"><%= t('prof.addressInfo') || 'Address' %></h2>
   <label><%= t('prof.address') %><input name="address1" value="<%= customer.address1 || '' %>" autocomplete="street-address"></label>
   <div class="field-row">
     <label><%= t('prof.city') %><input name="city" value="<%= customer.city || '' %>" autocomplete="address-level2"></label>
     <label><%= t('prof.postcode') %><input name="postcode" value="<%= customer.postcode || '' %>" autocomplete="postal-code"></label>
   </div>
-  <label><%= t('prof.country') %><input name="country" value="<%= customer.country || '' %>" maxlength="2" autocomplete="country"></label>
+  <label><%= t('prof.country') %><input name="country" value="<%= customer.country || '' %>" maxlength="2" autocomplete="country"><small class="hint">2-letter country code, e.g. BD, US, GB</small></label>
   <button type="submit" class="btn red"><%= t('common.saveChanges') %></button>
 </form>
 <%- include('_foot') %>

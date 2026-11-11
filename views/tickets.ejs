@@ -1,18 +1,77 @@
 <%- include('_head') %>
-<div class="pagehead"><div><h1><%= t('tix.title') %></h1><p class="sub"><%= t('tix.sub') %></p></div><a class="btn red" href="/tickets/new"><%- icon('plus') %><%= t('tix.new') %></a></div>
-<% if (locals.ticketsUnavailable) { %><div class="ui-empty"><h3><%= t('tix.unavailable') %></h3><p><%= t('tix.unavailableHint') %></p><a class="btn" href="/contact"><%= t('nav.contact') %></a></div><% } else if (!tickets.length) { %><div class="ui-empty"><h3><%= t('dash.noTickets') %></h3><p><%= t('tix.emptyHint') %></p></div><% } else { %>
-<div class="panel"><div class="pad"><table>
-  <thead><tr><th><%= t('tix.subject') %></th><th><%= t('col.status') %></th><th><%= t('tix.priority') %></th><th><%= t('tix.lastReply') %></th></tr></thead>
-  <tbody>
-  <% tickets.forEach(tk => { %>
-    <tr>
-      <td><a class="cell-main" href="/tickets/<%= tk.id %>"><%= tk.subject %></a><span class="cell-sub">#<%= tk.tid || tk.id %></span></td>
-      <td><span class="pill <%= String(tk.status).replace(/\s+/g, '-') %>"><%= st(tk.status) %></span></td>
-      <td><%= st(tk.priority) %></td>
-      <td><%= fmtDate(tk.lastreply) %></td>
-    </tr>
-  <% }) %>
-  </tbody>
-</table></div></div>
+<div class="pagehead">
+  <div>
+    <div class="page-eyebrow"><span class="page-icon"><%- icon('life') %></span><span class="page-label"><%= t('nav.groupSupport') %></span></div>
+    <h1><%= t('tix.title') %></h1>
+    <p class="sub"><%= t('tix.sub') %></p>
+  </div>
+  <a class="btn red" href="/tickets/new"><%- icon('plus') %><%= t('tix.new') %></a>
+</div>
+<% if (locals.ticketsUnavailable) { %>
+<div class="ui-empty">
+  <div class="ui-empty-icon"><%- icon('alert') %></div>
+  <h3><%= t('tix.unavailable') %></h3>
+  <p><%= t('tix.unavailableHint') %></p>
+  <a class="btn" href="/contact"><%= t('nav.contact') %></a>
+</div>
+<% } else if (!tickets.length) { %>
+<div class="ui-empty">
+  <div class="ui-empty-icon"><%- icon('life') %></div>
+  <h3><%= t('dash.noTickets') %></h3>
+  <p><%= t('tix.emptyHint') %></p>
+  <a class="btn red" href="/tickets/new"><%- icon('plus') %><%= t('tix.new') %></a>
+</div>
+<% } else { %>
+<div class="panel">
+  <div class="list-toolbar">
+    <input class="list-search" type="search" placeholder="Search tickets…" id="tix-search">
+    <div class="list-filter-btns">
+      <button class="filter-btn" aria-pressed="true" data-filter="all">All</button>
+      <button class="filter-btn" aria-pressed="false" data-filter="open">Open</button>
+      <button class="filter-btn" aria-pressed="false" data-filter="answered">Answered</button>
+      <button class="filter-btn" aria-pressed="false" data-filter="closed">Closed</button>
+    </div>
+  </div>
+  <div class="pad"><table id="tix-table">
+    <thead><tr><th><%= t('tix.subject') %></th><th><%= t('col.status') %></th><th><%= t('tix.priority') %></th><th><%= t('tix.lastReply') %></th></tr></thead>
+    <tbody>
+    <% tickets.forEach(tk => { %>
+      <tr data-subject="<%= String(tk.subject||'').toLowerCase() %>" data-status="<%= String(tk.status||'').toLowerCase().replace(/[\s-]+/g,'-') %>">
+        <td><a class="cell-main" href="/tickets/<%= tk.id %>"><%= tk.subject %></a><span class="cell-sub">#<%= tk.tid || tk.id %></span></td>
+        <td><span class="pill <%= String(tk.status).replace(/\s+/g, '-') %>"><%= st(tk.status) %></span></td>
+        <td><%= st(tk.priority) %></td>
+        <td><%= fmtDate(tk.lastreply) %></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table></div>
+</div>
+<script>
+(function(){
+  const search = document.getElementById('tix-search');
+  const rows = document.querySelectorAll('#tix-table tbody tr');
+  const filters = document.querySelectorAll('[data-filter]');
+  let activeFilter = 'all';
+  const filterMap = { open: ['open','customer-reply','in-progress'], answered: ['answered'], closed: ['closed','cancelled'] };
+  function update() {
+    const q = search.value.toLowerCase();
+    rows.forEach(r => {
+      const matchSearch = !q || r.dataset.subject.includes(q);
+      let matchFilter = activeFilter === 'all';
+      if (!matchFilter) {
+        const allowed = filterMap[activeFilter] || [activeFilter];
+        matchFilter = allowed.some(s => r.dataset.status.startsWith(s));
+      }
+      r.toggleAttribute('data-hidden', !(matchSearch && matchFilter));
+    });
+  }
+  search.addEventListener('input', update);
+  filters.forEach(btn => btn.addEventListener('click', () => {
+    activeFilter = btn.dataset.filter;
+    filters.forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+    update();
+  }));
+})();
+</script>
 <% } %>
 <%- include('_foot') %>

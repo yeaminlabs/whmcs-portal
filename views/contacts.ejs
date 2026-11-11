@@ -1,9 +1,29 @@
 <%- include('_head') %>
-<div class="pagehead"><div><h1><%= t('con.title') %></h1><p class="sub"><%= t('con.sub') %></p></div></div>
-<% if (!contacts.length) { %><div class="ui-empty"><h3><%= t('con.empty') %></h3></div><% } else { %>
+<div class="pagehead">
+  <div>
+    <div class="page-eyebrow"><span class="page-icon"><%- icon('users') %></span><span class="page-label"><%= t('nav.groupAccount') %></span></div>
+    <h1><%= t('con.title') %></h1>
+    <p class="sub"><%= t('con.sub') %></p>
+  </div>
+</div>
+<% if (!contacts.length) { %>
+<div class="ui-empty">
+  <div class="ui-empty-icon"><%- icon('users') %></div>
+  <h3><%= t('con.empty') %></h3>
+  <p>Sub-contacts can receive emails and manage specific parts of your account.</p>
+</div>
+<% } else { %>
 <div class="panel"><div class="pad"><table>
-  <thead><tr><th><%= t('con.name') %></th><th><%= t('prof.email') %></th></tr></thead>
-  <tbody><% contacts.forEach(c => { %><tr><td><%= c.firstname %> <%= c.lastname %></td><td><%= c.email %></td></tr><% }) %></tbody>
+  <thead><tr><th><%= t('con.name') %></th><th><%= t('prof.email') %></th><th><%= t('prof.phone') %></th></tr></thead>
+  <tbody>
+  <% contacts.forEach(c => { %>
+    <tr>
+      <td><span class="cell-main"><%= c.firstname %> <%= c.lastname %></span></td>
+      <td><a href="mailto:<%= c.email %>"><%= c.email %></a></td>
+      <td><%= c.phonenumber || '—' %></td>
+    </tr>
+  <% }) %>
+  </tbody>
 </table></div></div>
 <% } %>
 <%- include('_foot') %>

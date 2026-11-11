@@ -1,9 +1,43 @@
 <%- include('_head') %>
-<div class="pagehead"><div><h1><%= t('em.title') %></h1><p class="sub"><%= t('em.sub') %></p></div></div>
-<% if (!emails.length) { %><div class="ui-empty"><h3><%= t('em.empty') %></h3></div><% } else { %>
-<div class="panel"><div class="pad"><table>
-  <thead><tr><th><%= t('tix.subject') %></th><th><%= t('em.date') %></th></tr></thead>
-  <tbody><% emails.forEach(e => { %><tr><td><%= e.subject %></td><td><%= fmtDate(e.date) %></td></tr><% }) %></tbody>
-</table></div></div>
+<div class="pagehead">
+  <div>
+    <div class="page-eyebrow"><span class="page-icon"><%- icon('history') %></span><span class="page-label"><%= t('nav.groupAccount') %></span></div>
+    <h1><%= t('em.title') %></h1>
+    <p class="sub"><%= t('em.sub') %></p>
+  </div>
+</div>
+<% if (!emails.length) { %>
+<div class="ui-empty">
+  <div class="ui-empty-icon"><%- icon('history') %></div>
+  <h3><%= t('em.empty') %></h3>
+  <p>Emails sent to your account will appear here.</p>
+</div>
+<% } else { %>
+<div class="panel">
+  <div class="list-toolbar">
+    <input class="list-search" type="search" placeholder="Search emails…" id="em-search">
+  </div>
+  <div class="pad"><table id="em-table">
+    <thead><tr><th><%= t('tix.subject') %></th><th><%= t('em.date') %></th></tr></thead>
+    <tbody>
+    <% emails.forEach(e => { %>
+      <tr data-subject="<%= String(e.subject||'').toLowerCase() %>">
+        <td><span class="cell-main"><%= e.subject %></span></td>
+        <td><%= fmtDate(e.date) %></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table></div>
+</div>
+<script>
+(function(){
+  const search = document.getElementById('em-search');
+  const rows = document.querySelectorAll('#em-table tbody tr');
+  search.addEventListener('input', () => {
+    const q = search.value.toLowerCase();
+    rows.forEach(r => r.toggleAttribute('data-hidden', q && !r.dataset.subject.includes(q)));
+  });
+})();
+</script>
 <% } %>
 <%- include('_foot') %>

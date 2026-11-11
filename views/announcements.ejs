@@ -1,5 +1,28 @@
 <%- include('_head') %>
-<div class="pagehead"><div><h1><%= t('ann.title') %></h1><p class="sub"><%= t('ann.sub') %></p></div></div>
-<% if (!items.length) { %><div class="ui-empty"><h3><%= t('ann.empty') %></h3></div><% } %>
-<% items.forEach(a => { %><article class="ui-card"><div class="ui-card-header"><h2 class="ui-card-title"><%= a.title %></h2><p class="ui-card-desc"><%= fmtDate(a.date) %></p></div><div class="ui-card-content"><p><%= String(a.text || a.announcement || '').replace(/<[^>]+>/g, ' ') %></p></div></article><% }) %>
+<div class="pagehead">
+  <div>
+    <div class="page-eyebrow"><span class="page-icon"><%- icon('bell') %></span><span class="page-label"><%= t('nav.groupSupport') %></span></div>
+    <h1><%= t('ann.title') %></h1>
+    <p class="sub"><%= t('ann.sub') %></p>
+  </div>
+</div>
+<% if (!items.length) { %>
+<div class="ui-empty">
+  <div class="ui-empty-icon"><%- icon('bell') %></div>
+  <h3><%= t('ann.empty') %></h3>
+  <p>Important updates and service announcements will appear here.</p>
+</div>
+<% } %>
+<% items.forEach((a, idx) => { %>
+<article class="ui-card reveal<% if(idx===0){%> reveal-2<%}else if(idx===1){%> reveal-3<%}%>">
+  <div class="ui-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+    <div>
+      <h2 class="ui-card-title"><%= a.title %></h2>
+      <p class="ui-card-desc" style="display:flex;align-items:center;gap:6px"><%- icon('calendar') %> <%= fmtDate(a.date) %></p>
+    </div>
+    <span class="pill Active" style="flex:none">New</span>
+  </div>
+  <div class="ui-card-content"><p><%= String(a.text || a.announcement || '').replace(/<[^>]+>/g, ' ') %></p></div>
+</article>
+<% }) %>
 <%- include('_foot') %>

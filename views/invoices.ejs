@@ -1,21 +1,76 @@
 <%- include('_head') %>
-<div class="pagehead"><div><h1><%= t('inv.title') %></h1><p class="sub"><%= t('inv.sub') %></p></div></div>
-<% if (!invoices.length) { %><div class="ui-empty"><h3><%= t('inv.empty') %></h3></div><% } else { %>
-<div class="panel"><div class="pad"><table>
-  <thead><tr><th><%= t('col.invoice') %></th><th><%= t('col.issued') %></th><th><%= t('col.due') %></th><th><%= t('col.total') %></th><th><%= t('col.balance') %></th><th><%= t('col.status') %></th><th><span class="sr-only"><%= t('col.actions') %></span></th></tr></thead>
-  <tbody>
-  <% invoices.forEach(i => { const open = i.status === 'Unpaid'; const p = i.currencyprefix || ''; %>
-    <tr>
-      <td>#<%= i.invoicenum || i.id %></td>
-      <td><%= fmtDate(i.date) %></td>
-      <td><%= fmtDate(i.duedate) %></td>
-      <td><%= price(i.total, i.currencycode) %><% const b = billedAs(i.total, i.currencycode); if (b) { %><span class="cell-sub"><%= t('cur.billed', { amount: b }) %></span><% } %></td>
-      <td><%= price(i.balance, i.currencycode) %></td>
-      <td><span class="pill <%= i.status %>"><%= st(i.status) %></span></td>
-      <td class="row-actions"><a class="row-link" href="/invoices/<%= i.id %>"><%= t('common.view') %></a><% if (open) { %> <a class="btn red btn-sm" href="/invoices/<%= i.id %>/pay"><%= t('dash.payNow') %></a><% } %></td>
-    </tr>
-  <% }) %>
-  </tbody>
-</table></div></div>
+<%
+const unpaidCount = invoices.filter(i => ['Unpaid','Overdue'].includes(i.status)).length;
+const paidCount = invoices.filter(i => i.status === 'Paid').length;
+%>
+<div class="pagehead">
+  <div>
+    <div class="page-eyebrow"><span class="page-icon"><%- icon('receipt') %></span><span class="page-label"><%= t('nav.groupManage') %></span></div>
+    <h1><%= t('inv.title') %></h1>
+    <p class="sub"><%= t('inv.sub') %></p>
+  </div>
+</div>
+<% if (!invoices.length) { %>
+<div class="ui-empty">
+  <div class="ui-empty-icon"><%- icon('receipt') %></div>
+  <h3><%= t('inv.empty') %></h3>
+  <p><%= t('dash.allPaid') %></p>
+</div>
+<% } else { %>
+<% if (unpaidCount > 0) { %>
+<div class="attention" style="margin-bottom:12px" role="alert">
+  <span class="dot"><%- icon('alert') %></span>
+  <div><strong><%= unpaidCount === 1 ? t('dash.dueOne', {n:1,amount:''}) : unpaidCount + ' invoices need attention' %></strong><small><%= t('dash.overdueHint') %></small></div>
+  <a class="btn red" href="/invoices/<%= invoices.find(i => ['Unpaid','Overdue'].includes(i.status)).id %>/pay"><%= t('dash.payNow') %></a>
+</div>
+<% } %>
+<div class="panel">
+  <div class="list-toolbar">
+    <input class="list-search" type="search" placeholder="Search invoices…" id="inv-search">
+    <div class="list-filter-btns">
+      <button class="filter-btn" aria-pressed="true" data-filter="all">All (<%= invoices.length %>)</button>
+      <% if (unpaidCount) { %><button class="filter-btn red" aria-pressed="false" data-filter="unpaid">Unpaid (<%= unpaidCount %>)</button><% } %>
+      <% if (paidCount) { %><button class="filter-btn" aria-pressed="false" data-filter="paid">Paid (<%= paidCount %>)</button><% } %>
+    </div>
+  </div>
+  <div class="pad"><table id="inv-table">
+    <thead><tr><th><%= t('col.invoice') %></th><th><%= t('col.issued') %></th><th><%= t('col.due') %></th><th><%= t('col.total') %></th><th><%= t('col.balance') %></th><th><%= t('col.status') %></th><th><span class="sr-only"><%= t('col.actions') %></span></th></tr></thead>
+    <tbody>
+    <% invoices.forEach(i => { const open = ['Unpaid','Overdue'].includes(i.status); %>
+      <tr data-num="#<%= (i.invoicenum||i.id) %>" data-status="<%= i.status.toLowerCase() %>" data-filtergroup="<%= open ? 'unpaid' : i.status.toLowerCase() %>">
+        <td>#<%= i.invoicenum || i.id %></td>
+        <td><%= fmtDate(i.date) %></td>
+        <td><%= fmtDate(i.duedate) %></td>
+        <td><%= price(i.total, i.currencycode) %><% const b = billedAs(i.total, i.currencycode); if (b) { %><span class="cell-sub"><%= t('cur.billed', { amount: b }) %></span><% } %></td>
+        <td><%= price(i.balance, i.currencycode) %></td>
+        <td><span class="pill <%= i.status %>"><%= st(i.status) %></span></td>
+        <td class="row-actions"><a class="row-link" href="/invoices/<%= i.id %>"><%= t('common.view') %></a><% if (open) { %> <a class="btn red btn-sm" href="/invoices/<%= i.id %>/pay"><%= t('dash.payNow') %></a><% } %></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table></div>
+</div>
+<script>
+(function(){
+  const search = document.getElementById('inv-search');
+  const rows = document.querySelectorAll('#inv-table tbody tr');
+  const filters = document.querySelectorAll('[data-filter]');
+  let activeFilter = 'all';
+  function update() {
+    const q = search.value.toLowerCase();
+    rows.forEach(r => {
+      const matchSearch = !q || r.dataset.num.includes(q) || r.dataset.status.includes(q);
+      const matchFilter = activeFilter === 'all' || r.dataset.filtergroup === activeFilter;
+      r.toggleAttribute('data-hidden', !(matchSearch && matchFilter));
+    });
+  }
+  search.addEventListener('input', update);
+  filters.forEach(btn => btn.addEventListener('click', () => {
+    activeFilter = btn.dataset.filter;
+    filters.forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+    update();
+  }));
+})();
+</script>
 <% } %>
 <%- include('_foot') %>

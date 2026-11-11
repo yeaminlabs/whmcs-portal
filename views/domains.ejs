@@ -1,19 +1,65 @@
 <%- include('_head') %>
-<div class="pagehead"><div><h1><%= t('dom.title') %></h1><p class="sub"><%= t('dom.sub') %></p></div><a class="btn ghost" href="/order/domain"><%- icon('search') %><%= t('nav.registerDomain') %></a></div>
-<% if (!domains.length) { %><div class="ui-empty"><h3><%= t('dash.noDomains') %></h3><p><a href="/order/domain"><%= t('dash.searchDomain') %></a></p></div><% } else { %>
-<div class="panel"><div class="pad"><table>
-  <thead><tr><th><%= t('col.domain') %></th><th><%= t('col.status') %></th><th><%= t('col.expires') %></th><th><%= t('dom.autoRenew') %></th><th><span class="sr-only"><%= t('col.actions') %></span></th></tr></thead>
-  <tbody>
-  <% domains.forEach(d => { %>
-    <tr>
-      <td><%= d.domainname %></td>
-      <td><span class="pill <%= d.status %>"><%= st(d.status) %></span></td>
-      <td><%= fmtDate(d.expirydate) %></td>
-      <td><%= String(d.donotrenew) === '1' ? t('common.off') : t('common.on') %></td>
-      <td><a class="row-link" href="/domains/<%= d.id %>"><%= t('common.manage') %></a></td>
-    </tr>
-  <% }) %>
-  </tbody>
-</table></div></div>
+<div class="pagehead">
+  <div>
+    <div class="page-eyebrow"><span class="page-icon"><%- icon('globe') %></span><span class="page-label"><%= t('nav.groupManage') %></span></div>
+    <h1><%= t('dom.title') %></h1>
+    <p class="sub"><%= t('dom.sub') %></p>
+  </div>
+  <a class="btn ghost" href="/order/domain"><%- icon('search') %><%= t('nav.registerDomain') %></a>
+</div>
+<% if (!domains.length) { %>
+<div class="ui-empty">
+  <div class="ui-empty-icon"><%- icon('globe') %></div>
+  <h3><%= t('dash.noDomains') %></h3>
+  <p><%= t('dash.searchDomain') %></p>
+  <a class="btn ghost" href="/order/domain"><%- icon('search') %><%= t('nav.registerDomain') %></a>
+</div>
+<% } else { %>
+<div class="panel">
+  <div class="list-toolbar">
+    <input class="list-search" type="search" placeholder="Search domains…" id="dom-search">
+    <div class="list-filter-btns">
+      <button class="filter-btn" aria-pressed="true" data-filter="all">All (<%= domains.length %>)</button>
+      <button class="filter-btn" aria-pressed="false" data-filter="Active">Active</button>
+      <button class="filter-btn" aria-pressed="false" data-filter="Expired">Expired</button>
+    </div>
+  </div>
+  <div class="pad"><table id="dom-table">
+    <thead><tr><th><%= t('col.domain') %></th><th><%= t('col.status') %></th><th><%= t('col.expires') %></th><th><%= t('dom.autoRenew') %></th><th><span class="sr-only"><%= t('col.actions') %></span></th></tr></thead>
+    <tbody>
+    <% domains.forEach(d => { %>
+      <tr data-name="<%= String(d.domainname||'').toLowerCase() %>" data-status="<%= d.status %>">
+        <td class="mono"><%= d.domainname %></td>
+        <td><span class="pill <%= d.status %>"><%= st(d.status) %></span></td>
+        <td><%= fmtDate(d.expirydate) %></td>
+        <td><% if (String(d.donotrenew) === '1') { %><span style="color:var(--g500)"><%= t('common.off') %></span><% } else { %><span style="color:var(--ok)"><%- icon('check') %> <%= t('common.on') %></span><% } %></td>
+        <td><a class="row-link" href="/domains/<%= d.id %>"><%= t('common.manage') %></a></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table></div>
+</div>
+<script>
+(function(){
+  const search = document.getElementById('dom-search');
+  const rows = document.querySelectorAll('#dom-table tbody tr');
+  const filters = document.querySelectorAll('[data-filter]');
+  let activeFilter = 'all';
+  function update() {
+    const q = search.value.toLowerCase();
+    rows.forEach(r => {
+      const matchSearch = !q || r.dataset.name.includes(q);
+      const matchFilter = activeFilter === 'all' || r.dataset.status === activeFilter;
+      r.toggleAttribute('data-hidden', !(matchSearch && matchFilter));
+    });
+  }
+  search.addEventListener('input', update);
+  filters.forEach(btn => btn.addEventListener('click', () => {
+    activeFilter = btn.dataset.filter;
+    filters.forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+    update();
+  }));
+})();
+</script>
 <% } %>
 <%- include('_foot') %>

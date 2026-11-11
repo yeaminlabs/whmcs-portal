@@ -713,6 +713,7 @@ module.exports = {
   'dash.30d': '৩০ দিন',
   'dash.analytics': 'অ্যানালিটিক্স',
   'dash.status': 'স্থিতি',
+  'option': 'অপশন',
   '2.33k': '2.33k',
   '70%': '70%',
   '<%= t(': '<%= t(',
