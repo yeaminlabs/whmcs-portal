@@ -146,7 +146,7 @@ function listOf(obj, key) {
   return Array.isArray(inner) ? inner : [inner];
 }
 
-router.get('/', async (req, res) => {
+router.get(['/', '/dashboard'], async (req, res) => {
   try {
     const cid = req.session.clientId;
     const ticketsAllowed = !whmcs.isBlocked('GetSupportTickets');
