@@ -197,8 +197,13 @@ const credit = Number(customer.credit) || 0;
       const r = await fetch('/google/data/searchconsole/sites');
       const j = await r.json();
       allSites = j.sites || [];
-      domainSel.innerHTML = '<option value=""><%= t("common.all") %></option>' +
-        allSites.map((s) => '<option value="' + encodeURIComponent(s.siteUrl) + '">' + s.siteUrl + '</option>').join('');
+      domainSel.innerHTML = '<option value=""><%= t("common.all") %></option>';
+      allSites.forEach((s) => {
+        const option = document.createElement('option');
+        option.value = s.siteUrl;
+        option.textContent = s.siteUrl;
+        domainSel.appendChild(option);
+      });
       if (allSites.length && !domainSel.value) domainSel.value = allSites[0].siteUrl;
       loadData();
     } catch (e) {
