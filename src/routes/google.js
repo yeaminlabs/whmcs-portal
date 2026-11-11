@@ -128,8 +128,13 @@ router.get('/data/:tool', requireLogin, async (req, res) => {
     } else {
       let siteUrl = req.query.siteUrl;
       if (!siteUrl) {
-        const sitesRes = await axios.get('https://www.googleapis.com/webmasters/v3/sites', { headers: authHeader });
-        const sites = sitesRes.data.siteEntry || [];
+        let sites;
+        try {
+          const sitesRes = await axios.get('https://www.googleapis.com/webmasters/v3/sites', { headers: authHeader });
+          sites = sitesRes.data.siteEntry || [];
+        } catch (e) {
+          return res.status(409).json({ error: 'no_sc_site', message: 'No verified Search Console sites found. Add and verify a site at search.google.com/search-console.' });
+        }
         if (!sites.length) return res.status(409).json({ error: 'no_sc_site', message: 'No verified Search Console sites found. Add and verify a site at search.google.com/search-console.' });
         siteUrl = sites[0].siteUrl;
       }
