@@ -194,3 +194,13 @@
 .ticket-line:hover{background:#fff1f2}
 .tickets-panel .svc-muted a{color:#d0021b;font-weight:600}
 @media(max-width:900px){.operations-section .dashboard-grid{grid-template-columns:1fr}}
+
+/* Equal-height insight row */
+.insight-grid{align-items:stretch}
+.insight-grid .queries-card{display:flex;flex-direction:column;contain:size;min-height:28rem}
+.insight-grid .queries-card .query-scroll{flex:1 1 0;min-height:0;max-height:none}
+.insight-grid .queries-card .panel-header,.insight-grid .queries-card .panel-footer{flex:none}
+.query-scroll thead th{background:#111!important;color:#fff!important;opacity:1}
+#countryBars{grid-template-columns:repeat(5,minmax(0,1fr));max-height:none;overflow:visible}
+#countryBars .country-share{padding:.625rem .25rem}
+@media(max-width:900px){.insight-grid .queries-card{contain:none;height:30rem}}
