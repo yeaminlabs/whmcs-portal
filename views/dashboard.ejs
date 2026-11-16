@@ -344,9 +344,9 @@ const invOtherPct = pct(invOtherN, invoices.length);
 
   const metricColors = {
     clicks: '#d0021b',
-    impressions: '#4262ce',
-    ctr: '#157651',
-    position: '#986014',
+    impressions: '#111111',
+    ctr: '#6b6b6b',
+    position: '#b5b5b5',
   };
 
   const state = { range: 28, selected: new Set(['clicks', 'impressions']), requestId: 0 };
@@ -518,76 +518,143 @@ const invOtherPct = pct(invOtherN, invoices.length);
   function number(n) { return Math.round(n).toLocaleString('en-US'); }
   function compact(n) { return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(n); }
 
+  let chartAnim = 0, chartSeries = [], chartHover = -1, chartProgress = 1, chartTip = null, chartBound = false;
+  const chartColors = { clicks: '#d0021b', impressions: '#111111' };
+
   function drawChart(series) {
+    chartSeries = series;
+    chartHover = -1;
+    cancelAnimationFrame(chartAnim);
+    if (!chartBound) bindChartHover();
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      chartProgress = 1; paintChart(); return;
+    }
+    const start = performance.now(), dur = 1100;
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / dur);
+      chartProgress = 1 - Math.pow(1 - t, 3);
+      paintChart();
+      if (t < 1) chartAnim = requestAnimationFrame(tick);
+    };
+    chartAnim = requestAnimationFrame(tick);
+  }
+
+  function chartGeometry() {
+    const rect = chartEl.getBoundingClientRect();
+    const padL = 12, padR = 12, padT = 16, padB = 28;
+    return { w: rect.width, h: rect.height, padL, padR, padT, padB, plotW: rect.width - padL - padR, plotH: rect.height - padT - padB };
+  }
+
+  function smoothPath(ctx, pts) {
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    if (pts.length < 3) { pts.slice(1).forEach((p) => ctx.lineTo(p[0], p[1])); return; }
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+      const c1x = p1[0] + (p2[0] - p0[0]) / 6, c2x = p2[0] - (p3[0] - p1[0]) / 6;
+      const lo = Math.min(p1[1], p2[1]), hi = Math.max(p1[1], p2[1]);
+      const c1y = Math.min(hi, Math.max(lo, p1[1] + (p2[1] - p0[1]) / 6));
+      const c2y = Math.min(hi, Math.max(lo, p2[1] - (p3[1] - p1[1]) / 6));
+      ctx.bezierCurveTo(c1x, c1y, c2x, c2y, p2[0], p2[1]);
+    }
+  }
+
+  function chartPoints(key, g) {
+    const vals = chartSeries.map((s) => Number(s[key]) || 0);
+    const max = Math.max(...vals, 1);
+    return vals.map((v, i) => [g.padL + (i / (vals.length - 1 || 1)) * g.plotW, g.padT + g.plotH - (v / max) * g.plotH * 0.92]);
+  }
+
+  function paintChart() {
+    const series = chartSeries;
+    if (!series.length) return;
     const ctx = chartEl.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
-    const rect = chartEl.getBoundingClientRect();
-    chartEl.width = rect.width * dpr;
-    chartEl.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
-    const w = rect.width;
-    const h = rect.height;
-    ctx.clearRect(0, 0, w, h);
+    const g = chartGeometry();
+    chartEl.width = g.w * dpr; chartEl.height = g.h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, g.w, g.h);
 
-    const clicks = series.map((s) => s.clicks);
-    const impressions = series.map((s) => s.impressions);
-    const maxVal = Math.max(...clicks, ...impressions, 1);
-    const padL = 8, padR = 8, padT = 12, padB = 24;
-    const plotW = w - padL - padR;
-    const plotH = h - padT - padB;
+    ctx.lineWidth = 1; ctx.setLineDash([3, 5]); ctx.strokeStyle = '#e4e4e4';
+    for (let i = 0; i <= 3; i++) {
+      const y = g.padT + (g.plotH / 3) * i;
+      ctx.beginPath(); ctx.moveTo(g.padL, y); ctx.lineTo(g.w - g.padR, y); ctx.stroke();
+    }
+    ctx.setLineDash([]);
 
-    const xAt = (i) => (i / (series.length - 1 || 1)) * plotW + padL;
-    const yAt = (v) => padT + plotH - (v / maxVal) * plotH;
-
-    ctx.strokeStyle = '#e3e7ee';
-    ctx.lineWidth = 1;
-    for (let g = 0; g <= 3; g++) {
-      const y = padT + (plotH / 3) * g;
-      ctx.beginPath();
-      ctx.moveTo(padL, y);
-      ctx.lineTo(w - padR, y);
-      ctx.stroke();
+    ctx.fillStyle = '#8a8a8a'; ctx.font = '11px system-ui,sans-serif'; ctx.textBaseline = 'alphabetic';
+    const ticks = Math.min(5, series.length);
+    for (let k = 0; k < ticks; k++) {
+      const i = ticks === 1 ? 0 : Math.round((k / (ticks - 1)) * (series.length - 1));
+      const x = g.padL + (i / (series.length - 1 || 1)) * g.plotW;
+      ctx.textAlign = k === 0 ? 'left' : k === ticks - 1 ? 'right' : 'center';
+      ctx.fillText(formatSeriesDate(series[i].date), x, g.h - 8);
     }
 
-    const selected = Array.from(state.selected);
-    selected.forEach((key) => {
-      const values = key === 'clicks' ? clicks : impressions;
-      ctx.beginPath();
-      values.forEach((v, i) => {
-        const x = xAt(i);
-        const y = yAt(v);
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      });
-      ctx.strokeStyle = metricColors[key];
-      ctx.lineWidth = 2.25;
-      ctx.lineJoin = 'round';
-      ctx.lineCap = 'round';
-      ctx.stroke();
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, 0, g.padL + g.plotW * chartProgress + 2, g.h); ctx.clip();
 
-      if (key === 'impressions' && series.length > 1) {
-        const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
-        grad.addColorStop(0, metricColors[key] + '33');
-        grad.addColorStop(1, metricColors[key] + '00');
-        ctx.beginPath();
-        values.forEach((v, i) => {
-          const x = xAt(i);
-          const y = yAt(v);
-          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        });
-        ctx.lineTo(xAt(values.length - 1), padT + plotH);
-        ctx.lineTo(xAt(0), padT + plotH);
-        ctx.closePath();
-        ctx.fillStyle = grad;
-        ctx.fill();
+    ['impressions', 'clicks'].forEach((key) => {
+      if (!state.selected.has(key)) return;
+      const pts = chartPoints(key, g);
+      const color = chartColors[key];
+      if (series.length > 1) {
+        const grad = ctx.createLinearGradient(0, g.padT, 0, g.padT + g.plotH);
+        grad.addColorStop(0, color + (key === 'clicks' ? '40' : '26'));
+        grad.addColorStop(1, color + '00');
+        ctx.beginPath(); smoothPath(ctx, pts);
+        ctx.lineTo(pts[pts.length - 1][0], g.padT + g.plotH); ctx.lineTo(pts[0][0], g.padT + g.plotH);
+        ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
       }
-
-      values.forEach((v, i) => {
-        ctx.beginPath();
-        ctx.arc(xAt(i), yAt(v), 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = metricColors[key];
-        ctx.fill();
+      ctx.save();
+      ctx.shadowColor = color + '66'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 3;
+      ctx.beginPath(); smoothPath(ctx, pts);
+      ctx.strokeStyle = color; ctx.lineWidth = 2.75; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
+      ctx.restore();
+      if (series.length <= 60) pts.forEach((p, i) => {
+        if (i === chartHover) return;
+        ctx.beginPath(); ctx.arc(p[0], p[1], 2.25, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
+        ctx.lineWidth = 1.5; ctx.strokeStyle = color; ctx.stroke();
       });
     });
+    ctx.restore();
+
+    if (chartHover >= 0 && chartProgress >= 1) {
+      const x = g.padL + (chartHover / (series.length - 1 || 1)) * g.plotW;
+      ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, g.padT); ctx.lineTo(x, g.padT + g.plotH); ctx.stroke(); ctx.setLineDash([]);
+      ['impressions', 'clicks'].forEach((key) => {
+        if (!state.selected.has(key)) return;
+        const p = chartPoints(key, g)[chartHover];
+        ctx.beginPath(); ctx.arc(p[0], p[1], 9, 0, Math.PI * 2); ctx.fillStyle = chartColors[key] + '22'; ctx.fill();
+        ctx.beginPath(); ctx.arc(p[0], p[1], 4.5, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
+        ctx.lineWidth = 2.5; ctx.strokeStyle = chartColors[key]; ctx.stroke();
+      });
+    }
+  }
+
+  function bindChartHover() {
+    chartBound = true;
+    const wrap = chartEl.parentElement;
+    chartTip = document.createElement('div');
+    chartTip.className = 'chart-tip'; chartTip.hidden = true;
+    wrap.appendChild(chartTip);
+    chartEl.addEventListener('mousemove', (e) => {
+      if (!chartSeries.length || chartProgress < 1) return;
+      const g = chartGeometry(), r = chartEl.getBoundingClientRect();
+      const frac = Math.min(1, Math.max(0, (e.clientX - r.left - g.padL) / g.plotW));
+      const i = Math.round(frac * (chartSeries.length - 1));
+      if (i !== chartHover) { chartHover = i; paintChart(); }
+      const s = chartSeries[i];
+      chartTip.innerHTML = '<b>' + escapeHtml(formatSeriesDate(s.date)) + '</b>' +
+        (state.selected.has('clicks') ? '<span><i style="background:#d0021b"></i>Clicks <strong>' + number(s.clicks) + '</strong></span>' : '') +
+        (state.selected.has('impressions') ? '<span><i style="background:#111"></i>Impressions <strong>' + number(s.impressions) + '</strong></span>' : '');
+      chartTip.hidden = false;
+      const x = g.padL + (i / (chartSeries.length - 1 || 1)) * g.plotW;
+      const tw = chartTip.offsetWidth;
+      chartTip.style.left = Math.min(g.w - tw, Math.max(0, x - tw / 2)) + 'px';
+    });
+    chartEl.addEventListener('mouseleave', () => { chartHover = -1; chartTip.hidden = true; if (chartSeries.length) paintChart(); });
+    window.addEventListener('resize', () => { if (chartSeries.length && !chartEl.hidden) paintChart(); });
   }
 
   function renderQueries(queries) {
