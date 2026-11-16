@@ -151,3 +151,46 @@
 #countryBars .country-share:hover strong{color:#fff}
 .country-share strong{color:#d0021b;font-size:.875rem;font-weight:700}
 @media(max-width:900px){.insight-grid{grid-template-columns:1fr}.insight-grid .queries-card{grid-row:auto}}
+
+/* Workspace: SNBD red / black / white */
+.operations-section .section-header{align-items:flex-end;margin-bottom:1rem}
+.operations-section .section-header h2{color:#111;font-weight:800;position:relative;padding-left:.875rem}
+.operations-section .section-header h2::before{content:"";position:absolute;left:0;top:.2em;bottom:.2em;width:4px;border-radius:4px;background:linear-gradient(#d0021b,#111)}
+.operations-section .quiet-badge{background:#111;color:#fff;border:0;border-radius:999px;padding:.375rem .875rem;font-weight:600}
+.operations-section .dashboard-grid{gap:1rem;align-items:start}
+.operations-section .primary-column,.operations-section .secondary-column{display:grid;gap:1rem;align-content:start;margin:0}
+.operations-section .panel{background:#fff;border:1px solid #e6e6e6;border-radius:14px;overflow:hidden;position:relative;margin:0;box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 20px -14px rgba(0,0,0,.25);transition:box-shadow .2s,transform .2s}
+.operations-section .panel:hover{box-shadow:0 14px 30px -16px rgba(0,0,0,.35);transform:translateY(-1px)}
+.operations-section .panel::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,#d0021b,#111)}
+.operations-section .panel-header{padding-top:1rem;border-bottom:1px solid #eee;align-items:center}
+.operations-section .panel-header h3{color:#111;font-weight:700}
+.operations-section .panel-header p{color:#666}
+.operations-section .count-badge{background:#d0021b;color:#fff;border-radius:999px;padding:.0625rem .5rem;font-size:.75rem;font-weight:700}
+.operations-section .text-button{flex:none;white-space:nowrap;color:#d0021b;border:1px solid #d0021b;background:#fff;border-radius:999px;font-weight:600;padding:.375rem .875rem}
+.operations-section .text-button:hover{background:#d0021b;color:#fff}
+.services-table thead th{background:#111;color:#fff;font-size:.6875rem;letter-spacing:.04em;text-transform:uppercase;border:0}
+.services-table tbody tr:hover{background:#fff1f2}
+.services-table td a,.invoice-empty a{color:#d0021b;font-weight:600}
+.service-glyph{background:#111!important;color:#fff!important;border-radius:10px}
+.service-glyph.coral{background:#d0021b!important}
+.status-label.active{color:#111;background:#fafafa;border:1px solid #e6e6e6;border-radius:999px;padding:.125rem .625rem}
+.status-label.active span{background:#d0021b}
+.invoice-row{border-radius:10px;margin:.25rem .5rem;width:calc(100% - 1rem);background:#fafafa;border:1px solid #eee}
+.invoice-row:hover{background:#fff1f2;border-color:#d0021b}
+.invoice-id span{background:#111;color:#fff;border-radius:8px}
+.invoice-status.paid{color:#111}
+.invoice-status.unpaid{color:#d0021b;font-weight:700}
+.invoice-empty{padding:2rem 1rem;text-align:center;color:#777;background:repeating-linear-gradient(135deg,#fafafa 0 10px,#fff 10px 20px)}
+.domain-panel{background:linear-gradient(160deg,#111 0,#1c1c1c 100%)!important;border-color:#111!important}
+.domain-panel .panel-header{border-bottom-color:rgba(255,255,255,.12)}
+.domain-panel .panel-header h3{color:#fff}
+.domain-panel .panel-header p,.domain-panel small{color:#bdbdbd}
+.quick-domain{padding:1rem}
+.quick-domain-row{display:flex;gap:.5rem}
+.quick-domain-row input{flex:1;min-width:0;background:#fff;border:1px solid #fff;border-radius:10px;padding:.625rem .75rem}
+.quick-domain-row button{background:#d0021b;color:#fff;border:0;border-radius:10px;padding:0 .875rem;cursor:pointer}
+.quick-domain-row button:hover{background:#a80016}
+.ticket-line{display:block;margin:.375rem .75rem;padding:.625rem .75rem;border:1px solid #eee;border-left:3px solid #d0021b;border-radius:10px;background:#fafafa;color:#111}
+.ticket-line:hover{background:#fff1f2}
+.tickets-panel .svc-muted a{color:#d0021b;font-weight:600}
+@media(max-width:900px){.operations-section .dashboard-grid{grid-template-columns:1fr}}
