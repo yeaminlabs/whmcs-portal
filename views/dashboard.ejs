@@ -23,23 +23,34 @@ const invDuePct = pct(invDueN, invoices.length);
 const invOtherPct = pct(invOtherN, invoices.length);
 %>
 
-<!-- Hero panel: welcome + metric strip -->
-<section class="hero-panel" aria-labelledby="heroWelcome">
-  <div class="hero-head">
+<!-- Hero panel: account command center + metric rail -->
+<section class="hero-panel hero-command" aria-labelledby="heroWelcome">
+  <span class="hero-command-sweep" aria-hidden="true"></span>
+  <span class="hero-command-signal" aria-hidden="true"></span>
+  <div class="hero-head hero-command-head">
     <div class="welcome-block">
-      <h2 id="heroWelcome"><%= t('dash.welcome') %> <span><%= first %></span></h2>
+      <div class="hero-meta-row">
+        <span class="hero-status<%= numDue > 0 ? ' warn' : '' %>" role="status"><i aria-hidden="true"></i><span><%= numDue > 0 ? (numDue === 1 ? '1 invoice needs attention' : numDue + ' invoices need attention') : 'All systems running' %></span></span>
+        <time class="hero-date" datetime="<%= new Date().toISOString() %>"><%= fmtDate(new Date()) %></time>
+      </div>
+      <h2 id="heroWelcome"><span class="hero-greeting"><%= t('dash.welcome') %></span> <strong><%= first %></strong></h2>
       <p><%= t(numDue > 0 ? (numDue === 1 ? 'dash.dueOne' : 'dash.dueMany') : 'dash.allPaid', { n: numDue, amount: money(dueBalance) }) %></p>
+      <div class="hero-actions">
+        <a class="hero-ghost" href="<%= numDue > 0 ? '/invoices' : '/tickets' %>"><%- icon(numDue > 0 ? 'receipt' : 'life') %><span><%= numDue > 0 ? t('dash.payNow') : t('dash.support') %></span></a>
+        <button class="hero-primary" id="newServiceButton"><%- icon('plus') %><span><%= t('dash.orderHosting') %></span></button>
+      </div>
     </div>
-    <div class="hero-actions">
-      <span class="hero-date"><%= fmtDate(new Date()) %></span>
-      <button class="hero-primary" id="newServiceButton"><%- icon('plus') %><span><%= t('dash.orderHosting') %></span></button>
-    </div>
+    <a class="hero-next" href="<%= numDue > 0 ? '/invoices' : '/tickets' %>" aria-label="<%= numDue > 0 ? t('dash.viewInvoices') : t('dash.support') %>">
+      <span class="hero-next-label"><%= t('dash.summary') %></span>
+      <span class="hero-next-main"><span class="hero-next-icon"><%- icon(numDue > 0 ? 'receipt' : 'life') %></span><strong><%= numDue > 0 ? t('dash.amountDue') : t('dash.support') %></strong><%- icon('chev', 'hero-next-chevron') %></span>
+      <span class="hero-next-note"><%= numDue > 0 ? money(dueBalance) + ' · ' + t(numDue === 1 ? 'dash.unpaidOne' : 'dash.unpaidMany', { n: numDue }) : t('dash.allPaid') %></span>
+    </a>
   </div>
   <div class="metric-strip" aria-label="<%= t('dash.summary') %>">
-    <button class="metric" data-target="services" data-page-link="/services"><span class="metric-top"><%- icon('server') %><small><%= t('dash.services') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= numServices %></strong><em><%= t('dash.active') %></em></span></button>
-    <button class="metric" data-target="domains" data-page-link="/domains"><span class="metric-top"><%- icon('globe') %><small><%= t('dash.domains') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= numDomains %></strong><em><%= t('dash.active') %></em></span></button>
-    <button class="metric" data-target="invoices" data-page-link="/invoices"><span class="metric-top"><%- icon('receipt') %><small><%= t('dash.amountDue') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= money(numDue > 0 ? dueBalance : 0) %></strong><em><%= numDue === 1 ? '1 due' : numDue + ' due' %></em></span></button>
-    <button class="metric" data-target="tickets" data-page-link="/tickets"><span class="metric-top"><%- icon('life') %><small><%= t('dash.support') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= numTickets %></strong><em><%= numTickets === 1 ? '1 open' : numTickets + ' open' %></em></span></button>
+    <button class="metric" data-target="services" data-page-link="/services"><span class="metric-top"><%- icon('server') %><small><%= t('dash.services') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong data-count="<%= numServices %>"><%= numServices %></strong><em><%= t('dash.active') %></em></span></button>
+    <button class="metric" data-target="domains" data-page-link="/domains"><span class="metric-top"><%- icon('globe') %><small><%= t('dash.domains') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong data-count="<%= numDomains %>"><%= numDomains %></strong><em><%= t('dash.active') %></em></span></button>
+    <button class="metric<%= numDue > 0 ? ' metric-alert' : '' %>" data-target="invoices" data-page-link="/invoices"><span class="metric-top"><%- icon('receipt') %><small><%= t('dash.amountDue') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= money(numDue > 0 ? dueBalance : 0) %></strong><em><%= numDue === 1 ? '1 due' : numDue + ' due' %></em></span></button>
+    <button class="metric<%= numTickets > 0 ? ' metric-alert' : '' %>" data-target="tickets" data-page-link="/tickets"><span class="metric-top"><%- icon('life') %><small><%= t('dash.support') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong data-count="<%= numTickets %>"><%= numTickets %></strong><em><%= numTickets === 1 ? '1 open' : numTickets + ' open' %></em></span></button>
   </div>
 </section>
 
@@ -750,6 +761,30 @@ const invOtherPct = pct(invOtherN, invoices.length);
 
   document.getElementById('newServiceButton').addEventListener('click', () => {
     location.href = '/store';
+  });
+})();
+
+(function(){
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.querySelectorAll('.hero-command [data-count]').forEach(function(el){
+    var end = Number(el.dataset.count) || 0; if (!end) return;
+    var t0 = performance.now(), dur = 900;
+    (function step(now){
+      var k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = Math.round(end * e).toLocaleString('en-US');
+      if (k < 1) requestAnimationFrame(step);
+    })(t0);
+  });
+  var hero = document.querySelector('.hero-command');
+  if (hero) hero.addEventListener('pointermove', function(e){
+    if (e.pointerType === 'touch') return;
+    var r = hero.getBoundingClientRect();
+    hero.style.setProperty('--spot-x', (e.clientX - r.left) + 'px');
+    hero.style.setProperty('--spot-y', (e.clientY - r.top) + 'px');
+  });
+  if (hero) hero.addEventListener('pointerleave', function(){
+    hero.style.setProperty('--spot-x', '92%');
+    hero.style.setProperty('--spot-y', '0%');
   });
 })();
 </script>
