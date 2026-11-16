@@ -53,10 +53,15 @@ docs/BRIDGE_CONTRACT.md  Portal ↔ WHMCS bridge protocol
 ```bash
 npm install
 cp .env.example .env   # fill in the values
+npm run build           # build the Astryx React workspace
 npm start              # http://localhost:3000
 ```
 
 Set `MOCK_MODE=true` to run with demo data and no WHMCS. Demo logins: `demo@example.com` / `demo1234` (has payment history) and `new@example.com` / `demo1234` (no payments, can switch currency).
+
+### Astryx React workspace
+
+The new design-system surface is served at `http://localhost:3000/app/#/dashboard` after `npm run build`. It uses the existing WHMCS session and the account-scoped `GET /api/react/dashboard` endpoint; the legacy EJS dashboard at `/dashboard` remains available during the migration. Use `npm run dev:client` for the Vite client during frontend work (the backend remains the proxy target on port 3000).
 
 ### Environment variables
 

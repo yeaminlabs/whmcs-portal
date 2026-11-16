@@ -5,6 +5,7 @@ const session = require('express-session');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const fs = require('fs');
 const path = require('path');
 const { performance } = require('perf_hooks');
 
@@ -72,6 +73,15 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+// The Astryx React client is a separately built surface. Keep the existing
+// EJS portal routes unchanged while the client migrates one screen at a time.
+const reactDist = path.join(__dirname, '..', 'client', 'dist');
+const reactIndex = path.join(reactDist, 'index.html');
+if (fs.existsSync(reactIndex)) {
+  app.use('/app', express.static(reactDist));
+  app.get('/app/*', (req, res) => res.sendFile(reactIndex));
+}
+
 app.use(session({
   secret: config.sessionSecret,
   resave: false,
@@ -133,6 +143,7 @@ app.use('/', require('./routes/auth'));
 app.use('/', require('./routes/store'));
 app.use('/', require('./routes/services'));
 app.use('/', require('./routes/pay').router);
+app.use('/api/react', require('./routes/react-api'));
 app.use('/', require('./routes/portal'));
 app.use('/google', require('./routes/google'));
 
