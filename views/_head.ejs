@@ -4,7 +4,6 @@ const tl = ti.toLowerCase();
 const HOME = { href: '/dashboard', icon: 'layout', text: t('nav.dashboard'), on: ti === 'Dashboard' };
 const NAV = [
   { id: 'manage', icon: 'server', label: t('nav.groupManage'), items: [
-    { href: '/dashboard', icon: 'layout', text: t('nav.dashboard'), on: ti === 'Dashboard' },
     { href: '/services', icon: 'server', text: t('nav.services'), on: ti === 'My Services' || tl.startsWith('service') },
     { href: '/domains', icon: 'globe', text: t('nav.domains'), on: ti === 'My Domains' || (tl.startsWith('domain') && ti !== 'Order Domain') },
     { href: '/invoices', icon: 'receipt', text: t('nav.invoices'), on: tl.includes('invoice') },
@@ -46,6 +45,7 @@ const isPublic = !(session && session.clientId) && typeof publicPage !== 'undefi
 <link rel="preload" href="/fonts/inter-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
 <% if (lang === 'bn') { %><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap"><% } %>
 <link rel="stylesheet" href="/css/app.css">
+<% if (ti === 'Dashboard') { %><link rel="stylesheet" href="/css/dashboard.css"><% } %>
 </head>
 <body class="lang-<%= lang %>">
 <a class="skip" href="#main"><%= t('a11y.skip') %></a>

@@ -38,7 +38,7 @@ const invOtherPct = pct(invOtherN, invoices.length);
   <div class="metric-strip" aria-label="<%= t('dash.summary') %>">
     <button class="metric" data-target="services"><span class="metric-top"><%- icon('server') %><small><%= t('dash.services') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= numServices %></strong><em><%= t('dash.active') %></em></span></button>
     <button class="metric" data-target="domains"><span class="metric-top"><%- icon('globe') %><small><%= t('dash.domains') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= numDomains %></strong><em><%= t('dash.active') %></em></span></button>
-    <button class="metric" data-target="invoices"><span class="metric-top"><%- icon('receipt') %><small><%= t('dash.amountDue') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= numDue > 0 ? dueBalance : 0 %><span>.00</span></strong><em><%= numDue === 1 ? '1 due' : numDue + ' due' %></em></span></button>
+    <button class="metric" data-target="invoices"><span class="metric-top"><%- icon('receipt') %><small><%= t('dash.amountDue') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= money(numDue > 0 ? dueBalance : 0) %></strong><em><%= numDue === 1 ? '1 due' : numDue + ' due' %></em></span></button>
     <button class="metric" data-target="tickets"><span class="metric-top"><%- icon('life') %><small><%= t('dash.support') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= numTickets %></strong><em><%= numTickets === 1 ? '1 open' : numTickets + ' open' %></em></span></button>
   </div>
 </section>
