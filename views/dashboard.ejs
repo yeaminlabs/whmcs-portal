@@ -621,7 +621,7 @@ const invOtherPct = pct(invOtherN, invoices.length);
   function renderDevices(devices) {
     const total = devices.reduce((sum, d) => sum + d.clicks, 0);
     deviceLegend.innerHTML = devices.map((d) =>
-      '<span><i style="background:' + metricColors[d.device === 'mobile' ? 'clicks' : d.device === 'desktop' ? 'impressions' : 'ctr'] + '"></i>' +
+      '<span><i style="background:' + (({mobile:'#d0021b',desktop:'#111111',tablet:'#9a9a9a'})[d.device] || '#9a9a9a') + '"></i>' +
       '<b>' + escapeHtml(d.device) + '</b><strong>' + (total ? Math.round(d.clicks / total * 100) : 0) + '%</strong><small>' + number(d.clicks) + ' clicks</small></span>'
     ).join('');
     donutTotal.textContent = compact(total);
@@ -629,7 +629,7 @@ const invOtherPct = pct(invOtherN, invoices.length);
     const mobile = shares[0] * 100;
     const desktop = (shares[0] + shares[1]) * 100;
     deviceDonut.style.background = total
-      ? 'conic-gradient(var(--ok) 0 ' + mobile + '%,#4262ce ' + mobile + '% ' + desktop + '%,#94a2bb ' + desktop + '% 100%)'
+      ? 'conic-gradient(#d0021b 0 ' + mobile + '%,#111 ' + mobile + '% ' + desktop + '%,#b5b5b5 ' + desktop + '% 100%)'
       : 'var(--g100)';
   }
 
