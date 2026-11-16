@@ -73,13 +73,15 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// The Astryx React client is a separately built surface. Keep the existing
-// EJS portal routes unchanged while the client migrates one screen at a time.
+// The legacy EJS portal is the canonical client area. Keep the separately built
+// Astryx client available for development, but send its public shell back to
+// the real WHMCS-backed dashboard so every customer page stays on one route set.
 const reactDist = path.join(__dirname, '..', 'client', 'dist');
 const reactIndex = path.join(reactDist, 'index.html');
 if (fs.existsSync(reactIndex)) {
+  app.get(['/app', '/app/'], (req, res) => res.redirect(302, '/dashboard'));
+  app.get('/app/*', (req, res) => res.redirect(302, '/dashboard'));
   app.use('/app', express.static(reactDist));
-  app.get('/app/*', (req, res) => res.sendFile(reactIndex));
 }
 
 app.use(session({

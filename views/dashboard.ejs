@@ -51,7 +51,13 @@ const invOtherPct = pct(invOtherN, invoices.length);
       <p><%= t('sc.updatingEvery') %></p>
     </div>
     <div class="section-actions">
-      <span class="property-label"><span class="domain-avatar"><%= (customer && customer.email ? customer.email.split('@')[0].slice(0, 1).toUpperCase() : 'A') %></span>Property</span>
+      <label class="property-picker" for="scProperty">
+        <span class="domain-avatar" aria-hidden="true"><%= (customer && customer.email ? customer.email.split('@')[0].slice(0, 1).toUpperCase() : 'A') %></span>
+        <span class="sr-only">Search Console property</span>
+        <select id="scProperty" aria-label="Search Console property" disabled>
+          <option>Loading properties…</option>
+        </select>
+      </label>
       <button class="control-button" id="scRefresh"><%- icon('refresh') %><span><%= t('sc.refresh') %></span></button>
     </div>
   </header>
@@ -96,6 +102,7 @@ const invOtherPct = pct(invOtherN, invoices.length);
           <p id="scChartDesc"><%= t('sc.dailyClicksImpressions') %></p>
         </div>
       </header>
+      <p id="scDataStatus" class="sc-data-status" role="status" aria-live="polite" hidden></p>
       <div class="large-chart" id="scLargeChart">
         <canvas id="scChart" height="200"></canvas>
         <div class="chart-empty" id="scChartEmpty" hidden>
@@ -315,6 +322,9 @@ const invOtherPct = pct(invOtherN, invoices.length);
   };
   const chartEl = document.getElementById('scChart');
   const emptyEl = document.getElementById('scChartEmpty');
+  const chartDescEl = document.getElementById('scChartDesc');
+  const propertySelect = document.getElementById('scProperty');
+  const statusEl = document.getElementById('scDataStatus');
   const lastUpdatedEl = document.getElementById('scLastUpdated');
   const queryTableBody = document.getElementById('queryTableBody');
   const deviceLegend = document.getElementById('deviceLegend');
@@ -333,7 +343,7 @@ const invOtherPct = pct(invOtherN, invoices.length);
     position: '#986014',
   };
 
-  const state = { range: 28, selected: new Set(['clicks', 'impressions']) };
+  const state = { range: 28, selected: new Set(['clicks', 'impressions']), requestId: 0 };
 
   const ranges = {
     1: { label: '24 hours' },
@@ -343,36 +353,112 @@ const invOtherPct = pct(invOtherN, invoices.length);
     365: { label: '12 months' },
   };
 
+  function setStatus(message) {
+    if (!statusEl) return;
+    statusEl.textContent = message || '';
+    statusEl.hidden = !message;
+  }
+
+  function resetDataDisplay() {
+    Object.values(kpiEls).forEach((el) => (el.textContent = '–'));
+    Object.values(trendEls).forEach((el) => (el.textContent = ''));
+    if (chartEl) chartEl.hidden = true;
+    if (emptyEl) emptyEl.hidden = true;
+    if (queryTableBody) queryTableBody.innerHTML = '';
+    if (deviceLegend) deviceLegend.innerHTML = '';
+    if (countryBars) countryBars.innerHTML = '';
+    if (donutTotal) donutTotal.textContent = '–';
+  }
+
+  function normalizedHost(value) {
+    let raw = String(value || '').trim();
+    if (raw.indexOf('sc-domain:') === 0) raw = raw.slice('sc-domain:'.length);
+    try {
+      const url = new URL(raw.indexOf('://') === -1 ? 'https://' + raw : raw);
+      return url.hostname.toLowerCase().replace(/^www\./, '').replace(/^app\./, '');
+    } catch (e) {
+      return raw.toLowerCase().replace(/^www\./, '').replace(/^app\./, '').replace(/\/+$/, '');
+    }
+  }
+
+  function propertyName(siteUrl) {
+    const raw = String(siteUrl || '');
+    return raw.indexOf('sc-domain:') === 0 ? raw.slice('sc-domain:'.length) : normalizedHost(raw);
+  }
+
+  function selectedSiteFrom(sites) {
+    let saved = '';
+    try { saved = localStorage.getItem('snbd.searchconsole.site') || ''; } catch (e) { /* private mode */ }
+    if (saved && sites.some((site) => site.siteUrl === saved)) return saved;
+
+    const portalHost = normalizedHost(window.location.hostname);
+    const matching = sites.find((site) => normalizedHost(site.siteUrl) === portalHost);
+    return matching ? matching.siteUrl : sites[0].siteUrl;
+  }
+
+  function renderProperties(sites, selectedSite) {
+    if (!propertySelect) return;
+    propertySelect.innerHTML = '';
+    sites.forEach((site) => {
+      const option = document.createElement('option');
+      option.value = site.siteUrl;
+      option.textContent = propertyName(site.siteUrl);
+      propertySelect.appendChild(option);
+    });
+    propertySelect.value = selectedSite;
+    propertySelect.disabled = sites.length < 2;
+  }
+
   async function loadSites() {
     try {
       const r = await fetch('/google/data/searchconsole/sites');
       const j = await r.json();
-      const sites = j.sites || [];
-      if (sites.length) {
-        window.__scSelectedSite = sites[0].siteUrl;
-        loadData();
+      if (!r.ok || j.error) {
+        resetDataDisplay();
+        setStatus(j.message || 'Search Console properties could not be loaded. Reconnect Search Console and try again.');
+        return;
       }
+      const sites = Array.isArray(j.sites) ? j.sites.filter((site) => site && site.siteUrl) : [];
+      if (!sites.length) {
+        resetDataDisplay();
+        setStatus('No verified Search Console properties were found for this Google account.');
+        return;
+      }
+      const selectedSite = selectedSiteFrom(sites);
+      window.__scSelectedSite = selectedSite;
+      renderProperties(sites, selectedSite);
+      setStatus('');
+      loadData();
     } catch (e) {
       console.warn('[sc] sites load failed', e.message);
+      resetDataDisplay();
+      setStatus('Search Console properties could not be loaded. Try refreshing the page.');
     }
+  }
+
+  function formatSeriesDate(value) {
+    const date = new Date(String(value || '') + 'T00:00:00Z');
+    return Number.isNaN(date.getTime()) ? String(value || '') : date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
   async function loadData() {
     const siteUrl = window.__scSelectedSite;
+    const requestId = ++state.requestId;
     if (!siteUrl) {
-      Object.values(kpiEls).forEach((el) => (el.textContent = '–'));
-      Object.values(trendEls).forEach((el) => (el.textContent = ''));
+      resetDataDisplay();
       return;
     }
     try {
       // 1) Date-series + summary (trend chart + KPIs) — isolated from breakdowns.
       const r1 = await fetch('/google/data/searchconsole?siteUrl=' + encodeURIComponent(siteUrl) + '&days=' + state.range);
       const j1 = await r1.json();
-      if (j1.error) {
-        Object.values(kpiEls).forEach((el) => (el.textContent = '–'));
-        Object.values(trendEls).forEach((el) => (el.textContent = ''));
+      if (requestId !== state.requestId || siteUrl !== window.__scSelectedSite) return;
+      if (!r1.ok || j1.error || !j1.summary) {
+        resetDataDisplay();
+        setStatus(j1.message || 'Search Console data could not be loaded for this property.');
         return;
       }
+      setStatus('');
       kpiEls.clicks.textContent = j1.summary.clicks.toLocaleString();
       kpiEls.impressions.textContent = j1.summary.impressions.toLocaleString();
       kpiEls.ctr.textContent = ((j1.summary.ctr || 0) * 100).toFixed(2) + '%';
@@ -382,6 +468,9 @@ const invOtherPct = pct(invOtherN, invoices.length);
         emptyEl.hidden = true;
         chartEl.hidden = false;
         drawChart(series);
+        if (chartDescEl) {
+          chartDescEl.textContent = 'Daily clicks and impressions · ' + formatSeriesDate(series[0].date) + ' – ' + formatSeriesDate(series[series.length - 1].date);
+        }
       } else {
         emptyEl.hidden = false;
         chartEl.hidden = true;
@@ -390,21 +479,23 @@ const invOtherPct = pct(invOtherN, invoices.length);
 
       // 2) Breakdowns — separate single-dimension calls so keys[0] is the real value.
       await Promise.all([
-        fetchBreakdown('query'),
-        fetchBreakdown('device'),
-        fetchBreakdown('country'),
+        fetchBreakdown('query', siteUrl),
+        fetchBreakdown('device', siteUrl),
+        fetchBreakdown('country', siteUrl),
       ]);
     } catch (e) {
+      if (requestId !== state.requestId || siteUrl !== window.__scSelectedSite) return;
       console.warn('[sc] data load failed', e.message);
+      resetDataDisplay();
+      setStatus('Search Console data could not be loaded. Try refreshing the page.');
     }
   }
 
-  async function fetchBreakdown(dim) {
+  async function fetchBreakdown(dim, siteUrl) {
     try {
-      const siteUrl = window.__scSelectedSite;
       const r = await fetch('/google/data/searchconsole?siteUrl=' + encodeURIComponent(siteUrl) + '&days=' + state.range + '&dimensions=' + dim);
       const j = await r.json();
-      if (j.error) return;
+      if (!r.ok || j.error || siteUrl !== window.__scSelectedSite) return;
       if (dim === 'query') renderQueries(j.breakdowns && j.breakdowns.query ? j.breakdowns.query : []);
       if (dim === 'device') renderDevices(j.breakdowns && j.breakdowns.device ? j.breakdowns.device : []);
       if (dim === 'country') renderCountries(j.breakdowns && j.breakdowns.country ? j.breakdowns.country : []);
@@ -542,6 +633,14 @@ const invOtherPct = pct(invOtherN, invoices.length);
       loadData();
     });
   });
+
+  if (propertySelect) {
+    propertySelect.addEventListener('change', () => {
+      window.__scSelectedSite = propertySelect.value;
+      try { localStorage.setItem('snbd.searchconsole.site', propertySelect.value); } catch (e) { /* private mode */ }
+      loadData();
+    });
+  }
 
   refreshBtn.addEventListener('click', loadData);
   loadSites();
