@@ -110,3 +110,26 @@ Restart=on-failure
 ```
 
 nginx proxies `portal.bysnbdhost.top` to `127.0.0.1:3000` and forwards `X-Forwarded-*` headers. Express trusts the loopback proxy.
+
+
+### Persistent Google connections
+
+Search Console and Analytics OAuth tokens are stored per WHMCS client and tool in
+`data/google-tokens.sqlite` (SQLite, file permissions 0600). Set `GOOGLE_TOKENS_DB`
+to choose a different durable location. Keep this file across releases and include
+it in protected server backups; do not copy a development database to production.
+Existing `data/google-tokens.json` (or `GOOGLE_TOKENS_FILE`) imports automatically
+once, transactionally, on first database use. The legacy file is retained as a
+backup; disconnects are not re-imported on restart.
+
+Expired access tokens refresh using the stored refresh token and
+`GOOGLE_CLIENT_SECRET`. Subsequent token updates preserve an existing refresh
+token when Google omits a new one. Revoked authorization or a missing refresh
+token/client secret can still require reconnecting. No production OAuth round
+trip is implied by local tests. Install dependencies on the target server with
+`npm ci` before restarting (SQLite uses a native module).
+
+The dashboard previews the ten best average positions among the query rows
+returned by Search Console (currently up to 250). View all shows all returned rows
+inside the same bounded scroll area. Country percentages use clicks across the
+returned country rows, including countries outside the five displayed flags.

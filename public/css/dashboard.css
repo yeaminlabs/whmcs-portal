@@ -91,3 +91,28 @@
   .invoice-row .row-arrow{display:none}
   .ticket-line{min-height:2.75rem}
 }
+
+/* Content scrolls inside panels instead of stretching the dashboard. */
+.queries-card{overflow:hidden}
+.query-scroll{max-height:22rem;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.query-scroll .sc-query-table{min-width:28rem;width:100%;table-layout:fixed}
+.query-scroll .sc-query-term{width:36%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.query-scroll .sc-query-term strong{font-weight:500}
+.query-scroll thead{position:sticky;top:0;z-index:1;background:var(--ns-surface-2)}
+.query-scroll th,.query-scroll td{padding:.625rem .5rem;font-size:.75rem;font-variant-numeric:tabular-nums}
+#viewQueries:disabled{opacity:.5;cursor:default;text-decoration:none}
+#countryBars{display:flex;flex-wrap:wrap;gap:.75rem 1rem;max-height:12rem;overflow:auto}
+#countryBars .country-share{display:flex;align-items:center;gap:.5rem;font-variant-numeric:tabular-nums}
+.country-share [role=img]{font-size:1.5rem;line-height:1.25}
+.country-share strong{font-size:.8125rem;font-weight:600}
+.services-panel .table-wrap,.invoice-list,.tickets-panel{max-height:25rem;overflow:auto;overscroll-behavior:contain}
+.tickets-panel .panel-header{position:sticky;top:0;background:var(--ns-surface);z-index:1}
+.query-scroll .sc-query-row{display:table-row;padding:0;border:0}
+.query-scroll .sc-query-table{border-collapse:collapse;min-width:36rem}
+.query-scroll td,.query-scroll th{border-bottom:1px solid var(--ns-line);text-align:right}
+.query-scroll .sc-query-term{text-align:left;width:36%}
+.query-scroll th{white-space:normal;font-size:.6875rem;line-height:1.4}
+.queries-card .text-button{background:transparent;color:var(--ns-blue);box-shadow:none}
+.queries-card .text-button:hover{background:var(--ns-surface-2);color:var(--ns-blue)}
+.queries-card .panel-header>div{min-width:0}
+.queries-card .text-button{min-width:6rem;flex-shrink:0}

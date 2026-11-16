@@ -1,6 +1,7 @@
 jest.mock('axios', () => ({ post: jest.fn(), get: jest.fn() }));
 jest.mock('../../src/lib/google-tokens', () => ({
   get: jest.fn(),
+  set: jest.fn(),
   del: jest.fn(),
   tools: jest.fn(),
 }));
@@ -78,6 +79,59 @@ describe('google routes', () => {
     expect(res._json.error).toBe('expired');
   });
 
+  test('data route refreshes an expired token and retries with it', async () => {
+    axios.post.mockReset();
+    axios.get.mockReset();
+    const h = handlerFor('/data/:tool');
+    gtokens.get.mockReturnValue({
+      analytics: { access_token: 'stale', refresh_token: 'rt', obtained_at: 0, expires_in: 3600 },
+    });
+    axios.post
+      .mockResolvedValueOnce({ data: { access_token: 'fresh', expires_in: 3600 } })
+      .mockResolvedValueOnce({ data: { reports: [{ data: { totals: [] } }] } });
+    axios.get
+      .mockResolvedValueOnce({ data: { accounts: [{ name: 'accounts/999', displayName: 'Test' }] } })
+      .mockResolvedValueOnce({ data: { properties: [{ name: 'properties/777' }] } });
+    const r = req({ params: { tool: 'analytics' }, query: {} });
+    const res = mockRes();
+    await h(r, res);
+    const [refreshUrl, refreshBody] = axios.post.mock.calls[0];
+    expect(refreshUrl).toBe('https://oauth2.googleapis.com/token');
+    expect(refreshBody.grant_type).toBe('refresh_token');
+    expect(refreshBody.refresh_token).toBe('rt');
+    expect(gtokens.set).toHaveBeenCalledWith('c1', 'analytics', expect.objectContaining({ access_token: 'fresh' }));
+    const [url, , cfg] = axios.post.mock.calls[1];
+    expect(url).toContain('runReport');
+    expect(url).toContain('777:runReport');
+    expect(cfg.headers.Authorization).toBe('Bearer fresh');
+    expect(res._json).toEqual({ reports: [{ data: { totals: [] } }] });
+  });
+
+  test('data route 409 when expired token cannot be refreshed', async () => {
+    axios.post.mockReset();
+    const h = handlerFor('/data/:tool');
+    gtokens.get.mockReturnValue({
+      analytics: { access_token: 'stale', refresh_token: 'rt', obtained_at: 0, expires_in: 3600 },
+    });
+    axios.post.mockRejectedValue(new Error('invalid_grant'));
+    const r = req({ params: { tool: 'analytics' }, query: {} });
+    const res = mockRes();
+    await h(r, res);
+    expect(res._status).toBe(409);
+    expect(res._json.error).toBe('expired');
+  });
+
+  test('data route 409 when expired token has no refresh_token', async () => {
+    const h = handlerFor('/data/:tool');
+    gtokens.get.mockReturnValue({ analytics: { access_token: 'stale', obtained_at: 0, expires_in: 3600 } });
+    const r = req({ params: { tool: 'analytics' }, query: {} });
+    const res = mockRes();
+    await h(r, res);
+    expect(res._status).toBe(409);
+    expect(res._json.error).toBe('expired');
+    expect(axios.post).not.toHaveBeenCalled();
+  });
+
   test('data route auto-discovers GA4 property when no viewId provided', async () => {
     const h = handlerFor('/data/:tool');
     gtokens.get.mockReturnValue({ analytics: { access_token: 'tok', obtained_at: Date.now(), expires_in: 3600 } });
@@ -153,6 +207,16 @@ describe('google routes', () => {
     expect(res._status).toBe(undefined);
     const [url] = axios.post.mock.calls[0];
     expect(url).toContain(encodeURIComponent('https://mysite.com/'));
+  });
+
+  test('country breakdown includes an ISO alpha-2 code for flag rendering', async () => {
+    const h = handlerFor('/data/:tool');
+    gtokens.get.mockReturnValue({ searchconsole: { access_token: 'tok', obtained_at: Date.now(), expires_in: 3600 } });
+    axios.post.mockResolvedValue({ data: { rows: [{ keys: ['USA'], clicks: 5, impressions: 50, position: 2 }] } });
+    const r = req({ params: { tool: 'searchconsole' }, query: { siteUrl: 'https://flags.example/', dimensions: 'country' } });
+    const res = mockRes();
+    await h(r, res);
+    expect(res._json.breakdowns.country[0]).toEqual(expect.objectContaining({ country: 'USA', countryCode: 'US' }));
   });
 
   test('data route 409 when no Search Console sites found', async () => {

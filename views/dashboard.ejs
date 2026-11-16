@@ -36,10 +36,10 @@ const invOtherPct = pct(invOtherN, invoices.length);
     </div>
   </div>
   <div class="metric-strip" aria-label="<%= t('dash.summary') %>">
-    <button class="metric" data-target="services"><span class="metric-top"><%- icon('server') %><small><%= t('dash.services') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= numServices %></strong><em><%= t('dash.active') %></em></span></button>
-    <button class="metric" data-target="domains"><span class="metric-top"><%- icon('globe') %><small><%= t('dash.domains') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= numDomains %></strong><em><%= t('dash.active') %></em></span></button>
-    <button class="metric" data-target="invoices"><span class="metric-top"><%- icon('receipt') %><small><%= t('dash.amountDue') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= money(numDue > 0 ? dueBalance : 0) %></strong><em><%= numDue === 1 ? '1 due' : numDue + ' due' %></em></span></button>
-    <button class="metric" data-target="tickets"><span class="metric-top"><%- icon('life') %><small><%= t('dash.support') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= numTickets %></strong><em><%= numTickets === 1 ? '1 open' : numTickets + ' open' %></em></span></button>
+    <button class="metric" data-target="services" data-page-link="/services"><span class="metric-top"><%- icon('server') %><small><%= t('dash.services') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= numServices %></strong><em><%= t('dash.active') %></em></span></button>
+    <button class="metric" data-target="domains" data-page-link="/domains"><span class="metric-top"><%- icon('globe') %><small><%= t('dash.domains') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= numDomains %></strong><em><%= t('dash.active') %></em></span></button>
+    <button class="metric" data-target="invoices" data-page-link="/invoices"><span class="metric-top"><%- icon('receipt') %><small><%= t('dash.amountDue') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= money(numDue > 0 ? dueBalance : 0) %></strong><em><%= numDue === 1 ? '1 due' : numDue + ' due' %></em></span></button>
+    <button class="metric" data-target="tickets" data-page-link="/tickets"><span class="metric-top"><%- icon('life') %><small><%= t('dash.support') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= numTickets %></strong><em><%= numTickets === 1 ? '1 open' : numTickets + ' open' %></em></span></button>
   </div>
 </section>
 
@@ -123,8 +123,9 @@ const invOtherPct = pct(invOtherN, invoices.length);
         <article class="panel queries-card" id="queriesSection">
           <header class="panel-header">
             <div><h3><%= t('dash.topQueries') %></h3><p><%= t('dash.topQueriesSubtitle') %></p></div>
-            <button class="text-button" id="viewQueries"><%- icon('arrow') %><%= t('common.viewAll') %></button>
+            <button class="text-button" id="viewQueries" aria-controls="queryScroll" aria-expanded="false" disabled><%- icon('arrow') %><span id="viewQueriesLabel"><%= t('common.viewAll') %></span></button>
           </header>
+          <div class="query-scroll" id="queryScroll" role="region" aria-label="Ranking keywords" tabindex="0">
           <table class="sc-query-table" id="queryTable" role="table" aria-label="<%= t('dash.topQueries') %>">
             <thead>
               <tr class="sc-query-row head">
@@ -137,6 +138,7 @@ const invOtherPct = pct(invOtherN, invoices.length);
             </thead>
             <tbody id="queryTableBody"></tbody>
           </table>
+          </div>
           <footer class="panel-footer"><span id="querySummary"></span><span class="subtle"><%= t('sc.selectedPeriod') %></span></footer>
         </article>
         <article class="panel device-card">
@@ -147,7 +149,7 @@ const invOtherPct = pct(invOtherN, invoices.length);
           </div>
         </article>
         <article class="panel countries-card">
-          <header class="panel-header"><div><h3><%= t('dash.topCountries') %></h3><p><%= t('dash.topCountriesSubtitle') %></p></div><span class="quiet-badge">5 markets</span></header>
+          <header class="panel-header"><h3><%= t('dash.topCountries') %></h3></header>
           <div class="sc-country-list" id="countryBars"></div>
         </article>
       </div>
@@ -173,7 +175,7 @@ const invOtherPct = pct(invOtherN, invoices.length);
             <h3 tabindex="-1"><%= t('dash.yourServices') %> <span class="count-badge" id="servicesBadge"><%= numServices %></span></h3>
             <p><%= t('dash.liveWorkloads') %></p>
           </div>
-          <button class="text-button" data-page-link="My services"><%- icon('arrow') %><%= t('common.viewAll') %></button>
+          <button class="text-button" data-page-link="/services"><%- icon('arrow') %><%= t('common.viewAll') %></button>
         </header>
         <div class="table-wrap">
           <table class="services-table">
@@ -221,7 +223,7 @@ const invOtherPct = pct(invOtherN, invoices.length);
             <h3 tabindex="-1"><%= t('dash.recentInvoices') %></h3>
             <p><%= t('dash.billingHistory') %></p>
           </div>
-          <button class="text-button" data-page-link="Invoices"><%- icon('arrow') %><%= t('common.viewAll') %></button>
+          <button class="text-button" data-page-link="/invoices"><%- icon('arrow') %><%= t('common.viewAll') %></button>
         </header>
         <div class="invoice-list">
           <% if (!invoices.length) { %>
@@ -264,7 +266,7 @@ const invOtherPct = pct(invOtherN, invoices.length);
             <h3 tabindex="-1"><%= t('nav.tickets') %></h3>
             <p><%= t('dash.supportTickets') %></p>
           </div>
-          <button class="text-button" data-page-link="Support tickets"><%- icon('arrow') %><%= t('common.all') %></button>
+          <button class="text-button" data-page-link="/tickets"><%- icon('arrow') %><%= t('common.all') %></button>
         </header>
         <% if (ticketsUnavailable) { %>
           <p class="svc-muted" style="padding:16px 20px;"><%= t('tix.unavailable') %> <a href="/contact"><%= t('nav.contact') %></a></p>
@@ -333,6 +335,10 @@ const invOtherPct = pct(invOtherN, invoices.length);
   const donutTotal = document.getElementById('donutTotal');
   const querySummary = document.getElementById('querySummary');
   const rangeItems = document.querySelectorAll('.sc-range-item');
+  const viewQueries = document.getElementById('viewQueries');
+  const viewQueriesLabel = document.getElementById('viewQueriesLabel');
+  let rankedQueries = [];
+  let showAllQueries = false;
 
   if (!refreshBtn || !chartEl) return;
 
@@ -364,7 +370,9 @@ const invOtherPct = pct(invOtherN, invoices.length);
     Object.values(trendEls).forEach((el) => (el.textContent = ''));
     if (chartEl) chartEl.hidden = true;
     if (emptyEl) emptyEl.hidden = true;
-    if (queryTableBody) queryTableBody.innerHTML = '';
+    rankedQueries = [];
+    showAllQueries = false;
+    if (queryTableBody) renderQueries([]);
     if (deviceLegend) deviceLegend.innerHTML = '';
     if (countryBars) countryBars.innerHTML = '';
     if (donutTotal) donutTotal.textContent = '–';
@@ -444,6 +452,9 @@ const invOtherPct = pct(invOtherN, invoices.length);
   async function loadData() {
     const siteUrl = window.__scSelectedSite;
     const requestId = ++state.requestId;
+    showAllQueries = false;
+    if (viewQueriesLabel) viewQueriesLabel.textContent = '<%= t("common.viewAll") %>';
+    if (viewQueries) viewQueries.setAttribute('aria-expanded', 'false');
     if (!siteUrl) {
       resetDataDisplay();
       return;
@@ -580,18 +591,27 @@ const invOtherPct = pct(invOtherN, invoices.length);
   }
 
   function renderQueries(queries) {
-    queryTableBody.innerHTML = queries.length
-      ? queries.map((q) =>
+    if (!queryTableBody) return;
+    const source = Array.isArray(queries) ? queries : [];
+    rankedQueries = source.filter(q => Number(q.position) > 0).slice().sort((a, b) => Number(a.position) - Number(b.position) || Number(b.impressions || 0) - Number(a.impressions || 0));
+    const visible = showAllQueries ? rankedQueries : rankedQueries.slice(0, 10);
+    queryTableBody.innerHTML = visible.length
+      ? visible.map((q) =>
           '<tr class="sc-query-row">' +
-          '<td class="sc-query-term"><strong>' + escapeHtml(q.query) + '</strong></td>' +
+          '<td class="sc-query-term" title="' + escapeHtml(q.query) + '"><strong>' + escapeHtml(q.query) + '</strong></td>' +
           '<td>' + number(q.clicks) + '</td>' +
           '<td>' + number(q.impressions) + '</td>' +
           '<td>' + (q.impressions ? (q.clicks / q.impressions * 100).toFixed(2) : 0) + '%</td>' +
-          '<td>' + q.position.toFixed(1) + '</td>' +
+          '<td>' + Number(q.position).toFixed(1) + '</td>' +
           '</tr>'
         ).join('')
       : '<tr class="sc-query-row"><td colspan="5" class="query-empty"><%= t("sc.noQueries") %></td></tr>';
-    querySummary.textContent = '<%= t("sc.showingQueries") %>' + queries.length + '<%= t("sc.queries") %>';
+    querySummary.textContent = visible.length + ' / ' + rankedQueries.length;
+    if (viewQueries) {
+      viewQueries.disabled = rankedQueries.length <= 10;
+      if (viewQueriesLabel) viewQueriesLabel.textContent = showAllQueries ? '<%= t("sc.showTopTen") %>' : '<%= t("common.viewAll") %>';
+      viewQueries.setAttribute('aria-expanded', String(showAllQueries));
+    }
   }
 
   function escapeHtml(value) {
@@ -614,15 +634,29 @@ const invOtherPct = pct(invOtherN, invoices.length);
   }
 
   function renderCountries(countries) {
-    const total = countries.reduce((sum, c) => sum + c.clicks, 0);
-    countryBars.innerHTML = countries.map((c) =>
-      '<div>' +
-      '<span><strong>' + escapeHtml(c.country) + '</strong><small>' + number(c.clicks) + ' clicks</small></span>' +
-      '<i><b style="width:' + (total ? c.clicks / total * 100 : 0) + '%;background:#4262ce"></b></i>' +
-      '<em>' + (total ? (c.clicks / total * 100).toFixed(1) : '0.0') + '%</em>' +
-      '</div>'
-    ).join('');
+    if (!countryBars) return;
+    const total = countries.reduce((sum, c) => sum + Number(c.clicks || 0), 0);
+    countryBars.innerHTML = countries.slice().sort((a, b) => b.clicks - a.clicks).slice(0, 5).map(c => {
+      const code = String(c.countryCode || '').toUpperCase();
+      const flag = /^[A-Z]{2}$/.test(code)
+        ? String.fromCodePoint(...[...code].map(ch => 127397 + ch.charCodeAt(0))) : '🌐';
+      const percentage = total ? (c.clicks / total * 100).toFixed(1) : '0.0';
+      return '<div class="country-share"><span role="img" aria-label="' + escapeHtml(c.country) + '" title="' + escapeHtml(c.country) + '">' + flag + '</span><strong>' + percentage + '%</strong></div>';
+    }).join('');
   }
+
+  if (viewQueries) viewQueries.addEventListener('click', () => {
+    showAllQueries = !showAllQueries;
+    renderQueries(rankedQueries);
+    const queryScroll = document.getElementById('queryScroll');
+    if (queryScroll) queryScroll.scrollTop = 0;
+  });
+
+  document.querySelectorAll('[data-page-link]').forEach((button) => {
+    const href = button.dataset.pageLink;
+    if (!href || href.charAt(0) !== '/') return;
+    button.addEventListener('click', () => { window.location.href = href; });
+  });
 
   rangeItems.forEach((item) => {
     item.addEventListener('click', () => {

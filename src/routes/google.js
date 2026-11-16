@@ -2,6 +2,7 @@
 
 const express = require('express');
 const axios = require('axios');
+const countries = require('i18n-iso-countries');
 const { requireLogin } = require('../middleware/auth');
 const config = require('../config');
 const gtokens = require('../lib/google-tokens');
@@ -26,6 +27,32 @@ function tokenFor(clientId, tool) {
 function expired(token) {
   if (!token) return true;
   return Date.now() >= ((token.obtained_at || 0) + ((token.expires_in || 0) * 1000));
+}
+
+/** Swap an expired access token for a fresh one using the stored refresh_token.
+ * Returns the refreshed token, or null when it cannot be refreshed. */
+async function refresh(clientId, tool) {
+  const d = gtokens.get(clientId);
+  const token = d && d[tool];
+  if (!token || !token.refresh_token) return null;
+  try {
+    const r = await axios.post('https://oauth2.googleapis.com/token', {
+      refresh_token: token.refresh_token,
+      client_id: config.googleClientId,
+      client_secret: config.googleClientSecret,
+      grant_type: 'refresh_token',
+    });
+    const fresh = {
+      access_token: r.data.access_token,
+      refresh_token: r.data.refresh_token || token.refresh_token,
+      expires_in: r.data.expires_in || token.expires_in,
+      obtained_at: Date.now(),
+    };
+    gtokens.set(clientId, tool, fresh);
+    return fresh;
+  } catch {
+    return null;
+  }
 }
 
 function isoDateDaysAgo(days) {
@@ -99,12 +126,14 @@ router.get('/disconnect/:tool', requireLogin, (req, res) => {
 
 router.get('/data/searchconsole/sites', requireLogin, async (req, res) => {
   const clientId = req.session.clientId;
-  const token = tokenFor(clientId, 'searchconsole');
+  let token = tokenFor(clientId, 'searchconsole');
   if (!token) {
     return res.status(409).json({ error: 'not_connected', message: 'Connect Search Console first.' });
   }
   if (expired(token)) {
-    return res.status(409).json({ error: 'expired', message: 'Token for searchconsole expired; reconnect.' });
+    const fresh = await refresh(clientId, 'searchconsole');
+    if (!fresh) return res.status(409).json({ error: 'expired', message: 'Token for searchconsole expired; reconnect.' });
+    token = fresh;
   }
   const authHeader = { Authorization: 'Bearer ' + token.access_token };
   try {
@@ -127,12 +156,14 @@ router.get('/data/:tool', requireLogin, async (req, res) => {
   if (!['analytics', 'searchconsole'].includes(tool)) {
     return res.status(400).json({ error: 'Unknown tool.' });
   }
-  const token = tokenFor(req.session.clientId, tool);
+  let token = tokenFor(req.session.clientId, tool);
   if (!token) {
     return res.status(409).json({ error: 'not_connected', message: 'Connect ' + tool + ' first.' });
   }
   if (expired(token)) {
-    return res.status(409).json({ error: 'expired', message: 'Token for ' + tool + ' expired; reconnect.' });
+    const fresh = await refresh(req.session.clientId, tool);
+    if (!fresh) return res.status(409).json({ error: 'expired', message: 'Token for ' + tool + ' expired; reconnect.' });
+    token = fresh;
   }
   const authHeader = { Authorization: 'Bearer ' + token.access_token };
   try {
@@ -222,7 +253,7 @@ router.get('/data/:tool', requireLogin, async (req, res) => {
           const impressions = Number(r.impressions || 0);
           const ctr = impressions > 0 ? clicks / impressions : 0;
           const position = Number(r.position || 0);
-          return { [dimensions]: key, clicks, impressions, ctr, position };
+          return { [dimensions]: key, clicks, impressions, ctr, position, ...(dimensions === 'country' ? { countryCode: countries.alpha3ToAlpha2(String(key).toUpperCase()) || (/^[a-z]{2}$/i.test(key) ? key.toUpperCase() : null) } : {}) };
         });
         return {
           siteUrl,

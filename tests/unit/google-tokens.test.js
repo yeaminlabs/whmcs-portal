@@ -1,48 +1,55 @@
-process.env.GOOGLE_TOKENS_FILE = require('path').join(
-  __dirname, '..', '..', 'data', 'test-google-tokens.json'
-);
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
+const { execFileSync } = require('child_process');
+const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'portal-google-test-'));
+process.env.GOOGLE_TOKENS_FILE = path.join(dir, 'legacy.json');
+process.env.GOOGLE_TOKENS_DB = path.join(dir, 'connections.sqlite');
 const gtokens = require('../../src/lib/google-tokens');
-
-const FILE = process.env.GOOGLE_TOKENS_FILE;
-
+const FILE = process.env.GOOGLE_TOKENS_DB;
 beforeEach(() => {
-  fs.mkdirSync(path.dirname(FILE), { recursive: true });
-  try { fs.unlinkSync(FILE); } catch { /* ignore */ }
+  for (const f of fs.readdirSync(dir)) fs.unlinkSync(path.join(dir, f));
 });
-afterAll(() => {
-  try { fs.unlinkSync(FILE); } catch { /* ignore */ }
-});
+afterAll(() => fs.rmSync(dir, { recursive: true, force: true }));
 
-describe('google-tokens', () => {
-  test('get returns null for empty store', () => {
+describe('persistent Google connections', () => {
+  test('empty store returns no connections', () => {
     expect(gtokens.get('c1')).toBeNull();
     expect(gtokens.tools('c1')).toEqual([]);
   });
-
-  test('set/get/del/tools round trip', () => {
-    const token = { access_token: 'at', refresh_token: 'rt', expires_in: 3600, obtained_at: Date.now() };
-    gtokens.set('c1', 'analytics', token);
-    expect(gtokens.get('c1')).toEqual({ analytics: token });
-    expect(gtokens.tools('c1')).toEqual(['analytics']);
-
-    gtokens.set('c1', 'searchconsole', { access_token: 'at2', expires_in: 3600, obtained_at: Date.now() });
-    expect(gtokens.tools('c1').sort()).toEqual(['analytics', 'searchconsole']);
-
+  test('round trip and per-account isolation', () => {
+    gtokens.set('c1', 'analytics', { access_token: 'fixture-a' });
+    gtokens.set('c1', 'searchconsole', { access_token: 'fixture-b' });
+    gtokens.set('c2', 'analytics', { access_token: 'fixture-c' });
+    expect(gtokens.tools('c1')).toEqual(['analytics', 'searchconsole']);
     gtokens.del('c1', 'analytics');
     expect(gtokens.tools('c1')).toEqual(['searchconsole']);
-    expect(gtokens.get('c1')).toEqual({ searchconsole: expect.objectContaining({ access_token: 'at2' }) });
-
+    expect(gtokens.get('c2').analytics.access_token).toBe('fixture-c');
     gtokens.del('c1', 'searchconsole');
-    expect(gtokens.get('c1')).toEqual({});
-    expect(gtokens.tools('c1')).toEqual([]);
+    expect(gtokens.get('c1')).toBeNull();
   });
-
-  test('set is isolated per client', () => {
-    gtokens.set('c1', 'analytics', { access_token: 'a1', expires_in: 3600, obtained_at: Date.now() });
-    gtokens.set('c2', 'analytics', { access_token: 'a2', expires_in: 3600, obtained_at: Date.now() });
-    expect(gtokens.get('c1').analytics.access_token).toBe('a1');
-    expect(gtokens.get('c2').analytics.access_token).toBe('a2');
+  test('refresh token survives an access-token update without a new refresh token', () => {
+    gtokens.set('c1', 'analytics', { refresh_token: 'fixture-refresh', access_token: 'fixture-old' });
+    gtokens.set('c1', 'analytics', { access_token: 'fixture-new', refresh_token: undefined });
+    expect(gtokens.get('c1').analytics.refresh_token).toBe('fixture-refresh');
+  });
+  test('migrates JSON once and does not resurrect a disconnected connection', () => {
+    fs.writeFileSync(process.env.GOOGLE_TOKENS_FILE, JSON.stringify({ c1: { analytics: { access_token: 'fixture-legacy' } } }));
+    expect(gtokens.get('c1').analytics.access_token).toBe('fixture-legacy');
+    gtokens.del('c1', 'analytics');
+    expect(gtokens.get('c1')).toBeNull();
+    expect(fs.existsSync(process.env.GOOGLE_TOKENS_FILE)).toBe(true);
+  });
+  test('survives a new Node process and restricts database file permissions', () => {
+    gtokens.set('c1', 'analytics', { access_token: 'fixture-persisted' });
+    const output = execFileSync(process.execPath, ['-e', `const store = require(${JSON.stringify(path.resolve(__dirname, '../../src/lib/google-tokens'))}); process.stdout.write(JSON.stringify(store.tools('c1')));`], { env: process.env }).toString();
+    expect(JSON.parse(output)).toEqual(['analytics']);
+    expect(fs.statSync(FILE).mode & 0o777).toBe(0o600);
+  });
+  test('a corrupt legacy file fails explicitly without marking migration complete', () => {
+    fs.writeFileSync(process.env.GOOGLE_TOKENS_FILE, '{broken');
+    expect(() => gtokens.get('c1')).toThrow();
+    fs.writeFileSync(process.env.GOOGLE_TOKENS_FILE, '{}');
+    expect(gtokens.get('c1')).toBeNull();
   });
 });
