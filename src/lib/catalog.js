@@ -6,7 +6,15 @@
  * GetProducts returns hidden and retired products too, and has no flag for
  * either, so visibility is synced from the public store group page
  * (/store/<group>) — the same list customers see on portal.snbdhost.com.
+ * Whatever is hidden or retired in WHMCS is therefore dropped from the portal
+ * store, the order flow and the plan-upgrade list.
+ *
+ * Visibility is fail-closed once it has been seen: the last good answer per
+ * group is kept on disk, so an outage or restart never re-exposes products.
+ * Only a group that has never been synced falls back to showing everything.
  */
+const fs = require('fs');
+const path = require('path');
 const axios = require('axios');
 const https = require('https');
 const whmcs = require('./whmcs');
@@ -141,26 +149,79 @@ function escapeRe(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+/**
+ * Which product slugs of `group` WHMCS lists on its public store.
+ * An empty Set is a real answer: the group is hidden (WHMCS redirects within
+ * /store) or all of its products are hidden or retired (a store page with no
+ * product links). Anything that does not look like a WHMCS store page throws,
+ * so an error page is never mistaken for "everything is hidden".
+ */
 async function fetchVisibleSlugs(group) {
   const res = await axios.get(`${config.whmcsUrl}/store/${encodeURIComponent(group)}`, {
-    timeout: 10000, httpsAgent: ipv4, maxRedirects: 3, responseType: 'text',
+    timeout: 10000, httpsAgent: ipv4, maxRedirects: 0, responseType: 'text',
+    validateStatus: (s) => s >= 200 && s < 400,
     headers: { 'User-Agent': 'SNBDHostPortal/1.0' },
   });
+  if (res.status >= 300) {
+    const to = String((res.headers && res.headers.location) || '');
+    if (/^(https?:\/\/[^/]+)?\/store(\/|$|\?)/.test(to)) return new Set();
+    throw new Error(`unexpected redirect (${res.status}) from the store page`);
+  }
+  const html = String(res.data);
+  const own = new RegExp(`href="[^"]*/store/${escapeRe(group)}"`);
+  if (!own.test(html)) throw new Error('response is not a WHMCS store page');
   const re = new RegExp(`href="/store/${escapeRe(group)}/([^"?#/]+)"`, 'g');
-  const found = new Set([...String(res.data).matchAll(re)].map((m) => decodeURIComponent(m[1])));
-  if (!found.size) throw new Error('no products listed on the store page');
+  return new Set([...html.matchAll(re)].map((m) => decodeURIComponent(m[1])));
+}
+
+const SNAPSHOT_FILE = path.join(__dirname, '..', '..', 'data', 'store-visibility.json');
+let snapshot = null;
+
+function readSnapshot() {
+  if (snapshot) return snapshot;
+  try {
+    const raw = JSON.parse(fs.readFileSync(SNAPSHOT_FILE, 'utf8'));
+    snapshot = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  } catch (e) {
+    snapshot = {};
+  }
+  return snapshot;
+}
+
+function saveSnapshot(group, slugs) {
+  const snap = readSnapshot();
+  const next = [...slugs].sort();
+  if (snap[group] && JSON.stringify(snap[group].slugs) === JSON.stringify(next)) return;
+  snap[group] = { slugs: next, at: new Date().toISOString() };
+  try {
+    fs.mkdirSync(path.dirname(SNAPSHOT_FILE), { recursive: true });
+    const tmp = `${SNAPSHOT_FILE}.${process.pid}.tmp`;
+    fs.writeFileSync(tmp, JSON.stringify(snap, null, 2));
+    fs.renameSync(tmp, SNAPSHOT_FILE);
+  } catch (e) {
+    console.warn(`[catalog] could not save the store visibility snapshot: ${e.message}`);
+  }
+}
+
+async function syncVisibleSlugs(group) {
+  const found = await fetchVisibleSlugs(group);
+  saveSnapshot(group, found);
   return found;
 }
 
 async function visibleSlugs(group) {
   if (config.useMock || !config.whmcsUrl) return null;
-  if (Date.now() - (visibilityFailedAt.get(group) || 0) < VISIBILITY_RETRY) return null;
+  const known = () => {
+    const s = readSnapshot()[group];
+    return s && Array.isArray(s.slugs) ? new Set(s.slugs) : null;
+  };
+  if (Date.now() - (visibilityFailedAt.get(group) || 0) < VISIBILITY_RETRY) return known();
   try {
-    return await cached(`visibility:${group}`, VISIBILITY_TTL, () => fetchVisibleSlugs(group), { staleMs: HOUR });
+    return await cached(`visibility:${group}`, VISIBILITY_TTL, () => syncVisibleSlugs(group), { staleMs: HOUR });
   } catch (e) {
     console.warn(`[catalog] store visibility sync failed for ${group}: ${e.message}`);
     visibilityFailedAt.set(group, Date.now());
-    return null;
+    return known();
   }
 }
 
@@ -241,4 +302,4 @@ async function productPrice(pid, currencyCode, billingcycle) {
   return Number.isFinite(v) && v >= 0 ? v : null;
 }
 
-module.exports = { productPrice, siblingsOf, GROUPS, FAMILIES, listGroups, getGroup, getProduct, getTldPrices, paymentMethods, loadProducts, visibleSlugs, parseDescription, pricingFor, storePath };
+module.exports = { productPrice, siblingsOf, GROUPS, FAMILIES, listGroups, getGroup, getProduct, getTldPrices, paymentMethods, loadProducts, visibleSlugs, fetchVisibleSlugs, parseDescription, pricingFor, storePath };
