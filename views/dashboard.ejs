@@ -21,6 +21,10 @@ const invOtherN = Math.max(0, invoices.length - invPaidN - invDueN);
 const invPaidPct = pct(invPaidN, invoices.length);
 const invDuePct = pct(invDueN, invoices.length);
 const invOtherPct = pct(invOtherN, invoices.length);
+const googleConnected = {
+  analytics: Array.isArray(gtools) && gtools.includes('analytics'),
+  searchconsole: Array.isArray(gtools) && gtools.includes('searchconsole'),
+};
 %>
 
 <!-- Hero panel: account command center + metric rail -->
@@ -52,6 +56,40 @@ const invOtherPct = pct(invOtherN, invoices.length);
     <button class="metric<%= numDue > 0 ? ' metric-alert' : '' %>" data-target="invoices" data-page-link="/invoices"><span class="metric-top"><%- icon('receipt') %><small><%= t('dash.amountDue') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= money(numDue > 0 ? dueBalance : 0) %></strong><em><%= numDue === 1 ? '1 due' : numDue + ' due' %></em></span></button>
     <button class="metric<%= numTickets > 0 ? ' metric-alert' : '' %>" data-target="tickets" data-page-link="/tickets"><span class="metric-top"><%- icon('life') %><small><%= t('dash.support') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong data-count="<%= numTickets %>"><%= numTickets %></strong><em><%= numTickets === 1 ? '1 open' : numTickets + ' open' %></em></span></button>
   </div>
+</section>
+
+<!-- Google connection prompt: shown until Search Console is connected or the account hides this surface. -->
+<section class="google-connect-prompt" id="googleConnectPrompt" aria-labelledby="googleConnectTitle"<%= googleConnected.searchconsole ? ' hidden' : '' %>>
+  <div class="google-connect-visual" aria-hidden="true">
+    <div class="google-connect-brand">
+      <img src="/img/snbd-logo.png" alt="" width="136" height="34" decoding="async">
+      <span class="google-connect-plus">+</span>
+      <span class="google-connect-mark">G</span>
+    </div>
+    <span class="google-connect-orbit google-connect-orbit-one"></span>
+    <span class="google-connect-orbit google-connect-orbit-two"></span>
+  </div>
+  <div class="google-connect-copy">
+    <h2 id="googleConnectTitle"><%= t('google.connectPromptTitle') %></h2>
+    <p><%= t('google.connectPromptBody') %></p>
+    <div class="google-connect-tools" aria-label="<%= t('google.connectPromptTools') %>">
+      <a class="google-tool-action" data-google-tool="searchconsole" href="<%= googleConnected.searchconsole ? '/google/tools' : '/google/connect/searchconsole' %>">
+        <span class="google-tool-icon"><%- icon('search') %></span>
+        <span class="google-tool-copy"><strong><%= t('gt.searchconsole') %></strong><small data-google-tool-state><%= googleConnected.searchconsole ? t('google.connected') : t('google.connect') %></small></span>
+        <%- icon('arrow', 'google-tool-arrow') %>
+      </a>
+      <a class="google-tool-action" data-google-tool="analytics" href="<%= googleConnected.analytics ? '/google/tools' : '/google/connect/analytics' %>">
+        <span class="google-tool-icon"><%- icon('activity') %></span>
+        <span class="google-tool-copy"><strong><%= t('gt.analytics') %></strong><small data-google-tool-state><%= googleConnected.analytics ? t('google.connected') : t('google.connect') %></small></span>
+        <%- icon('arrow', 'google-tool-arrow') %>
+      </a>
+    </div>
+  </div>
+  <div class="google-connect-controls">
+    <button class="google-connect-hide" id="hideGoogleConnect" type="button"><%= t('google.hidePrompt') %></button>
+    <span class="google-connect-hint"><%= t('google.hidePromptHint') %></span>
+  </div>
+  <p class="sr-only" id="googleConnectStatus" role="status" aria-live="polite"></p>
 </section>
 
 <!-- Search Console panel -->
@@ -348,8 +386,41 @@ const invOtherPct = pct(invOtherN, invoices.length);
   const rangeItems = document.querySelectorAll('.sc-range-item');
   const viewQueries = document.getElementById('viewQueries');
   const viewQueriesLabel = document.getElementById('viewQueriesLabel');
+  const searchSection = document.getElementById('searchSection');
+  const googleConnectPrompt = document.getElementById('googleConnectPrompt');
+  const hideGoogleConnect = document.getElementById('hideGoogleConnect');
+  const googleConnectStatus = document.getElementById('googleConnectStatus');
+  const googleToolActions = document.querySelectorAll('[data-google-tool]');
+  const googleHideKey = <%- JSON.stringify('snbd.dashboard.searchconsole.hidden.' + String(session.clientId || session.clientEmail || 'account').replace(/[^a-zA-Z0-9_-]/g, '_')) %>;
   let rankedQueries = [];
   let showAllQueries = false;
+  let googleConnections = <%- JSON.stringify(googleConnected) %>;
+  let googleConnectHidden = false;
+
+  try { googleConnectHidden = localStorage.getItem(googleHideKey) === '1'; } catch (e) { /* private mode */ }
+
+  function applyGoogleConnectionVisibility() {
+    if (searchSection) searchSection.hidden = googleConnectHidden;
+    if (googleConnectPrompt) googleConnectPrompt.hidden = googleConnectHidden || Boolean(googleConnections.searchconsole);
+    googleToolActions.forEach((action) => {
+      const tool = action.dataset.googleTool;
+      const connected = Boolean(googleConnections[tool]);
+      const state = action.querySelector('[data-google-tool-state]');
+      if (state) state.textContent = connected ? '<%= t("google.connected") %>' : '<%= t("google.connect") %>';
+      action.href = connected ? '/google/tools' : '/google/connect/' + tool;
+      action.classList.toggle('is-connected', connected);
+      action.setAttribute('aria-label', action.querySelector('strong').textContent + ' — ' + (state ? state.textContent : ''));
+    });
+  }
+
+  applyGoogleConnectionVisibility();
+
+  if (hideGoogleConnect) hideGoogleConnect.addEventListener('click', () => {
+    googleConnectHidden = true;
+    try { localStorage.setItem(googleHideKey, '1'); } catch (e) { /* private mode */ }
+    applyGoogleConnectionVisibility();
+    if (googleConnectStatus) googleConnectStatus.textContent = '<%= t("google.hiddenStatus") %>';
+  });
 
   if (!refreshBtn || !chartEl) return;
 
@@ -433,10 +504,16 @@ const invOtherPct = pct(invOtherN, invoices.length);
       const r = await fetch('/google/data/searchconsole/sites');
       const j = await r.json();
       if (!r.ok || j.error) {
+        if (j.error === 'not_connected' || j.error === 'expired' || j.error === 'no_sc_access') {
+          googleConnections.searchconsole = false;
+          applyGoogleConnectionVisibility();
+        }
         resetDataDisplay();
         setStatus(j.message || 'Search Console properties could not be loaded. Reconnect Search Console and try again.');
         return;
       }
+      googleConnections.searchconsole = true;
+      applyGoogleConnectionVisibility();
       const sites = Array.isArray(j.sites) ? j.sites.filter((site) => site && site.siteUrl) : [];
       if (!sites.length) {
         resetDataDisplay();
@@ -755,9 +832,11 @@ const invOtherPct = pct(invOtherN, invoices.length);
   }
 
   refreshBtn.addEventListener('click', loadData);
-  loadSites();
-  loadData();
-  setInterval(loadData, 60 * 60 * 1000);
+  if (!googleConnectHidden) {
+    loadSites();
+    loadData();
+    setInterval(loadData, 60 * 60 * 1000);
+  }
 
   document.getElementById('newServiceButton').addEventListener('click', () => {
     location.href = '/store';
