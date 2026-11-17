@@ -30,13 +30,22 @@
   const KEY = 'snbd.nav.open';
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { saved = {}; }
-  document.querySelectorAll('.snav-group').forEach((g) => {
-    const btn = g.querySelector('.snav-toggle');
-    const set = (open) => { g.dataset.open = String(open); btn.setAttribute('aria-expanded', String(open)); };
-    if (!g.hasAttribute('data-active') && saved[g.dataset.group]) set(true);
-    btn.addEventListener('click', () => {
+  const groups = Array.from(document.querySelectorAll('.snav-group'));
+  const setGroup = (g, open) => { g.dataset.open = String(open); g.querySelector('.snav-toggle').setAttribute('aria-expanded', String(open)); };
+  const closeAllGroups = () => groups.forEach((g) => setGroup(g, false));
+  const restoreGroups = () => groups.forEach((g) => setGroup(g, g.hasAttribute('data-active') || Boolean(saved[g.dataset.group])));
+  restoreGroups();
+  groups.forEach((g) => {
+    g.querySelector('.snav-toggle').addEventListener('click', () => {
+      if (document.body.classList.contains('nav-collapsed')) {
+        // In the icon rail a group icon expands the sidebar and opens only that group.
+        saved[g.dataset.group] = true;
+        setCollapsed(false);
+        groups.forEach((o) => setGroup(o, o === g || o.hasAttribute('data-active')));
+        return;
+      }
       const open = g.dataset.open !== 'true';
-      set(open);
+      setGroup(g, open);
       saved[g.dataset.group] = open;
       try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) { /* storage unavailable */ }
     });
@@ -51,6 +60,7 @@
   };
   const setCollapsed = (collapsed, persist = true) => {
     document.body.classList.toggle('nav-collapsed', collapsed);
+    if (collapsed) closeAllGroups(); else restoreGroups();
     if (!collapseButton) return;
     collapseButton.setAttribute('aria-pressed', String(collapsed));
     collapseButton.setAttribute('aria-label', collapsed ? collapseText.collapsed : collapseText.expanded);
@@ -60,6 +70,7 @@
     }
   };
   if (collapseButton) {
+    if (!window.matchMedia('(min-width: 921px)').matches) document.body.classList.remove('nav-collapsed');
     setCollapsed(document.body.classList.contains('nav-collapsed'), false);
     collapseButton.addEventListener('click', () => setCollapsed(!document.body.classList.contains('nav-collapsed')));
   }
