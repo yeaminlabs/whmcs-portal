@@ -27,34 +27,19 @@ const googleConnected = {
 };
 %>
 
-<!-- Hero panel: account command center + metric rail -->
-<section class="hero-panel hero-command" aria-labelledby="heroWelcome">
-  <span class="hero-command-sweep" aria-hidden="true"></span>
-  <span class="hero-command-signal" aria-hidden="true"></span>
-  <div class="hero-head hero-command-head">
-    <div class="welcome-block">
-      <div class="hero-meta-row">
-        <span class="hero-status<%= numDue > 0 ? ' warn' : '' %>" role="status"><i aria-hidden="true"></i><span><%= numDue > 0 ? (numDue === 1 ? '1 invoice needs attention' : numDue + ' invoices need attention') : 'All systems running' %></span></span>
-        <time class="hero-date" datetime="<%= new Date().toISOString() %>"><%= fmtDate(new Date()) %></time>
-      </div>
-      <h2 id="heroWelcome"><span class="hero-greeting"><%= t('dash.welcome') %></span> <strong><%= first %></strong></h2>
-      <p><%= t(numDue > 0 ? (numDue === 1 ? 'dash.dueOne' : 'dash.dueMany') : 'dash.allPaid', { n: numDue, amount: money(dueBalance) }) %></p>
-      <div class="hero-actions">
-        <a class="hero-ghost" href="<%= numDue > 0 ? '/invoices' : '/tickets' %>"><%- icon(numDue > 0 ? 'receipt' : 'life') %><span><%= numDue > 0 ? t('dash.payNow') : t('dash.support') %></span></a>
-        <button class="hero-primary" id="newServiceButton"><%- icon('plus') %><span><%= t('dash.orderHosting') %></span></button>
-      </div>
-    </div>
-    <a class="hero-next" href="<%= numDue > 0 ? '/invoices' : '/tickets' %>" aria-label="<%= numDue > 0 ? t('dash.viewInvoices') : t('dash.support') %>">
-      <span class="hero-next-label"><%= t('dash.summary') %></span>
-      <span class="hero-next-main"><span class="hero-next-icon"><%- icon(numDue > 0 ? 'receipt' : 'life') %></span><strong><%= numDue > 0 ? t('dash.amountDue') : t('dash.support') %></strong><%- icon('chev', 'hero-next-chevron') %></span>
-      <span class="hero-next-note"><%= numDue > 0 ? money(dueBalance) + ' · ' + t(numDue === 1 ? 'dash.unpaidOne' : 'dash.unpaidMany', { n: numDue }) : t('dash.allPaid') %></span>
-    </a>
+
+<div class="dx">
+
+<!-- 1 · Banner (reference: promo strip under the page title) -->
+<section class="dx-banner" aria-labelledby="dxWelcome">
+  <span class="dx-banner-ico" aria-hidden="true"><%- icon('bolt') %></span>
+  <div class="dx-banner-copy">
+    <strong id="dxWelcome"><%= t('dash.welcome') %> <%= first %></strong>
+    <span><%= t(numDue > 0 ? (numDue === 1 ? 'dash.dueOne' : 'dash.dueMany') : 'dash.allPaid', { n: numDue, amount: money(dueBalance) }) %></span>
   </div>
-  <div class="metric-strip" aria-label="<%= t('dash.summary') %>">
-    <button class="metric" data-target="services" data-page-link="/services"><span class="metric-top"><%- icon('server') %><small><%= t('dash.services') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong data-count="<%= numServices %>"><%= numServices %></strong><em><%= t('dash.active') %></em></span></button>
-    <button class="metric" data-target="domains" data-page-link="/domains"><span class="metric-top"><%- icon('globe') %><small><%= t('dash.domains') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong data-count="<%= numDomains %>"><%= numDomains %></strong><em><%= t('dash.active') %></em></span></button>
-    <button class="metric<%= numDue > 0 ? ' metric-alert' : '' %>" data-target="invoices" data-page-link="/invoices"><span class="metric-top"><%- icon('receipt') %><small><%= t('dash.amountDue') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong><%= money(numDue > 0 ? dueBalance : 0) %></strong><em><%= numDue === 1 ? '1 due' : numDue + ' due' %></em></span></button>
-    <button class="metric<%= numTickets > 0 ? ' metric-alert' : '' %>" data-target="tickets" data-page-link="/tickets"><span class="metric-top"><%- icon('life') %><small><%= t('dash.support') %></small><%- icon('chev', 'chev') %></span><span class="metric-value"><strong data-count="<%= numTickets %>"><%= numTickets %></strong><em><%= numTickets === 1 ? '1 open' : numTickets + ' open' %></em></span></button>
+  <div class="dx-banner-actions">
+    <a class="dx-btn ghost" href="/store"><%- icon('plus') %><span><%= t('dash.orderHosting') %></span></a>
+    <a class="dx-btn white" href="<%= numDue > 0 ? '/invoices' : '/tickets' %>"><span><%= numDue > 0 ? t('dash.payNow') : t('dash.support') %></span></a>
   </div>
 </section>
 
@@ -92,14 +77,45 @@ const googleConnected = {
   <p class="sr-only" id="googleConnectStatus" role="status" aria-live="polite"></p>
 </section>
 
-<!-- Search Console panel -->
-<section class="search-insights" id="searchSection" aria-labelledby="scSectionTitle">
-  <header class="section-header insights-header">
-    <div>
-      <h2 id="scSectionTitle"><%= t('sc.title') %> <span class="source-badge">Search Console</span></h2>
-      <p><%= t('sc.updatingEvery') %></p>
+<!-- 2 · Chart (left) + three stat cards (right) -->
+<div class="dx-row dx-row-top">
+  <section class="dx-card dx-chart" id="searchSection" aria-labelledby="scSectionTitle">
+    <header class="dx-card-head">
+      <div>
+        <h2 id="scSectionTitle"><%= t('sc.performanceOverTime') %></h2>
+        <div class="dx-legend" id="scChartLegend"><span class="source-badge"><%= t('sc.title') %></span><span><i class="c"></i><%= t('sc.clicks') %></span><span><i class="i"></i><%= t('sc.impressions') %></span></div>
+      </div>
+      <div class="dx-controls">
+        <label class="dx-check"><input type="checkbox" id="scShowClicks" checked><span><%= t('sc.showClicks') %></span></label>
+        <label class="dx-check"><input type="checkbox" id="scShowImpressions" checked><span><%= t('sc.showImpressions') %></span></label>
+        <select class="dx-select" id="scRange" aria-label="<%= t('sc.dateRange') %>">
+          <option value="1"><%= t('sc.range1') %></option>
+          <option value="7"><%= t('sc.range7') %></option>
+          <option value="28" selected><%= t('sc.range28') %></option>
+          <option value="90"><%= t('sc.range90') %></option>
+          <option value="365"><%= t('sc.range365') %></option>
+        </select>
+      </div>
+    </header>
+    <p id="scDataStatus" class="sc-data-status" role="status" aria-live="polite" hidden></p>
+    <div class="large-chart" id="scLargeChart">
+      <canvas id="scChart" height="200"></canvas>
+      <div class="chart-empty" id="scChartEmpty" hidden>
+        <h3><%= t('sc.noMatchingData') %></h3>
+        <p><%= t('sc.tryAnotherQuery') %></p>
+      </div>
     </div>
-    <div class="section-actions">
+    <p id="scChartDesc" class="sr-only"><%= t('sc.dailyClicksImpressions') %></p>
+    <div class="dx-kpis" id="scKpis">
+      <div class="dx-kpi" data-series="clicks"><span><%= t('sc.clicks') %></span><strong id="scClicks">–</strong><em class="sc-trend" id="scClicksTrend"></em></div>
+      <div class="dx-kpi" data-series="impressions"><span><%= t('sc.impressions') %></span><strong id="scImpressions">–</strong><em class="sc-trend" id="scImpressionsTrend"></em></div>
+      <div class="dx-kpi" data-series="ctr"><span><%= t('sc.ctr') %></span><strong id="scCtr">–</strong><em class="sc-trend" id="scCtrTrend"></em></div>
+      <div class="dx-kpi" data-series="position"><span><%= t('sc.position') %></span><strong id="scPosition">–</strong><em class="sc-trend" id="scPositionTrend"></em></div>
+    </div>
+    <% if (!gtools.includes('searchconsole')) { %>
+      <p class="svc-muted dx-connect-note"><%= t('sc.connectFirst') %> <a href="/google/tools"><%= t('nav.googleTools') %></a></p>
+    <% } %>
+    <footer class="dx-chart-foot">
       <label class="property-picker" for="scProperty">
         <span class="domain-avatar" aria-hidden="true"><%= (customer && customer.email ? customer.email.split('@')[0].slice(0, 1).toUpperCase() : 'A') %></span>
         <span class="sr-only">Search Console property</span>
@@ -107,230 +123,219 @@ const googleConnected = {
           <option>Loading properties…</option>
         </select>
       </label>
-      <button class="control-button" id="scRefresh"><%- icon('refresh') %><span><%= t('sc.refresh') %></span></button>
-    </div>
-  </header>
-  <div class="analytics-surface">
-    <div class="performance-toolbar">
-      <div class="date-segment sc-range seg" role="group" aria-label="<%= t('sc.dateRange') %>">
-        <button class="insight-filter sc-range-item" data-range="1" aria-pressed="false"><%= t('sc.range1') %></button>
-        <button class="insight-filter sc-range-item" data-range="7" aria-pressed="false"><%= t('sc.range7') %></button>
-        <button class="insight-filter sc-range-item active" data-range="28" aria-pressed="true"><%= t('sc.range28') %></button>
-        <button class="insight-filter sc-range-item" data-range="90" aria-pressed="false"><%= t('sc.range90') %></button>
-        <button class="insight-filter sc-range-item" data-range="365" aria-pressed="false"><%= t('sc.range365') %></button>
-      </div>
-      <div class="filter-actions">
-      </div>
-    </div>
-    <div class="search-kpis" id="scKpis">
-      <button class="search-kpi active" data-series="clicks" aria-pressed="true">
-        <span class="kpi-label"><span class="metric-check"><%- icon('check') %></span><%= t('sc.clicks') %></span>
-        <strong id="scClicks">–</strong>
-        <span class="sc-trend" id="scClicksTrend"></span>
-      </button>
-      <button class="search-kpi active" data-series="impressions" aria-pressed="true">
-        <span class="kpi-label"><span class="metric-check"><%- icon('check') %></span><%= t('sc.impressions') %></span>
-        <strong id="scImpressions">–</strong>
-        <span class="sc-trend" id="scImpressionsTrend"></span>
-      </button>
-      <button class="search-kpi" data-series="ctr" aria-pressed="false">
-        <span class="kpi-label"><span class="metric-check"><%- icon('check') %></span><%= t('sc.ctr') %></span>
-        <strong id="scCtr">–</strong>
-        <span class="sc-trend" id="scCtrTrend"></span>
-      </button>
-      <button class="search-kpi" data-series="position" aria-pressed="false">
-        <span class="kpi-label"><span class="metric-check"><%- icon('check') %></span><%= t('sc.position') %></span>
-        <strong id="scPosition">–</strong>
-        <span class="sc-trend" id="scPositionTrend"></span>
-      </button>
-    </div>
-    <article class="performance-card" aria-labelledby="scChartTitle">
-      <header>
-        <div>
-          <h3 id="scChartTitle"><%= t('sc.performanceOverTime') %></h3>
-          <p id="scChartDesc"><%= t('sc.dailyClicksImpressions') %></p>
-        </div>
-      </header>
-      <p id="scDataStatus" class="sc-data-status" role="status" aria-live="polite" hidden></p>
-      <div class="large-chart" id="scLargeChart">
-        <canvas id="scChart" height="200"></canvas>
-        <div class="chart-empty" id="scChartEmpty" hidden>
-          <h3><%= t('sc.noMatchingData') %></h3>
-          <p><%= t('sc.tryAnotherQuery') %></p>
-        </div>
-      </div>
-      <div class="chart-footer">
-        <div class="chart-legend" id="scChartLegend"></div>
-        <p><%= t('sc.eachMetricOwnScale') %></p>
-      </div>
       <p id="scLastUpdated" class="chart-scale-note"><span class="status-dot"></span> <%= t('sc.lastUpdate') %></p>
-    </article>
-    <% if (!gtools.includes('searchconsole')) { %>
-      <p class="svc-muted" style="padding:20px;"><%= t('sc.connectFirst') %> <a href="/google/tools"><%= t('nav.googleTools') %></a></p>
-    <% } else { %>
-      <div class="insight-grid">
-        <article class="panel queries-card" id="queriesSection">
-          <header class="panel-header">
-            <div><h3><%= t('dash.topQueries') %></h3><p><%= t('dash.topQueriesSubtitle') %></p></div>
-            <button class="text-button" id="viewQueries" aria-controls="queryScroll" aria-expanded="false" disabled><%- icon('arrow') %><span id="viewQueriesLabel"><%= t('common.viewAll') %></span></button>
-          </header>
-          <div class="query-scroll" id="queryScroll" role="region" aria-label="Ranking keywords" tabindex="0">
-          <table class="sc-query-table" id="queryTable" role="table" aria-label="<%= t('dash.topQueries') %>">
-            <thead>
-              <tr class="sc-query-row head">
-                <th scope="col" class="sc-query-term"><%= t('col.query') %></th>
-                <th scope="col"><%= t('sc.clicks') %></th>
-                <th scope="col"><%= t('sc.impressions') %></th>
-                <th scope="col"><%= t('sc.ctr') %></th>
-                <th scope="col"><%= t('sc.position') %></th>
-              </tr>
-            </thead>
-            <tbody id="queryTableBody"></tbody>
-          </table>
-          </div>
-          <footer class="panel-footer"><span id="querySummary"></span><span class="subtle"><%= t('sc.selectedPeriod') %></span></footer>
-        </article>
-        <article class="panel device-card">
-          <header class="panel-header"><div><h3><%= t('dash.deviceMix') %></h3><p><%= t('dash.deviceMixSubtitle') %></p></div><%- icon('activity') %></header>
-          <div class="sc-device-row">
-            <div class="donut-wrap"><div class="donut-chart" id="deviceDonut" role="img" aria-label="<%= t('dash.deviceMix') %>"><span><strong id="donutTotal">–</strong><small><%= t('dash.totalClicks') %></small></span></div></div>
-            <div class="sc-device-legend" id="deviceLegend"></div>
-          </div>
-        </article>
-        <article class="panel countries-card">
-          <header class="panel-header"><h3><%= t('dash.topCountries') %></h3></header>
-          <div class="sc-country-list" id="countryBars"></div>
-        </article>
-      </div>
-      <p id="scEmpty" class="svc-muted" style="display:none;padding:20px;"><%= t('sc.noData') %></p>
-    <% } %>
+      <button class="control-button" id="scRefresh" type="button"><%- icon('refresh') %><span><%= t('sc.refresh') %></span></button>
+    </footer>
+  </section>
+
+  <div class="dx-stats">
+    <a class="dx-stat" href="/services">
+      <span class="dx-stat-label"><%= t('dash.services') %></span>
+      <span class="dx-stat-go" aria-hidden="true"><%- icon('external') %></span>
+      <span class="dx-stat-ico"><%- icon('server') %></span>
+      <strong class="dx-stat-value" data-count="<%= numServices %>"><%= numServices %></strong>
+      <span class="dx-stat-sub"><%= t('dash.active') %></span>
+      <span class="dx-ring" style="--p:<%= svcPct %>" aria-hidden="true"></span>
+    </a>
+    <a class="dx-stat" href="/domains">
+      <span class="dx-stat-label"><%= t('dash.domains') %></span>
+      <span class="dx-stat-go" aria-hidden="true"><%- icon('external') %></span>
+      <span class="dx-stat-ico"><%- icon('globe') %></span>
+      <strong class="dx-stat-value" data-count="<%= numDomains %>"><%= numDomains %></strong>
+      <span class="dx-stat-sub"><%= t('dash.active') %></span>
+      <span class="dx-ring" style="--p:<%= domPct %>" aria-hidden="true"></span>
+    </a>
+    <a class="dx-stat<%= numDue > 0 ? ' alert' : '' %>" href="/invoices">
+      <span class="dx-stat-label"><%= t('dash.amountDue') %></span>
+      <span class="dx-stat-go" aria-hidden="true"><%- icon('external') %></span>
+      <span class="dx-stat-ico"><%- icon('receipt') %></span>
+      <strong class="dx-stat-value"><%= money(numDue > 0 ? dueBalance : 0) %></strong>
+      <span class="dx-stat-sub"><%= numDue > 0 ? t(numDue === 1 ? 'dash.unpaidOne' : 'dash.unpaidMany', { n: numDue }) : t('dash.allPaid') %></span>
+      <span class="dx-ring" style="--p:<%= invPaidPct %>" aria-hidden="true"></span>
+    </a>
   </div>
-</section>
+</div>
 
-<!-- Operations section -->
-<section class="operations-section" aria-labelledby="opsTitle">
-  <header class="section-header">
-    <div>
-      <h2 id="opsTitle"><%= t('dash.workspace.title') %></h2>
-      <p><%= t('dash.workspace.subtitle') %></p>
+<!-- 3 · Invoice list (left) + Notification centre (right) -->
+<div class="dx-row dx-row-mid">
+  <section class="dx-card" id="invoicesSection" aria-labelledby="invTitle">
+    <header class="dx-card-head">
+      <h2 id="invTitle" tabindex="-1"><%= t('dash.recentInvoices') %></h2>
+      <a class="dx-link" href="/invoices"><%= t('common.viewAll') %> <%- icon('arrow') %></a>
+    </header>
+    <div class="dx-tools">
+      <label class="dx-search">
+        <%- icon('search') %>
+        <span class="sr-only"><%= t('dash.searchInvoices') %></span>
+        <input type="search" id="invSearch" placeholder="<%= t('dash.searchInvoices') %>" autocomplete="off">
+      </label>
     </div>
-    <span class="quiet-badge"><%= t('dash.accountOverview') %></span>
-  </header>
-  <div class="dashboard-grid">
-    <div class="primary-column">
-      <article class="panel services-panel" id="servicesSection">
-        <header class="panel-header">
-          <div>
-            <h3 tabindex="-1"><%= t('dash.yourServices') %> <span class="count-badge" id="servicesBadge"><%= numServices %></span></h3>
-            <p><%= t('dash.liveWorkloads') %></p>
-          </div>
-          <button class="text-button" data-page-link="/services"><%- icon('arrow') %><%= t('common.viewAll') %></button>
-        </header>
-        <div class="table-wrap">
-          <table class="services-table">
-            <caption class="sr-only"><%= t('dash.activeServices') %></caption>
-            <thead>
-              <tr>
-                <th scope="col"><%= t('col.service') %></th>
-                <th scope="col"><%= t('col.status') %></th>
-                <th scope="col"><%= t('col.renews') %></th>
-                <th scope="col"><%= t('col.price') %></th>
-                <th scope="col"><span class="sr-only"><%= t('col.actions') %></span></th>
-              </tr>
-            </thead>
-            <tbody id="serviceRows">
-              <% if (!services.length) { %>
-                <tr>
-                  <td colspan="5"><%= t('dash.noServices') %> <a href="/store"><%= t('dash.orderFirst') %></a></td>
-                </tr>
-              <% } %>
-              <% services.forEach(s => { %>
-                <tr>
-                  <td data-label="<%= t('col.service') %>">
-                    <span class="service-name">
-                      <span class="service-glyph <%= s.status === 'Active' ? 'coral' : 'blue' %>" ><%- icon('server') %></span>
-                      <span>
-                        <strong><%= s.name || s.groupname || t('col.service') %></strong>
-                        <small><%= s.domain || t('dash.noDomain') %></small>
-                      </span>
-                    </span>
-                  </td>
-                  <td data-label="<%= t('col.status') %>"><span class="status-label <%= s.status === 'Active' ? 'active' : '' %>" ><span></span><%= st(s.status) %></span></td>
-                  <td data-label="<%= t('col.renews') %>"><%= fmtDate(s.nextduedate) %></td>
-                  <td data-label="<%= t('col.price') %>"><strong><%= money(s.recurringamount || s.amount) %></strong><small>/mo</small></td>
-                  <td><button class="row-button" aria-label="<%= t('common.manage') %> <%= s.name || s.groupname %>" ><%- icon('chev', 'chev') %></button></td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
-        </div>
-      </article>
-
-      <article class="panel invoice-panel" id="invoicesSection">
-        <header class="panel-header">
-          <div>
-            <h3 tabindex="-1"><%= t('dash.recentInvoices') %></h3>
-            <p><%= t('dash.billingHistory') %></p>
-          </div>
-          <button class="text-button" data-page-link="/invoices"><%- icon('arrow') %><%= t('common.viewAll') %></button>
-        </header>
-        <div class="invoice-list">
+    <div class="dx-table-wrap">
+      <table class="dx-table">
+        <caption class="sr-only"><%= t('dash.recentInvoices') %></caption>
+        <thead>
+          <tr>
+            <th scope="col"><%= t('col.invoice') %></th>
+            <th scope="col"><%= t('col.issued') %></th>
+            <th scope="col"><%= t('col.due') %></th>
+            <th scope="col"><%= t('col.total') %></th>
+            <th scope="col"><%= t('col.status') %></th>
+          </tr>
+        </thead>
+        <tbody id="invoiceRows">
           <% if (!invoices.length) { %>
-            <div class="invoice-empty"><%= t('dash.noInvoices') %></div>
+            <tr><td colspan="5" class="dx-empty"><%= t('dash.noInvoices') %></td></tr>
           <% } %>
-          <% invoices.forEach(i => { const open = ['Unpaid', 'Overdue'].includes(i.status); %>
-            <button class="invoice-row<%= open ? ' unpaid' : '' %>">
-              <span class="invoice-id"><span><%- icon('receipt') %></span><strong>#<%= i.invoicenum || i.id %></strong></span>
-              <span class="invoice-date"><small><%= t('dash.issued') %></small><%= fmtDate(i.date) %></span>
-              <span class="invoice-total"><small><%= t('dash.total') %></small><%= money(i.total, i.currencycode) %></span>
-              <span class="invoice-status<%= open ? ' unpaid' : ' paid' %>"><%- icon(open ? 'alert' : 'check') %><%= st(i.status) %></span>
-              <span class="row-arrow"><%- icon('chev', 'chev') %></span>
-            </button>
+          <% invoices.forEach(i => { const open = ['Unpaid', 'Overdue'].includes(i.status); const num = i.invoicenum || i.id; %>
+            <tr data-page-link="/invoices/<%= i.id %>" data-search="<%= String('#' + num + ' ' + i.status + ' ' + (i.date || '') + ' ' + (i.duedate || '')).toLowerCase() %>">
+              <td><a class="dx-id" href="/invoices/<%= i.id %>">#<%= num %></a></td>
+              <td><%= fmtDate(i.date) %></td>
+              <td><%= i.duedate ? fmtDate(i.duedate) : '—' %></td>
+              <td><strong><%= money(i.total, i.currencycode) %></strong></td>
+              <td><span class="dx-pill <%= open ? 'bad' : 'ok' %>"><%- icon(open ? 'alert' : 'check') %><%= st(i.status) %></span></td>
+            </tr>
           <% }) %>
-        </div>
-      </article>
+          <tr id="invNoMatch" hidden><td colspan="5" class="dx-empty"><%= t('dash.noMatches') %></td></tr>
+        </tbody>
+      </table>
     </div>
+  </section>
 
-    <aside class="secondary-column">
-      <article class="panel domain-panel" id="domainsSection">
-        <header class="panel-header">
-          <div>
-            <h3 tabindex="-1"><%= t('dash.nextDomain') %></h3>
-            <p><%= t('dash.nextDomainSubtitle') %></p>
-          </div>
-        </header>
-        <div class="quick-domain">
-          <div class="quick-domain-row">
-            <input id="domainSearch" type="search" placeholder="<%= t('dash.domainPlaceholder') %>" autocomplete="off">
-            <button id="findDomain"><%- icon('search') %></button>
-          </div>
-          <small id="domainHint"><%= t('dash.domainHint') %></small>
-          <p id="domainResult" class="domain-result" aria-live="polite" hidden></p>
-        </div>
-      </article>
+  <section class="dx-card dx-notif" id="ticketsSection" aria-labelledby="notifTitle">
+    <header class="dx-card-head">
+      <h2 id="notifTitle" tabindex="-1"><%= t('dash.notifTitle') %></h2>
+    </header>
+    <div class="dx-notif-list">
+      <% if (numDue > 0) { %>
+        <a class="dx-notif-item" href="/invoices">
+          <span class="dx-notif-ico bad"><%- icon('receipt') %></span>
+          <span class="dx-notif-copy"><strong><%= t('dash.amountDue') %> · <%= money(dueBalance) %></strong><small><%= t(numDue === 1 ? 'dash.unpaidOne' : 'dash.unpaidMany', { n: numDue }) %></small></span>
+          <time><%= unpaid && (unpaid.duedate || unpaid.date) ? fmtDate(unpaid.duedate || unpaid.date) : '' %></time>
+        </a>
+      <% } %>
+      <% if (overdueServices > 0) { %>
+        <a class="dx-notif-item" href="/services">
+          <span class="dx-notif-ico warn"><%- icon('alert') %></span>
+          <span class="dx-notif-copy"><strong><%= t(overdueServices === 1 ? 'dash.overdueOne' : 'dash.overdueMany', { n: overdueServices }) %></strong><small><%= t('dash.overdueHint') %></small></span>
+        </a>
+      <% } %>
+      <% tickets.forEach(tk => { %>
+        <a class="dx-notif-item" href="/tickets/<%= tk.id %>">
+          <span class="dx-notif-ico"><%- icon('life') %></span>
+          <span class="dx-notif-copy"><strong><%= tk.subject %></strong><small>#<%= tk.tid || tk.id %> · <%= st(tk.status) %></small></span>
+          <time><%= fmtDate(tk.lastreply || tk.date) %></time>
+        </a>
+      <% }) %>
+      <% if (ticketsUnavailable) { %>
+        <p class="svc-muted dx-notif-empty"><%= t('tix.unavailable') %> <a href="/contact"><%= t('nav.contact') %></a></p>
+      <% } else if (!numDue && !overdueServices && !tickets.length) { %>
+        <p class="svc-muted dx-notif-empty"><%= t('dash.notifEmpty') %></p>
+      <% } %>
+    </div>
+    <a class="dx-viewall" href="/tickets"><%= t('common.viewAll') %></a>
+  </section>
+</div>
 
-      <article class="panel tickets-panel" id="ticketsSection">
-        <header class="panel-header">
-          <div>
-            <h3 tabindex="-1"><%= t('nav.tickets') %></h3>
-            <p><%= t('dash.supportTickets') %></p>
-          </div>
-          <button class="text-button" data-page-link="/tickets"><%- icon('arrow') %><%= t('common.all') %></button>
-        </header>
-        <% if (ticketsUnavailable) { %>
-          <p class="svc-muted" style="padding:16px 20px;"><%= t('tix.unavailable') %> <a href="/contact"><%= t('nav.contact') %></a></p>
-        <% } else if (!tickets.length) { %>
-          <p class="svc-muted" style="padding:16px 20px;"><%= t('dash.noTickets') %></p>
-        <% } %>
-        <% tickets.forEach(tk => { %>
-          <a class="ticket-line" href="/tickets/<%= tk.id %>"><b><%= tk.subject %></b><small>#<%= tk.tid || tk.id %> · <%= st(tk.status) %> · <%= fmtDate(tk.lastreply || tk.date) %></small></a>
-        <% }) %>
-      </article>
-    </aside>
+<!-- 4 · Services (left) + domain finder (right) -->
+<div class="dx-row dx-row-low">
+  <section class="dx-card" id="servicesSection" aria-labelledby="svcTitle">
+    <header class="dx-card-head">
+      <h2 id="svcTitle" tabindex="-1"><%= t('dash.yourServices') %> <span class="count-badge" id="servicesBadge"><%= numServices %></span></h2>
+      <a class="dx-link" href="/services"><%= t('common.viewAll') %> <%- icon('arrow') %></a>
+    </header>
+    <div class="dx-table-wrap">
+      <table class="dx-table">
+        <caption class="sr-only"><%= t('dash.activeServices') %></caption>
+        <thead>
+          <tr>
+            <th scope="col"><%= t('col.service') %></th>
+            <th scope="col"><%= t('col.status') %></th>
+            <th scope="col"><%= t('col.renews') %></th>
+            <th scope="col"><%= t('col.price') %></th>
+          </tr>
+        </thead>
+        <tbody id="serviceRows">
+          <% if (!services.length) { %>
+            <tr><td colspan="4" class="dx-empty"><%= t('dash.noServices') %> <a href="/store"><%= t('dash.orderFirst') %></a></td></tr>
+          <% } %>
+          <% services.forEach(s => { %>
+            <tr<% if (s.id) { %> data-page-link="/services/<%= s.id %>"<% } %>>
+              <td>
+                <span class="service-name">
+                  <span class="service-glyph <%= s.status === 'Active' ? 'coral' : 'blue' %>"><%- icon('server') %></span>
+                  <span><strong><%= s.name || s.groupname || t('col.service') %></strong><small><%= s.domain || t('dash.noDomain') %></small></span>
+                </span>
+              </td>
+              <td><span class="dx-pill <%= s.status === 'Active' ? 'ok' : 'bad' %>"><%- icon(s.status === 'Active' ? 'check' : 'alert') %><%= st(s.status) %></span></td>
+              <td><%= fmtDate(s.nextduedate) %></td>
+              <td><strong><%= money(s.recurringamount || s.amount) %></strong><small class="dx-per">/mo</small></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <article class="panel domain-panel" id="domainsSection">
+    <header class="panel-header">
+      <div>
+        <h3 tabindex="-1"><%= t('dash.nextDomain') %></h3>
+        <p><%= t('dash.nextDomainSubtitle') %></p>
+      </div>
+    </header>
+    <div class="quick-domain">
+      <div class="quick-domain-row">
+        <input id="domainSearch" type="search" placeholder="<%= t('dash.domainPlaceholder') %>" autocomplete="off">
+        <button id="findDomain" type="button" aria-label="<%= t('common.search') %>"><%- icon('search') %></button>
+      </div>
+      <small id="domainHint"><%= t('dash.domainHint') %></small>
+      <p id="domainResult" class="domain-result" aria-live="polite" hidden></p>
+    </div>
+  </article>
+</div>
+
+<!-- 5 · Search Console insights (keywords, devices, countries) -->
+<% if (gtools.includes('searchconsole')) { %>
+<section class="dx-insights" id="searchInsights" aria-label="<%= t('sc.title') %>">
+  <div class="insight-grid">
+    <article class="panel queries-card" id="queriesSection">
+      <header class="panel-header">
+        <div><h3><%= t('dash.topQueries') %></h3><p><%= t('dash.topQueriesSubtitle') %></p></div>
+        <button class="text-button" id="viewQueries" aria-controls="queryScroll" aria-expanded="false" disabled><%- icon('arrow') %><span id="viewQueriesLabel"><%= t('common.viewAll') %></span></button>
+      </header>
+      <div class="query-scroll" id="queryScroll" role="region" aria-label="Ranking keywords" tabindex="0">
+      <table class="sc-query-table" id="queryTable" role="table" aria-label="<%= t('dash.topQueries') %>">
+        <thead>
+          <tr class="sc-query-row head">
+            <th scope="col" class="sc-query-term"><%= t('col.query') %></th>
+            <th scope="col"><%= t('sc.clicks') %></th>
+            <th scope="col"><%= t('sc.impressions') %></th>
+            <th scope="col"><%= t('sc.ctr') %></th>
+            <th scope="col"><%= t('sc.position') %></th>
+          </tr>
+        </thead>
+        <tbody id="queryTableBody"></tbody>
+      </table>
+      </div>
+      <footer class="panel-footer"><span id="querySummary"></span><span class="subtle"><%= t('sc.selectedPeriod') %></span></footer>
+    </article>
+    <article class="panel device-card">
+      <header class="panel-header"><div><h3><%= t('dash.deviceMix') %></h3><p><%= t('dash.deviceMixSubtitle') %></p></div><%- icon('activity') %></header>
+      <div class="sc-device-row">
+        <div class="donut-wrap"><div class="donut-chart" id="deviceDonut" role="img" aria-label="<%= t('dash.deviceMix') %>"><span><strong id="donutTotal">–</strong><small><%= t('dash.totalClicks') %></small></span></div></div>
+        <div class="sc-device-legend" id="deviceLegend"></div>
+      </div>
+    </article>
+    <article class="panel countries-card">
+      <header class="panel-header"><h3><%= t('dash.topCountries') %></h3></header>
+      <div class="sc-country-list" id="countryBars"></div>
+    </article>
   </div>
+  <p id="scEmpty" class="svc-muted" style="display:none;padding:20px;"><%= t('sc.noData') %></p>
 </section>
+<% } %>
 
-<!-- Billing overview donut -->
+<!-- 6 · Billing overview -->
 <% if (invoices.length) { %>
 <section class="panel billing-donut-panel" aria-labelledby="billTitle">
   <header class="panel-header">
@@ -347,13 +352,15 @@ const googleConnected = {
       </span>
     </div>
     <div class="device-legend">
-      <span><i style="background:var(--ok)"></i><b><%= t('dash.billingPaid') %></b><strong><%= invPaidN %></b><small><%= invPaidPct %>%</small></span>
-      <span><i style="background:#d0021b"></i><b><%= t('dash.billingDue') %></b><strong><%= invDueN %></b><small><%= invDuePct %>%</small></span>
-      <span><i style="background:var(--g200)"></i><b><%= t('dash.billingOther') %></b><strong><%= invOtherN %></b><small><%= invOtherPct %>%</small></span>
+      <span><i style="background:var(--ok)"></i><b><%= t('dash.billingPaid') %></b><strong><%= invPaidN %></strong><small><%= invPaidPct %>%</small></span>
+      <span><i style="background:#d0021b"></i><b><%= t('dash.billingDue') %></b><strong><%= invDueN %></strong><small><%= invDuePct %>%</small></span>
+      <span><i style="background:var(--g200)"></i><b><%= t('dash.billingOther') %></b><strong><%= invOtherN %></strong><small><%= invOtherPct %>%</small></span>
     </div>
   </div>
 </section>
 <% } %>
+
+</div>
 
 <%- include('_foot') %>
 <script>
@@ -383,10 +390,12 @@ const googleConnected = {
   const deviceDonut = document.getElementById('deviceDonut');
   const donutTotal = document.getElementById('donutTotal');
   const querySummary = document.getElementById('querySummary');
-  const rangeItems = document.querySelectorAll('.sc-range-item');
+  const rangeSelect = document.getElementById('scRange');
+  const showClicks = document.getElementById('scShowClicks');
+  const showImpressions = document.getElementById('scShowImpressions');
   const viewQueries = document.getElementById('viewQueries');
   const viewQueriesLabel = document.getElementById('viewQueriesLabel');
-  const searchSection = document.getElementById('searchSection');
+  const searchSurfaces = [document.getElementById('searchSection'), document.getElementById('searchInsights')];
   const googleConnectPrompt = document.getElementById('googleConnectPrompt');
   const hideGoogleConnect = document.getElementById('hideGoogleConnect');
   const googleConnectStatus = document.getElementById('googleConnectStatus');
@@ -400,7 +409,7 @@ const googleConnected = {
   try { googleConnectHidden = localStorage.getItem(googleHideKey) === '1'; } catch (e) { /* private mode */ }
 
   function applyGoogleConnectionVisibility() {
-    if (searchSection) searchSection.hidden = googleConnectHidden;
+    searchSurfaces.forEach((el) => { if (el) el.hidden = googleConnectHidden; });
     if (googleConnectPrompt) googleConnectPrompt.hidden = googleConnectHidden || Boolean(googleConnections.searchconsole);
     googleToolActions.forEach((action) => {
       const tool = action.dataset.googleTool;
@@ -810,16 +819,20 @@ const googleConnected = {
   document.querySelectorAll('[data-page-link]').forEach((button) => {
     const href = button.dataset.pageLink;
     if (!href || href.charAt(0) !== '/') return;
-    button.addEventListener('click', () => { window.location.href = href; });
+    button.addEventListener('click', (e) => { if (e.target.tagName === 'A') return; window.location.href = href; });
   });
 
-  rangeItems.forEach((item) => {
-    item.addEventListener('click', () => {
-      rangeItems.forEach((i) => { i.classList.remove('active'); i.setAttribute('aria-pressed', 'false'); });
-      item.classList.add('active');
-      item.setAttribute('aria-pressed', 'true');
-      state.range = parseInt(item.dataset.range, 10);
-      loadData();
+  if (rangeSelect) rangeSelect.addEventListener('change', () => {
+    state.range = parseInt(rangeSelect.value, 10) || 28;
+    loadData();
+  });
+
+  [[showClicks, 'clicks'], [showImpressions, 'impressions']].forEach(([box, key]) => {
+    if (!box) return;
+    box.addEventListener('change', () => {
+      if (box.checked) state.selected.add(key); else state.selected.delete(key);
+      chartProgress = 1;
+      if (chartSeries.length) paintChart();
     });
   });
 
@@ -831,21 +844,30 @@ const googleConnected = {
     });
   }
 
+  const invSearch = document.getElementById('invSearch');
+  if (invSearch) invSearch.addEventListener('input', () => {
+    const q = invSearch.value.trim().toLowerCase();
+    let shown = 0;
+    document.querySelectorAll('#invoiceRows tr[data-search]').forEach((tr) => {
+      const match = !q || tr.dataset.search.indexOf(q) > -1;
+      tr.hidden = !match;
+      if (match) shown++;
+    });
+    const none = document.getElementById('invNoMatch');
+    if (none) none.hidden = shown > 0 || !q;
+  });
+
   refreshBtn.addEventListener('click', loadData);
   if (!googleConnectHidden) {
     loadSites();
     loadData();
     setInterval(loadData, 60 * 60 * 1000);
   }
-
-  document.getElementById('newServiceButton').addEventListener('click', () => {
-    location.href = '/store';
-  });
 })();
 
 (function(){
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  document.querySelectorAll('.hero-command [data-count]').forEach(function(el){
+  document.querySelectorAll('.dx-stat [data-count]').forEach(function(el){
     var end = Number(el.dataset.count) || 0; if (!end) return;
     var t0 = performance.now(), dur = 900;
     (function step(now){
@@ -853,17 +875,6 @@ const googleConnected = {
       el.textContent = Math.round(end * e).toLocaleString('en-US');
       if (k < 1) requestAnimationFrame(step);
     })(t0);
-  });
-  var hero = document.querySelector('.hero-command');
-  if (hero) hero.addEventListener('pointermove', function(e){
-    if (e.pointerType === 'touch') return;
-    var r = hero.getBoundingClientRect();
-    hero.style.setProperty('--spot-x', (e.clientX - r.left) + 'px');
-    hero.style.setProperty('--spot-y', (e.clientY - r.top) + 'px');
-  });
-  if (hero) hero.addEventListener('pointerleave', function(){
-    hero.style.setProperty('--spot-x', '92%');
-    hero.style.setProperty('--spot-y', '0%');
   });
 })();
 </script>
