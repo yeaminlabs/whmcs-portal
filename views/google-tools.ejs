@@ -1,101 +1,50 @@
 <%- include('_head') %>
+<link rel="stylesheet" href="/css/google-tools.css">
 <%
 const tools = [
-  { key: 'analytics', name: t('gt.analytics'), icon: 'chart', desc: t('gt.analyticsDesc') },
-  { key: 'searchconsole', name: t('gt.searchconsole'), icon: 'globe', desc: t('gt.searchconsoleDesc') },
+  { key: 'searchconsole', name: t('gt.searchconsole'), icon: 'search', desc: t('gt.searchconsoleDesc') },
+  { key: 'analytics', name: t('gt.analytics'), icon: 'activity', desc: t('gt.analyticsDesc') },
 ];
-const steps = [
-  { n: 1, text: t('gt.step1') },
-  { n: 2, text: t('gt.step2') },
-  { n: 3, text: t('gt.step3') },
-  { n: 4, text: t('gt.step4') },
-];
+const doneCount = tools.filter((tl) => connected.includes(tl.key)).length;
 %>
-
-<section class="welcome reveal" aria-labelledby="gt-title">
-  <div class="welcome-row">
-    <div>
-      <h1 id="gt-title"><%= t('gt.title') %></h1>
-      <p><%= t('gt.intro') %></p>
-    </div>
-  </div>
-</section>
-
-<div class="dash-cols">
+<header class="gc-head">
   <div>
-    <section class="panel reveal reveal-2" aria-labelledby="gt-connected">
-      <header><span id="gt-connected"><%= t('gt.connected') %></span></header>
-      <div class="pad">
-        <% if (connected.length === 0) { %>
-          <p><%= t('gt.noneConnected') %></p>
-        <% } else { %>
-          <table>
-            <thead><tr><th><%= t('gt.tool') %></th><th><%= t('gt.status') %></th><th><span class="sr-only"><%= t('gt.actions') %></span></th></tr></thead>
-            <tbody>
-            <% tools.forEach(tl => { %>
-              <% if (connected.includes(tl.key)) { %>
-                <tr>
-                  <td><span class="cell-main"><%- icon(tl.icon) %><%= tl.name %></span><span class="cell-sub"><%= tl.desc %></span></td>
-                  <td><span class="pill ok"><%= t('gt.connected') %></span></td>
-                  <td><a class="row-link" href="/google/disconnect/<%= tl.key %>"><%= t('gt.disconnect') %></a></td>
-                </tr>
-                <section class="panel reveal reveal-2" style="margin-top:0.75rem;" aria-labelledby="gt-data-<%= tl.key %>">
-                  <header><span id="gt-data-<%= tl.key %>"><%= tl.name %> <%= t('gt.demoData') %></span></header>
-                  <div class="pad">
-                    <button class="btn" onclick="loadData('<%= tl.key %>')"><%= t('gt.loadData') %></button>
-                    <pre id="gt-data-<%= tl.key %>-body" class="data-body"></pre>
-                  </div>
-                </section>
-              <% } %>
-            <% }) %>
-            </tbody>
-          </table>
-        <% } %>
-      </div>
-    </section>
+    <h1 id="gt-title"><%= t('gt.title') %></h1>
+    <p><%= t('gt.intro') %></p>
   </div>
+  <span class="gc-count"><%= doneCount %> / <%= tools.length %> <%= t('gt.connectedLower') %></span>
+</header>
 
-  <aside>
-    <section class="panel reveal reveal-2" aria-labelledby="gt-connect">
-      <header><span id="gt-connect"><%= t('gt.connect') %></span></header>
-      <div class="pad">
-        <% tools.forEach(tl => { %>
-          <% if (!connected.includes(tl.key)) { %>
-            <div class="pad">
-              <strong><%- icon(tl.icon) %><%= tl.name %></strong><br>
-              <small><%= tl.desc %></small>
-              <a class="btn" href="/google/connect/<%= tl.key %>"><%= t('gt.connectBtn') %></a>
-            </div>
-          <% } %>
-        <% }) %>
+<ul class="gc-list" aria-labelledby="gt-title">
+  <% tools.forEach((tl, i) => { const on = connected.includes(tl.key); %>
+  <li class="gc-row<%= on ? ' is-on' : '' %>" style="--i:<%= i %>">
+    <span class="gc-ico" aria-hidden="true"><%- icon(tl.icon) %></span>
+    <div class="gc-main">
+      <b><%= tl.name %></b>
+      <small><%= tl.desc %></small>
+    </div>
+    <span class="gc-state"><i aria-hidden="true"></i><%= on ? t('gt.connected') : t('gt.notConnected') %></span>
+    <% if (on) { %>
+      <div class="gc-actions">
+        <button type="button" class="gc-link" data-preview="<%= tl.key %>"><%= t('gt.preview') %></button>
+        <a class="gc-btn ghost" href="/google/disconnect/<%= tl.key %>"><%= t('gt.disconnect') %></a>
       </div>
-    </section>
+    <% } else { %>
+      <div class="gc-actions"><a class="gc-btn" href="/google/connect/<%= tl.key %>"><%= t('gt.connectBtn') %></a></div>
+    <% } %>
+    <% if (on) { %><pre class="gc-preview" id="gt-data-<%= tl.key %>-body" hidden></pre><% } %>
+  </li>
+  <% }) %>
+</ul>
 
-    <section class="panel reveal reveal-3" aria-labelledby="gt-demo">
-      <header><span id="gt-demo"><%= t('gt.stepsTitle') %></span></header>
-      <div class="pad">
-        <ol class="steps">
-        <% steps.forEach(s => { %>
-          <li><span class="step-n"><%= s.n %></span> <%= s.text %></li>
-        <% }) %>
-        </ol>
-      </div>
-    </section>
-
-    <section class="panel reveal reveal-3">
-      <div class="help">
-        <strong><%= t('gt.needHelp') %></strong>
-        <p><%= t('gt.helpText') %></p>
-        <a class="btn" href="/dashboard"><%- icon('arrow') %><%= t('gt.backDashboard') %></a>
-      </div>
-    </section>
-  </aside>
-</div>
+<p class="gc-foot"><%- icon('check') %><span><%= t('gt.helpText') %></span> <a href="/dashboard"><%= t('gt.backDashboard') %></a></p>
 
 <script>
-async function loadData(tool) {
+document.querySelectorAll('[data-preview]').forEach((btn) => btn.addEventListener('click', async () => {
+  const tool = btn.dataset.preview;
   const body = document.getElementById('gt-data-' + tool + '-body');
-  body.textContent = 'Loading...';
+  if (!body.hidden) { body.hidden = true; return; }
+  body.hidden = false; body.textContent = 'Loading...';
   try {
     const r = await fetch('/google/data/' + tool);
     const j = await r.json();
@@ -103,6 +52,6 @@ async function loadData(tool) {
   } catch (e) {
     body.textContent = 'Error: ' + e.message;
   }
-}
+}));
 </script>
 <%- include('_foot') %>
