@@ -151,3 +151,14 @@ body.nav-collapsed .snav-link:focus-visible,body.nav-collapsed .snav-toggle:focu
 .prefs-summary.prefs-compact{height:2.25rem;min-height:2.25rem;padding:0 .55rem;gap:.35rem;font-size:.8125rem}
 .prefs-summary.prefs-compact .pc-part{gap:.3rem}
 .top-actions .icon-btn.notif-btn{width:2.25rem;height:2.25rem}
+
+/* Official Google artwork (Google G, Search Console, Analytics) keeps its own colours on a white tile */
+.google-connect-mark{background:#FFFFFF!important;border:1px solid #E1DAD4;box-shadow:0 4px 12px -8px rgba(48,41,46,.5)}
+.google-connect-mark img{display:block;width:1.375rem;height:1.375rem;object-fit:contain}
+.google-tool-icon,.gc-ico{background:#FFFFFF!important;border:1px solid #E1DAD4}
+.google-tool-icon img,.gc-ico img{display:block;max-width:1.6rem;max-height:1.6rem;width:auto;height:auto;object-fit:contain}
+.gc-row.is-on .gc-ico{background:#FFFFFF!important;border-color:#CFE0DB}
+.google-tool-action.is-connected .google-tool-icon{background:#FFFFFF!important}
+.dx-perf-sub{display:flex;align-items:center;gap:.4rem}
+.dx-perf-sub img{width:1rem;height:1rem;object-fit:contain}
+.google-connect-brand .google-connect-mark img{width:1.375rem;height:1.375rem;filter:none;object-fit:contain}

@@ -59,7 +59,7 @@ const serviceAction = (service) => {
     <div class="google-connect-brand">
       <img src="/img/snbd-logo.png" alt="" width="136" height="34" decoding="async">
       <span class="google-connect-plus">+</span>
-      <span class="google-connect-mark">G</span>
+      <span class="google-connect-mark"><img src="/img/google-g.png" alt="" width="22" height="22" decoding="async"></span>
     </div>
     <span class="google-connect-orbit google-connect-orbit-one"></span>
     <span class="google-connect-orbit google-connect-orbit-two"></span>
@@ -69,12 +69,12 @@ const serviceAction = (service) => {
     <p><%= t('google.connectPromptBody') %></p>
     <div class="google-connect-tools" aria-label="<%= t('google.connectPromptTools') %>">
       <a class="google-tool-action" data-google-tool="searchconsole" href="<%= googleConnected.searchconsole ? '/google/tools' : '/google/connect/searchconsole' %>">
-        <span class="google-tool-icon"><%- icon('search') %></span>
+        <span class="google-tool-icon"><img src="/img/google-search-console.png" alt="" width="24" height="24" decoding="async"></span>
         <span class="google-tool-copy"><strong><%= t('gt.searchconsole') %></strong><small data-google-tool-state><%= googleConnected.searchconsole ? t('google.connected') : t('google.connect') %></small></span>
         <%- icon('arrow', 'google-tool-arrow') %>
       </a>
       <a class="google-tool-action" data-google-tool="analytics" href="<%= googleConnected.analytics ? '/google/tools' : '/google/connect/analytics' %>">
-        <span class="google-tool-icon"><%- icon('activity') %></span>
+        <span class="google-tool-icon"><img src="/img/google-analytics.png" alt="" width="20" height="24" decoding="async"></span>
         <span class="google-tool-copy"><strong><%= t('gt.analytics') %></strong><small data-google-tool-state><%= googleConnected.analytics ? t('google.connected') : t('google.connect') %></small></span>
         <%- icon('arrow', 'google-tool-arrow') %>
       </a>
@@ -93,7 +93,7 @@ const serviceAction = (service) => {
     <header class="dx-card-head dx-perf-head">
       <div>
         <h2 id="scSectionTitle"><%= t('sc.performanceOverTime') %></h2>
-        <p class="dx-perf-sub"><%= t('gt.searchconsole') %></p>
+        <p class="dx-perf-sub"><img src="/img/google-search-console.png" alt="" width="16" height="16" decoding="async"><%= t('gt.searchconsole') %></p>
       </div>
       <select class="dx-select" id="scRange" aria-label="<%= t('sc.dateRange') %>">
         <option value="1"><%= t('sc.range1') %></option>

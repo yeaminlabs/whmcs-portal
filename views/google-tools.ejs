@@ -2,8 +2,8 @@
 <link rel="stylesheet" href="/css/google-tools.css">
 <%
 const tools = [
-  { key: 'searchconsole', name: t('gt.searchconsole'), icon: 'search', desc: t('gt.searchconsoleDesc') },
-  { key: 'analytics', name: t('gt.analytics'), icon: 'activity', desc: t('gt.analyticsDesc') },
+  { key: 'searchconsole', name: t('gt.searchconsole'), img: '/img/google-search-console.png', desc: t('gt.searchconsoleDesc') },
+  { key: 'analytics', name: t('gt.analytics'), img: '/img/google-analytics.png', desc: t('gt.analyticsDesc') },
 ];
 const doneCount = tools.filter((tl) => connected.includes(tl.key)).length;
 %>
@@ -18,7 +18,7 @@ const doneCount = tools.filter((tl) => connected.includes(tl.key)).length;
 <ul class="gc-list" aria-labelledby="gt-title">
   <% tools.forEach((tl, i) => { const on = connected.includes(tl.key); %>
   <li class="gc-row<%= on ? ' is-on' : '' %>" style="--i:<%= i %>">
-    <span class="gc-ico" aria-hidden="true"><%- icon(tl.icon) %></span>
+    <span class="gc-ico" aria-hidden="true"><img src="<%= tl.img %>" alt="" width="26" height="26" decoding="async"></span>
     <div class="gc-main">
       <b><%= tl.name %></b>
       <small><%= tl.desc %></small>
