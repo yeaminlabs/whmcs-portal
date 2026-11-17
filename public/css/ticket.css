@@ -1,0 +1,46 @@
+/* Ticket thread — customer vs operator, calm hibiscus/porcelain look */
+.tk-head{position:relative;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin:.25rem 0 1.25rem;padding:1.25rem 1.5rem;background:#FFFFFF;border:1px solid #E1DAD4;border-radius:16px;box-shadow:0 1px 2px rgba(48,41,46,.04);overflow:hidden;animation:tkUp .45s cubic-bezier(.2,.8,.2,1) both}
+.tk-head::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,#E1DAD4 0,#E1DAD4 88%,#BE3045 100%)}
+.tk-head-main{min-width:0}
+.tk-id{display:inline-flex;align-items:center;gap:.4rem;color:#685F65;font-size:.75rem;font-weight:600;letter-spacing:.04em}
+.tk-id .ico{width:.9rem;height:.9rem;color:#BE3045}
+.tk-head h1{margin:.35rem 0 .75rem;color:#30292E;font-size:1.625rem;font-weight:800;letter-spacing:-.02em;line-height:1.25;overflow-wrap:anywhere}
+.tk-meta{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}
+.tk-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.2rem .65rem;border-radius:999px;background:#F8F6F2;border:1px solid #E1DAD4;color:#685F65;font-size:.75rem;font-weight:600}
+.tk-chip .ico{width:.85rem;height:.85rem}
+.tk-chip-staff{background:#EEF4F2;border-color:#CFE0DB;color:#42736B}
+.tk-close{flex:none}
+
+.tk-thread{list-style:none;margin:0 0 1.25rem;padding:0;display:grid;gap:1rem}
+.tk-msg{display:flex;align-items:flex-end;gap:.75rem;max-width:100%;animation:tkUp .45s calc(.08s + var(--i) * .06s) cubic-bezier(.2,.8,.2,1) both}
+.tk-msg.is-you{flex-direction:row-reverse;margin-left:clamp(0rem,12vw,8rem)}
+.tk-msg.is-staff{margin-right:clamp(0rem,12vw,8rem)}
+.tk-avatar{display:grid;place-items:center;flex:none;width:2.5rem;height:2.5rem;border-radius:50%;font-size:.8125rem;font-weight:700}
+.tk-avatar .ico{width:1.15rem;height:1.15rem}
+.is-you .tk-avatar{background:#BE3045;color:#FFFFFF}
+.is-staff .tk-avatar{background:#42736B;color:#FFFFFF;box-shadow:0 0 0 4px #EEF4F2}
+.tk-bubble{min-width:0;flex:0 1 auto;max-width:44rem;padding:.875rem 1.125rem 1rem;border-radius:16px;border:1px solid #E1DAD4}
+.is-you .tk-bubble{background:#FBEDEE;border-color:#F0D5D9;border-bottom-right-radius:4px}
+.is-staff .tk-bubble{background:#FFFFFF;border-left:4px solid #42736B;border-bottom-left-radius:4px;box-shadow:0 8px 20px -16px rgba(48,41,46,.45)}
+.tk-by{display:flex;flex-wrap:wrap;align-items:center;gap:.25rem .6rem;margin-bottom:.4rem}
+.tk-by b{color:#30292E;font-size:.875rem}
+.tk-role{padding:.05rem .5rem;border-radius:999px;font-size:.6875rem;font-weight:700;letter-spacing:.02em}
+.is-you .tk-role{background:#FFFFFF;color:#A1263A;border:1px solid #F0D5D9}
+.is-staff .tk-role{background:#EEF4F2;color:#42736B;border:1px solid #CFE0DB}
+.tk-by time{color:#685F65;font-size:.75rem;margin-left:auto}
+.tk-body{color:#30292E;font-size:.9375rem;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.tk-body a{color:#BE3045;text-decoration:underline;text-underline-offset:2px}
+.tk-body a:hover{color:#A1263A}
+
+.tk-reply{display:grid;gap:.625rem;padding:1.125rem 1.25rem 1.25rem;background:#FFFFFF;border:1px solid #E1DAD4;border-radius:16px;box-shadow:0 1px 2px rgba(48,41,46,.04)}
+.tk-reply label{color:#30292E;font-size:.875rem;font-weight:700}
+.tk-reply textarea{width:100%;min-height:7rem;padding:.75rem .875rem;background:#F8F6F2;border:1px solid #E1DAD4;border-radius:12px;color:#30292E;font:inherit;line-height:1.55;resize:vertical}
+.tk-reply textarea:focus{background:#FFFFFF;border-color:#BE3045;box-shadow:0 0 0 4px rgba(190,48,69,.14);outline:none}
+.tk-reply-foot{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.tk-reply-foot small{color:#685F65;font-size:.75rem}
+.tk-reply-foot .btn .ico{width:1rem;height:1rem}
+.tk-closed{display:flex;align-items:center;gap:.6rem;margin:0;padding:.875rem 1.125rem;background:#E8F3EE;border:1px solid #BFE0CF;border-radius:12px;color:#26704E;font-size:.875rem}
+.tk-closed .ico{width:1.1rem;height:1.1rem}
+@keyframes tkUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media(max-width:700px){.tk-head{flex-direction:column;padding:1rem}.tk-head h1{font-size:1.375rem}.tk-msg.is-you,.tk-msg.is-staff{margin-inline:0}.tk-avatar{width:2rem;height:2rem}.tk-by time{margin-left:0}}
+@media(prefers-reduced-motion:reduce){.tk-head,.tk-msg{animation:none}}

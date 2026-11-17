@@ -1,14 +1,54 @@
 <%- include('_head') %>
+<link rel="stylesheet" href="/css/ticket.css">
+<%
+const esc = (v) => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const linkify = (v) => esc(v).replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"])/g, (u) => '<a href="' + u + '" target="_blank" rel="noopener noreferrer nofollow">' + u + '</a>');
+const isStaff = (r) => Boolean(r.admin) || /operator|staff|admin/i.test(String(r.requestor_type || '')) || (r.userid !== undefined && r.userid !== '' && Number(r.userid) === 0 && !Number(r.contactid));
+const initials = (n) => String(n || '?').trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '?';
+const staffCount = replies.filter(isStaff).length;
+const isClosed = ticket.status === 'Closed';
+%>
 <nav class="crumbs" aria-label="Breadcrumb"><a href="/tickets"><%= t('nav.tickets') %></a><%- icon('chev') %><span>#<%= ticket.tid || ticket.ticketid %></span></nav>
-<div class="pagehead"><div><h1><%= ticket.subject %></h1><p class="sub"><span class="pill <%= String(ticket.status).replace(/\s+/g, '-') %>"><%= st(ticket.status) %></span></p></div>
-  <% if (ticket.status !== 'Closed') { %><form method="post" action="/tickets/<%= ticket.ticketid %>/close"><button type="submit" class="btn ghost"><%= t('tix.close') %></button></form><% } %></div>
-<div class="thread">
-  <% replies.forEach(r => { %><div class="msg<%= r.admin ? ' staff' : '' %>"><b><%= r.admin || r.name || t('tix.you') %></b><time><%= fmtDate(r.date) %></time><p><%= r.message %></p></div><% }) %>
-</div>
-<% if (ticket.status !== 'Closed') { %>
-<form method="post" action="/tickets/<%= ticket.ticketid %>/reply" class="card">
-  <label><%= t('tix.reply') %><textarea name="message" required rows="5"></textarea></label>
-  <button type="submit" class="btn red"><%= t('tix.send') %></button>
+
+<header class="tk-head">
+  <div class="tk-head-main">
+    <span class="tk-id"><%- icon('mail') %>#<%= ticket.tid || ticket.ticketid %></span>
+    <h1><%= ticket.subject %></h1>
+    <div class="tk-meta">
+      <span class="pill <%= String(ticket.status).replace(/\s+/g, '-') %>"><%= st(ticket.status) %></span>
+      <span class="tk-chip"><%- icon('chat') %><%= replies.length %> <%= replies.length === 1 ? t('tix.message') : t('tix.messages') %></span>
+      <span class="tk-chip tk-chip-staff"><%- icon('headset') %><%= staffCount %> <%= t('tix.operatorReplies') %></span>
+    </div>
+  </div>
+  <% if (!isClosed) { %><form method="post" action="/tickets/<%= ticket.ticketid %>/close" class="tk-close"><button type="submit" class="btn ghost"><%= t('tix.close') %></button></form><% } %>
+</header>
+
+<ol class="tk-thread" aria-label="<%= t('tix.conversation') %>">
+  <% replies.forEach((r, i) => { const staff = isStaff(r); const who = staff ? (r.admin || r.requestor_name || r.name || t('tix.operator')) : (r.name || session.clientName || t('tix.you')); %>
+  <li class="tk-msg <%= staff ? 'is-staff' : 'is-you' %>" style="--i:<%= Math.min(i, 8) %>">
+    <span class="tk-avatar" aria-hidden="true"><%= staff ? '' : initials(who) %><% if (staff) { %><%- icon('headset') %><% } %></span>
+    <div class="tk-bubble">
+      <div class="tk-by">
+        <b><%= who %></b>
+        <span class="tk-role"><%= staff ? t('tix.operator') : t('tix.you') %></span>
+        <time datetime="<%= r.date %>"><%= fmtDate(r.date) %></time>
+      </div>
+      <div class="tk-body"><%- linkify(r.message) %></div>
+    </div>
+  </li>
+  <% }) %>
+</ol>
+
+<% if (!isClosed) { %>
+<form method="post" action="/tickets/<%= ticket.ticketid %>/reply" class="tk-reply">
+  <label for="tkReply"><%= t('tix.reply') %></label>
+  <textarea id="tkReply" name="message" required rows="4" placeholder="<%= t('tix.replyPlaceholder') %>"></textarea>
+  <div class="tk-reply-foot">
+    <small><%= t('tix.replyHint') %></small>
+    <button type="submit" class="btn red"><%- icon('arrow') %><%= t('tix.send') %></button>
+  </div>
 </form>
+<% } else { %>
+<p class="tk-closed"><%- icon('check') %><%= t('tix.closedNote') %></p>
 <% } %>
 <%- include('_foot') %>

@@ -101,7 +101,7 @@ const handlers = {
     return ok({ totalresults: 1, tickets: { ticket: [{ id: 401, tid: 'ABC-123', deptid: 1, subject: 'Welcome — how to use the portal', status: 'Open', priority: 'Medium', lastreply: '2026-11-09 10:00:00' }] } });
   },
   async GetSupportTicket() {
-    return ok({ ticketid: 401, userid: 1, tid: 'ABC-123', subject: 'Welcome — how to use the portal', status: 'Open', replies: { reply: [{ admin: 'Jane (Staff)', message: 'Hi! Reply here to test ticket threads.', date: '2026-11-09 10:00:00' }] } });
+    return ok({ ticketid: 401, userid: 1, tid: 'ABC-123', subject: 'Welcome — how to use the portal', status: 'Open', replies: { reply: [{ name: 'Demo User', requestor_type: 'Owner', message: 'Hi there, we are testing new modules.\nSee https://snbdhost.com for details.', date: '2026-11-09 09:40:00' }, { admin: '', requestor_type: 'Operator', name: 'Jane Rahman', message: 'Hi! Thanks for testing.\nReply here to test ticket threads.', date: '2026-11-09 10:00:00' }] } });
   },
   async OpenTicket(params) {
     return ok({ id: 402, tid: 'XYZ-999', subject: params.subject || 'New ticket' });
