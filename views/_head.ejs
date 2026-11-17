@@ -1,28 +1,28 @@
 <%
 const ti = (typeof title === 'string' ? title : '');
 const tl = ti.toLowerCase();
-const HOME = { href: '/dashboard', icon: 'layout', text: t('nav.dashboard'), on: ti === 'Dashboard' };
+const HOME = { href: '/dashboard', icon: 'home', text: t('nav.dashboard'), on: ti === 'Dashboard' };
 const NAV = [
-  { id: 'manage', icon: 'server', label: t('nav.groupManage'), items: [
+  { id: 'manage', icon: 'folder', label: t('nav.groupManage'), items: [
     { href: '/services', icon: 'server', text: t('nav.services'), on: ti === 'My Services' || tl.startsWith('service') },
     { href: '/domains', icon: 'globe', text: t('nav.domains'), on: ti === 'My Domains' || (tl.startsWith('domain') && ti !== 'Order Domain') },
     { href: '/invoices', icon: 'receipt', text: t('nav.invoices'), on: tl.includes('invoice') },
     { href: '/quotes', icon: 'quote', text: t('nav.quotes'), on: ti === 'Quotes' },
     { href: '/funds', icon: 'wallet', text: t('nav.funds'), on: ti === 'Add Funds' },
   ]},
-  { id: 'order', icon: 'cart', label: t('nav.groupOrder'), items: [
+  { id: 'order', icon: 'bolt', label: t('nav.groupOrder'), items: [
     { href: '/store', icon: 'cart', text: t('nav.order'), on: ti === 'Order Services' || ti === 'Order Complete' },
     { href: '/order/domain', icon: 'search', text: t('nav.registerDomain'), on: ti === 'Order Domain' },
   ]},
   { id: 'support', icon: 'life', label: t('nav.groupSupport'), items: [
-    { href: '/tickets', icon: 'life', text: t('nav.tickets'), on: tl.includes('ticket') },
+    { href: '/tickets', icon: 'mail', text: t('nav.tickets'), on: tl.includes('ticket') },
     { href: '/kb', icon: 'book', text: t('nav.help'), on: ti === 'Help Center' },
     { href: '/announcements', icon: 'bell', text: t('nav.announcements'), on: ti === 'Announcements' },
     { href: '/status', icon: 'activity', text: t('nav.status'), on: ti === 'Network Status' },
     { href: '/downloads', icon: 'download', text: t('nav.downloads'), on: ti === 'Downloads' },
     { href: '/contact', icon: 'chat', text: t('nav.contact'), on: ti === 'Contact' },
   ]},
-  { id: 'account', icon: 'user', label: t('nav.groupAccount'), items: [
+  { id: 'account', icon: 'lock', label: t('nav.groupAccount'), items: [
     { href: '/profile', icon: 'user', text: t('nav.profile'), on: ti === 'Profile' },
     { href: '/contacts', icon: 'users', text: t('nav.contacts'), on: ti === 'Contacts' },
     { href: '/security', icon: 'shield', text: t('nav.security'), on: ti === 'Security' },
@@ -108,7 +108,7 @@ const avatar = (size) => `<span class="avatar" style="--av:${size}px" aria-hidde
     </nav>
     <div class="side-foot">
       <a class="side-help" href="/tickets/new" title="<%= t('dash.needHelp') %>">
-        <span class="side-help-ico"><%- icon('chat') %></span>
+        <span class="side-help-ico"><%- icon('headset') %></span>
         <span><strong><%= t('dash.needHelp') %></strong><small><%= t('side.helpText') %></small></span>
       </a>
       <% if (mock) { %><span class="badge"><%= t('top.demo') %></span><% } %>
