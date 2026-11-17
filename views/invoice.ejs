@@ -1,27 +1,49 @@
 <%- include('_head') %>
 <% const cc = invoice.currencycode; const amt = (v) => price(v, cc); const balance = Number(invoice.balance) || 0; const billedBal = billedAs(balance, cc); %>
+<link rel="stylesheet" href="/css/invoice.css">
 <nav class="crumbs" aria-label="Breadcrumb"><a href="/invoices"><%= t('nav.invoices') %></a><%- icon('chev') %><span>#<%= invoice.invoicenum || invoice.invoiceid %></span></nav>
-<div class="pagehead">
-  <div><h1><%= t('inv.heading', { n: invoice.invoicenum || invoice.invoiceid }) %></h1>
-    <p class="sub"><span class="pill <%= invoice.status %>"><%= st(invoice.status) %></span> · <%= t('inv.issuedOn', { date: fmtDate(invoice.date) }) %> · <%= t('inv.dueOn', { date: fmtDate(invoice.duedate) }) %></p></div>
-  <% if (invoice.status === 'Unpaid') { %><a class="btn red" href="/invoices/<%= invoice.invoiceid %>/pay"><%= t('dash.pay', { amount: amt(balance) }) %></a><% } %>
-</div>
+<% const isOpen = ['Unpaid','Overdue'].includes(invoice.status); const isPaid = invoice.status === 'Paid'; %>
+<section class="inv-hero <%= isPaid ? 'is-paid' : isOpen ? 'is-open' : '' %>">
+  <span class="inv-glow" aria-hidden="true"></span>
+  <div class="inv-hero-main">
+    <span class="inv-eyebrow"><span class="inv-chip"><%- icon('receipt') %></span><%= t('nav.invoices') %></span>
+    <h1><%= t('inv.heading', { n: invoice.invoicenum || invoice.invoiceid }) %></h1>
+    <div class="inv-meta">
+      <span class="inv-status <%= invoice.status %>"><i></i><%= st(invoice.status) %></span>
+      <span class="inv-date"><small><%= t('col.issued') %></small><b><%= fmtDate(invoice.date) %></b></span>
+      <span class="inv-date"><small><%= t('col.due') %></small><b><%= fmtDate(invoice.duedate) %></b></span>
+    </div>
+  </div>
+  <div class="inv-hero-side">
+    <small><%= t('pay.balance') %></small>
+    <strong><%= amt(balance) %></strong>
+    <% if (isOpen) { %><a class="inv-pay" href="/invoices/<%= invoice.invoiceid %>/pay"><%= t('dash.pay', { amount: amt(balance) }) %><%- icon('arrow') %></a>
+    <% } else if (isPaid) { %><span class="inv-paid-badge"><%- icon('check') %><%= st('Paid') %></span><% } %>
+    <button type="button" class="inv-print" onclick="window.print()"><%- icon('download') %><span>Print</span></button>
+  </div>
+</section>
 <% if (notice === 'credit') { %><p class="alert ok" role="status"><%= t(balance > 0 ? 'inv.creditPartial' : 'inv.creditPaid') %></p><% } %>
 <% if (notice === 'card' || notice === 'bkash') { %><p class="alert ok" role="status"><%= t('inv.paidOk') %></p><% } %>
 <% if (notice === 'processing') { %><p class="alert" role="status"><%= t('inv.processing') %></p><% } %>
 <% if (notice === 'check') { %><p class="alert err" role="alert"><%= t('inv.checkPayment') %></p><% } %>
-<div class="panel"><div class="pad"><table>
-  <thead><tr><th><%= t('inv.description') %></th><th class="num"><%= t('col.amount') %></th></tr></thead>
-  <tbody>
-    <% items.forEach(it => { %><tr><td><%= it.description %></td><td class="num"><%= amt(it.amount) %></td></tr><% }) %>
-  </tbody>
-  <tfoot>
-    <tr><td><%= t('pay.subtotal') %></td><td class="num"><%= amt(invoice.subtotal) %></td></tr>
-    <% if (Number(invoice.tax) > 0) { %><tr><td><%= t('pay.tax') %></td><td class="num"><%= amt(invoice.tax) %></td></tr><% } %>
-    <% if (Number(invoice.credit) > 0) { %><tr><td><%= t('pay.creditApplied') %></td><td class="num">−<%= amt(invoice.credit) %></td></tr><% } %>
-    <tr class="tot"><td><%= t('col.total') %></td><td class="num"><%= amt(invoice.total) %></td></tr>
-    <tr class="tot"><td><%= t('pay.balance') %></td><td class="num"><%= amt(balance) %></td></tr>
-    <% if (billedBal) { %><tr><td colspan="2" class="cur-note"><%= t('cur.invoiceNote', { code: displayCurrency.code, billed: billedBal }) %></td></tr><% } %>
-  </tfoot>
-</table></div></div>
+<div class="inv-layout">
+  <article class="inv-sheet">
+    <header class="inv-sheet-head"><h2><%= t('inv.description') %></h2><span><%= items.length %> <%= items.length === 1 ? 'item' : 'items' %></span></header>
+    <ul class="inv-items">
+      <% items.forEach((it, idx) => { %><li style="--i:<%= idx %>"><span class="inv-item-ico"><%- icon('server') %></span><span class="inv-item-desc"><%= it.description %></span><strong><%= amt(it.amount) %></strong></li><% }) %>
+    </ul>
+  </article>
+  <aside class="inv-summary">
+    <h2>Summary</h2>
+    <dl>
+      <div><dt><%= t('pay.subtotal') %></dt><dd><%= amt(invoice.subtotal) %></dd></div>
+      <% if (Number(invoice.tax) > 0) { %><div><dt><%= t('pay.tax') %></dt><dd><%= amt(invoice.tax) %></dd></div><% } %>
+      <% if (Number(invoice.credit) > 0) { %><div><dt><%= t('pay.creditApplied') %></dt><dd class="neg">−<%= amt(invoice.credit) %></dd></div><% } %>
+      <div class="sum-total"><dt><%= t('col.total') %></dt><dd><%= amt(invoice.total) %></dd></div>
+    </dl>
+    <div class="sum-due <%= isOpen ? 'open' : '' %>"><span><%= t('pay.balance') %></span><strong><%= amt(balance) %></strong></div>
+    <% if (billedBal) { %><p class="cur-note"><%= t('cur.invoiceNote', { code: displayCurrency.code, billed: billedBal }) %></p><% } %>
+    <% if (isOpen) { %><a class="inv-pay block" href="/invoices/<%= invoice.invoiceid %>/pay"><%= t('dash.pay', { amount: amt(balance) }) %><%- icon('arrow') %></a><% } %>
+  </aside>
+</div>
 <%- include('_foot') %>

@@ -578,7 +578,7 @@ body.lang-bn h1,body.lang-bn h2{letter-spacing:0}
 .snav-inner .snav-link{opacity:0;transform:translateX(-6px)}
 .snav-group[data-open="true"] .snav-inner .snav-link{opacity:1;transform:none;transition:background .15s,color .15s,opacity .3s var(--ease) calc(var(--i) * 35ms + 60ms),transform .3s var(--ease) calc(var(--i) * 35ms + 60ms)}
 .snav-inner .snav-link:hover{background:#fff}
-.snav-inner .snav-link.active{background:#fff;box-shadow:0 1px 2px rgba(16,24,40,.06)}
+.snav-inner .snav-link.active{background:var(--red);color:#fff;box-shadow:0 6px 14px -6px rgba(208,2,27,.45)}
 .side-foot{margin-top:auto;display:grid;gap:10px;padding-top:10px}
 .side-help{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:12px;background:var(--g50);border:1px solid var(--line);color:var(--g700);transition:border-color .2s,background .2s}
 .side-help:hover{border-color:var(--red-200);background:#fff;color:var(--ink)}

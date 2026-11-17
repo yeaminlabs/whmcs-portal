@@ -1,0 +1,60 @@
+/* Invoice pages: SNBD red / black / white */
+.inv-hero{position:relative;overflow:hidden;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1.5rem;align-items:center;padding:1.75rem 2rem;margin:.5rem 0 1.25rem;border-radius:20px;color:#fff;background:linear-gradient(135deg,#0b0b0b 0,#171717 62%,#2a050b 100%);border:1px solid #222;animation:invUp .55s cubic-bezier(.2,.8,.2,1) both}
+.inv-glow{position:absolute;z-index:-1;width:20rem;height:20rem;right:-6rem;top:-9rem;border-radius:50%;background:rgba(208,2,27,.5);filter:blur(60px);animation:invFloat 9s ease-in-out infinite}
+.inv-hero.is-paid .inv-glow{background:rgba(255,255,255,.14)}
+.inv-eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:#bbb}
+.inv-chip{display:grid;place-items:center;width:1.75rem;height:1.75rem;border-radius:9px;background:rgba(208,2,27,.25);color:#ff5568}
+.inv-chip svg{width:.9rem;height:.9rem}
+.inv-hero h1{margin:.5rem 0 .875rem;font-size:2.25rem;font-weight:800;letter-spacing:-.02em;color:#fff}
+.inv-meta{display:flex;flex-wrap:wrap;align-items:center;gap:.75rem 1.25rem}
+.inv-status{display:inline-flex;align-items:center;gap:.5rem;padding:.3rem .8rem;border-radius:999px;font-size:.8125rem;font-weight:700;background:rgba(208,2,27,.2);border:1px solid rgba(208,2,27,.6);color:#ff8794}
+.inv-status i{width:.5rem;height:.5rem;border-radius:50%;background:#ff3b4e;animation:invPulse 2s infinite}
+.inv-status.Paid{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4);color:#fff}
+.inv-status.Paid i{background:#fff;animation:none}
+.inv-status.Cancelled,.inv-status.Refunded,.inv-status.Draft{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.2);color:#bbb}
+.inv-date{display:grid;line-height:1.25}
+.inv-date small{color:#9a9a9a;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em}
+.inv-date b{font-weight:600;color:#fff}
+.inv-hero-side{display:grid;gap:.5rem;justify-items:end;text-align:right}
+.inv-hero-side small{color:#9a9a9a;text-transform:uppercase;letter-spacing:.08em;font-size:.6875rem}
+.inv-hero-side strong{font-size:2.5rem;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+.inv-pay{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem 1.375rem;border-radius:999px;background:#d0021b;color:#fff;font-weight:700;text-decoration:none;box-shadow:0 10px 26px -8px rgba(208,2,27,.85);transition:transform .2s,box-shadow .2s,background .2s}
+.inv-pay svg{width:1rem;height:1rem;transition:transform .2s}
+.inv-pay:hover{background:#e0152d;transform:translateY(-2px);box-shadow:0 16px 30px -8px rgba(208,2,27,.95)}
+.inv-pay:hover svg{transform:translateX(4px)}
+.inv-pay.block{display:flex;width:100%;margin-top:1rem}
+.inv-paid-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1rem;border-radius:999px;background:#fff;color:#111;font-weight:700}
+.inv-paid-badge svg{width:1rem;height:1rem;color:#d0021b}
+.inv-print{display:inline-flex;align-items:center;gap:.375rem;background:none;border:0;color:#bbb;font-size:.75rem;cursor:pointer;padding:.25rem 0}
+.inv-print svg{width:.875rem;height:.875rem}
+.inv-print:hover{color:#fff}
+.inv-layout{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(16rem,1fr);gap:1.25rem;align-items:start}
+.inv-sheet,.inv-summary{position:relative;background:#fff;border:1px solid #e6e6e6;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04),0 12px 28px -18px rgba(0,0,0,.3);animation:invUp .6s .1s cubic-bezier(.2,.8,.2,1) both}
+.inv-sheet::before,.inv-summary::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,#d0021b,#111)}
+.inv-sheet-head{display:flex;justify-content:space-between;align-items:center;padding:1.125rem 1.5rem;border-bottom:1px solid #eee}
+.inv-sheet-head h2,.inv-summary h2{margin:0;font-size:.9375rem;font-weight:700;color:#111}
+.inv-sheet-head span{font-size:.75rem;color:#fff;background:#111;padding:.125rem .625rem;border-radius:999px}
+.inv-items{list-style:none;margin:0;padding:.5rem}
+.inv-items li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.875rem;align-items:center;padding:.875rem 1rem;border-radius:12px;transition:background .2s,transform .2s;animation:invUp .5s calc(.15s + var(--i)*.06s) both}
+.inv-items li:hover{background:#fff1f2;transform:translateX(3px)}
+.inv-item-ico{display:grid;place-items:center;width:2.25rem;height:2.25rem;border-radius:10px;background:#111;color:#fff}
+.inv-item-ico svg{width:1rem;height:1rem}
+.inv-item-desc{color:#111;font-weight:500;overflow-wrap:anywhere}
+.inv-items strong{font-variant-numeric:tabular-nums;color:#111}
+.inv-summary{padding:1.25rem 1.5rem 1.5rem;position:sticky;top:1rem}
+.inv-summary h2{margin-bottom:.75rem;padding-top:.25rem}
+.inv-summary dl{margin:0}
+.inv-summary dl>div{display:flex;justify-content:space-between;padding:.625rem 0;border-bottom:1px dashed #e4e4e4;font-size:.875rem;color:#555}
+.inv-summary dd{margin:0;color:#111;font-variant-numeric:tabular-nums}
+.inv-summary dd.neg{color:#d0021b}
+.inv-summary .sum-total{border-bottom:0;font-weight:700;color:#111}
+.sum-due{display:flex;justify-content:space-between;align-items:center;padding:.875rem 1rem;border-radius:12px;background:#111;color:#fff}
+.sum-due strong{font-size:1.25rem;font-variant-numeric:tabular-nums}
+.sum-due.open{background:linear-gradient(135deg,#d0021b,#8f0212)}
+.inv-summary .cur-note{font-size:.75rem;color:#777;margin:.75rem 0 0}
+@keyframes invUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes invFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(-24px,18px)}}
+@keyframes invPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,59,78,.55)}50%{box-shadow:0 0 0 6px rgba(255,59,78,0)}}
+@media(max-width:900px){.inv-hero{grid-template-columns:1fr;padding:1.25rem}.inv-hero-side{justify-items:start;text-align:left}.inv-layout{grid-template-columns:1fr}.inv-summary{position:static}.inv-hero h1{font-size:1.75rem}}
+@media(prefers-reduced-motion:reduce){.inv-hero,.inv-sheet,.inv-summary,.inv-items li,.inv-glow,.inv-status i{animation:none}}
+@media print{.inv-hero{background:#fff;color:#000;border:1px solid #000}.inv-hero *{color:#000!important}.inv-glow,.inv-pay,.inv-print{display:none}.inv-layout{grid-template-columns:1fr}}
