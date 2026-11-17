@@ -174,11 +174,15 @@ router.get(['/', '/dashboard'], async (req, res) => {
       ticketsAllowed ? whmcs.call('GetSupportTickets', { clientid: cid }).catch(() => null) : null,
       n8nStartingPlan(res.locals.displayCurrency && res.locals.displayCurrency.code),
     ]);
+    const serviceRows = listOf(products, 'products');
+    const reportedServiceTotal = Number(products && products.totalresults);
+    const serviceTotal = reportedServiceTotal > 0 ? reportedServiceTotal : serviceRows.length;
     res.render('dashboard', {
       title: 'Dashboard',
       customer: (details && details.client) || { fullname: req.session.clientName, email: req.session.clientEmail },
       stats: (details && details.stats) || {},
-      services: listOf(products, 'products').slice(0, 5),
+      services: serviceRows.slice(0, 5),
+      serviceTotal,
       domains: listOf(domains, 'domains').slice(0, 5),
       invoices: listOf(invoices, 'invoices').slice(0, 5),
       tickets: listOf(tickets, 'tickets').slice(0, 5),

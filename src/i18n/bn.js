@@ -110,6 +110,8 @@ module.exports = {
   'dash.overdueMany': '{n}টি সার্ভিসের পেমেন্ট বাকি পড়েছে',
   'dash.overdueHint': 'বকেয়া সার্ভিস সাসপেন্ড হতে পারে। ডাউনটাইম এড়াতে ইনভয়েস পরিশোধ করুন।',
   'dash.yourServices': 'আপনার সার্ভিস',
+  'dash.viewOrder': 'অর্ডার দেখুন',
+  'dash.manageHosting': 'হোস্টিং পরিচালনা করুন',
   'dash.recentInvoices': 'সাম্প্রতিক ইনভয়েস',
   'dash.yourDomains': 'আপনার ডোমেইন',
   'dash.noServices': 'এখনও কোনো সার্ভিস নেই।',

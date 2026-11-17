@@ -6,6 +6,7 @@ const numTickets = Number(stats.numactivetickets != null ? stats.numactiveticket
 const numDue = Number(stats.numdueinvoices) || 0;
 const dueBalance = Number(String(stats.dueinvoicesbalance || '0').replace(/[^0-9.-]/g, '')) || 0;
 const overdueServices = Number(stats.numoverdueservices) || 0;
+const serviceCount = Number(serviceTotal != null ? serviceTotal : services.length) || services.length;
 const unpaid = invoices.find(i => ['Unpaid', 'Overdue'].includes(i.status));
 const credit = Number(customer.credit) || 0;
 const todayStart = new Date(new Date().toDateString());
@@ -26,6 +27,13 @@ const invOtherPct = pct(invOtherN, invoices.length);
 const googleConnected = {
   analytics: Array.isArray(gtools) && gtools.includes('analytics'),
   searchconsole: Array.isArray(gtools) && gtools.includes('searchconsole'),
+};
+const serviceAction = (service) => {
+  const status = String(service.status || '').toLowerCase();
+  return {
+    href: service.id ? `/services/${service.id}` : '/services',
+    label: status === 'pending' ? t('dash.viewOrder') : t('dash.manageHosting'),
+  };
 };
 %>
 
@@ -241,45 +249,91 @@ const googleConnected = {
   </section>
 </div>
 
-<!-- 4 · Services (left) + domain finder (right) -->
+<!-- 4 · Services + ranking keywords (left) and domain promotions (right) -->
 <div class="dx-row dx-row-low">
-  <section class="dx-card" id="servicesSection" aria-labelledby="svcTitle">
-    <header class="dx-card-head">
-      <h2 id="svcTitle" tabindex="-1"><%= t('dash.yourServices') %> <span class="count-badge" id="servicesBadge"><%= numServices %></span></h2>
-      <a class="dx-link" href="/services"><%= t('common.viewAll') %> <%- icon('arrow') %></a>
-    </header>
-    <div class="dx-table-wrap">
-      <table class="dx-table">
-        <caption class="sr-only"><%= t('dash.activeServices') %></caption>
+  <div class="dx-low-main">
+    <section class="dx-card services-card" id="servicesSection" aria-labelledby="svcTitle">
+      <header class="dx-card-head">
+        <h2 id="svcTitle" tabindex="-1"><%= t('dash.yourServices') %> <span class="count-badge" id="servicesBadge"><%= serviceCount %></span></h2>
+        <% if (serviceCount > services.length) { %>
+          <a class="dx-link" href="/services"><%= t('common.viewAll') %> <%- icon('arrow') %></a>
+        <% } %>
+      </header>
+      <% if (!services.length) { %>
+        <div class="dx-empty service-empty"><svg class="dx-art-sm" viewBox="0 0 120 90" aria-hidden="true" fill="none" stroke-linejoin="round"><path d="M20 20h80v22H20zM20 48h80v22H20z"/><path d="M30 31h10M30 59h10" class="r"/><circle cx="88" cy="31" r="2.5" class="rf"/><circle cx="88" cy="59" r="2.5" class="rf"/></svg><br><%= t('dash.noServices') %> <a href="/store"><%= t('dash.orderFirst') %></a></div>
+      <% } else if (serviceCount <= 2) { %>
+        <div class="service-compact-list" id="serviceRows" data-service-count="<%= serviceCount %>">
+          <% services.slice(0, 2).forEach(s => { const statusKey = String(s.status || '').toLowerCase(); const isActive = statusKey === 'active'; const statusClass = isActive ? 'ok' : statusKey === 'pending' ? 'due' : 'bad'; const action = serviceAction(s); %>
+            <article class="service-compact-row<%= serviceCount === 1 ? ' is-single' : '' %>">
+              <div class="service-compact-identity">
+                <span class="service-glyph <%= isActive ? 'coral' : 'blue' %>"><%- icon('server') %></span>
+                <span><strong><%= s.name || s.groupname || t('col.service') %></strong><small><%= s.domain || t('dash.noDomain') %></small></span>
+              </div>
+              <div class="service-compact-details">
+                <span class="dx-pill <%= statusClass %>"><%- icon(isActive ? 'check' : 'alert') %><%= st(s.status) %></span>
+                <span class="service-compact-field"><small><%= t('col.renews') %></small><strong><%= fmtDate(s.nextduedate) %></strong></span>
+                <span class="service-compact-field service-compact-price"><small><%= t('col.price') %></small><strong><%= money(s.recurringamount || s.amount) %><small class="dx-per">/mo</small></strong></span>
+              </div>
+              <a class="service-compact-action" href="<%= action.href %>"><%= action.label %> <%- icon('arrow') %></a>
+            </article>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="dx-table-wrap">
+          <table class="dx-table">
+            <caption class="sr-only"><%= t('dash.activeServices') %></caption>
+            <thead>
+              <tr>
+                <th scope="col"><%= t('col.service') %></th>
+                <th scope="col"><%= t('col.status') %></th>
+                <th scope="col"><%= t('col.renews') %></th>
+                <th scope="col"><%= t('col.price') %></th>
+              </tr>
+            </thead>
+            <tbody id="serviceRows">
+              <% services.forEach(s => { %>
+                <tr<% if (s.id) { %> data-page-link="/services/<%= s.id %>"<% } %>>
+                  <td>
+                    <span class="service-name">
+                      <span class="service-glyph <%= s.status === 'Active' ? 'coral' : 'blue' %>"><%- icon('server') %></span>
+                      <span><strong><%= s.name || s.groupname || t('col.service') %></strong><small><%= s.domain || t('dash.noDomain') %></small></span>
+                    </span>
+                  </td>
+                  <td><span class="dx-pill <%= s.status === 'Active' ? 'ok' : 'bad' %>"><%- icon(s.status === 'Active' ? 'check' : 'alert') %><%= st(s.status) %></span></td>
+                  <td><%= fmtDate(s.nextduedate) %></td>
+                  <td><strong><%= money(s.recurringamount || s.amount) %></strong><small class="dx-per">/mo</small></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+
+    <% if (gtools.includes('searchconsole')) { %>
+    <article class="panel queries-card" id="queriesSection">
+      <header class="panel-header">
+        <div><h3><%= t('dash.topQueries') %></h3><p><%= t('dash.topQueriesSubtitle') %></p></div>
+        <button class="text-button" id="viewQueries" aria-controls="queryScroll" aria-expanded="false" disabled><%- icon('arrow') %><span id="viewQueriesLabel"><%= t('common.viewAll') %></span></button>
+      </header>
+      <div class="query-scroll" id="queryScroll" role="region" aria-label="Ranking keywords" tabindex="0">
+      <table class="sc-query-table" id="queryTable" role="table" aria-label="<%= t('dash.topQueries') %>">
         <thead>
-          <tr>
-            <th scope="col"><%= t('col.service') %></th>
-            <th scope="col"><%= t('col.status') %></th>
-            <th scope="col"><%= t('col.renews') %></th>
-            <th scope="col"><%= t('col.price') %></th>
+          <tr class="sc-query-row head">
+            <th scope="col" class="sc-query-term"><%= t('col.query') %></th>
+            <th scope="col"><%= t('sc.clicks') %></th>
+            <th scope="col"><%= t('sc.impressions') %></th>
+            <th scope="col"><%= t('sc.ctr') %></th>
+            <th scope="col"><%= t('sc.position') %></th>
           </tr>
         </thead>
-        <tbody id="serviceRows">
-          <% if (!services.length) { %>
-            <tr><td colspan="4" class="dx-empty"><svg class="dx-art-sm" viewBox="0 0 120 90" aria-hidden="true" fill="none" stroke-linejoin="round"><path d="M20 20h80v22H20zM20 48h80v22H20z"/><path d="M30 31h10M30 59h10" class="r"/><circle cx="88" cy="31" r="2.5" class="rf"/><circle cx="88" cy="59" r="2.5" class="rf"/></svg><br><%= t('dash.noServices') %> <a href="/store"><%= t('dash.orderFirst') %></a></td></tr>
-          <% } %>
-          <% services.forEach(s => { %>
-            <tr<% if (s.id) { %> data-page-link="/services/<%= s.id %>"<% } %>>
-              <td>
-                <span class="service-name">
-                  <span class="service-glyph <%= s.status === 'Active' ? 'coral' : 'blue' %>"><%- icon('server') %></span>
-                  <span><strong><%= s.name || s.groupname || t('col.service') %></strong><small><%= s.domain || t('dash.noDomain') %></small></span>
-                </span>
-              </td>
-              <td><span class="dx-pill <%= s.status === 'Active' ? 'ok' : 'bad' %>"><%- icon(s.status === 'Active' ? 'check' : 'alert') %><%= st(s.status) %></span></td>
-              <td><%= fmtDate(s.nextduedate) %></td>
-              <td><strong><%= money(s.recurringamount || s.amount) %></strong><small class="dx-per">/mo</small></td>
-            </tr>
-          <% }) %>
-        </tbody>
+        <tbody id="queryTableBody"></tbody>
       </table>
-    </div>
-  </section>
+      </div>
+      <footer class="panel-footer"><span id="querySummary"></span><span class="subtle"><%= t('sc.selectedPeriod') %></span></footer>
+    </article>
+    <% } %>
+  </div>
 
   <div class="dx-low-side">
   <article class="panel domain-panel" id="domainsSection">
@@ -328,27 +382,6 @@ const googleConnected = {
 <% if (gtools.includes('searchconsole')) { %>
 <section class="dx-insights" id="searchInsights" aria-label="<%= t('sc.title') %>">
   <div class="insight-grid">
-    <article class="panel queries-card" id="queriesSection">
-      <header class="panel-header">
-        <div><h3><%= t('dash.topQueries') %></h3><p><%= t('dash.topQueriesSubtitle') %></p></div>
-        <button class="text-button" id="viewQueries" aria-controls="queryScroll" aria-expanded="false" disabled><%- icon('arrow') %><span id="viewQueriesLabel"><%= t('common.viewAll') %></span></button>
-      </header>
-      <div class="query-scroll" id="queryScroll" role="region" aria-label="Ranking keywords" tabindex="0">
-      <table class="sc-query-table" id="queryTable" role="table" aria-label="<%= t('dash.topQueries') %>">
-        <thead>
-          <tr class="sc-query-row head">
-            <th scope="col" class="sc-query-term"><%= t('col.query') %></th>
-            <th scope="col"><%= t('sc.clicks') %></th>
-            <th scope="col"><%= t('sc.impressions') %></th>
-            <th scope="col"><%= t('sc.ctr') %></th>
-            <th scope="col"><%= t('sc.position') %></th>
-          </tr>
-        </thead>
-        <tbody id="queryTableBody"></tbody>
-      </table>
-      </div>
-      <footer class="panel-footer"><span id="querySummary"></span><span class="subtle"><%= t('sc.selectedPeriod') %></span></footer>
-    </article>
     <article class="panel device-card">
       <header class="panel-header"><div><h3><%= t('dash.deviceMix') %></h3><p><%= t('dash.deviceMixSubtitle') %></p></div><%- icon('activity') %></header>
       <div class="sc-device-row">
@@ -425,7 +458,7 @@ const googleConnected = {
   const showImpressions = document.getElementById('scShowImpressions');
   const viewQueries = document.getElementById('viewQueries');
   const viewQueriesLabel = document.getElementById('viewQueriesLabel');
-  const searchSurfaces = [document.getElementById('searchSection'), document.getElementById('searchInsights')];
+  const searchSurfaces = [document.getElementById('searchSection'), document.getElementById('searchInsights'), document.getElementById('queriesSection')];
   const googleConnectPrompt = document.getElementById('googleConnectPrompt');
   const hideGoogleConnect = document.getElementById('hideGoogleConnect');
   const googleConnectStatus = document.getElementById('googleConnectStatus');

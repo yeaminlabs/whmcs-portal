@@ -477,10 +477,41 @@
 @media(max-width:760px){.dx-row-top:has(#searchSection[hidden]) .dx-stats{grid-template-columns:minmax(0,1fr)}}
 
 /* lower rows */
+.dx-row-low{align-items:start}
+.dx-low-main{display:flex;flex-direction:column;align-items:stretch;gap:1rem;min-width:0}
 .dx-row-low .domain-panel{align-self:start;margin:0}
 .dx-insights .insight-grid{padding:0;border:0;background:transparent}
 .dx-insights .insight-grid .panel{background:#fff}
 .dx .billing-donut-panel{margin:0}
+
+/* Services are content-sized for small accounts; the ranking card follows them. */
+.services-card .dx-card-head{align-items:center}
+.service-empty{margin:0 1.25rem 1.25rem;padding:1.25rem 1rem!important;border:1px solid #E1DAD4;border-radius:12px;background:#F8F6F2}
+.service-compact-list{display:grid;gap:.625rem;padding:0 1.25rem 1.25rem}
+.service-compact-row{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(15rem,1fr) auto;align-items:center;gap:1rem;padding:.8rem 1rem;border:1px solid #E1DAD4;border-radius:12px;background:#FFFFFF;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.service-compact-row.is-single{padding:1rem}
+.service-compact-row:hover{transform:translateY(-1px);border-color:#BE3045;box-shadow:0 10px 22px -18px rgba(48,41,46,.45)}
+.service-compact-identity{display:flex;align-items:center;gap:.75rem;min-width:0}
+.service-compact-identity>span:last-child{display:grid;min-width:0}
+.service-compact-identity strong{overflow:hidden;color:#30292E;font-size:.875rem;text-overflow:ellipsis;white-space:nowrap}
+.service-compact-identity small{overflow:hidden;color:#685F65;font-size:.6875rem;text-overflow:ellipsis;white-space:nowrap}
+.service-compact-details{display:flex;align-items:center;justify-content:flex-end;gap:1rem;min-width:0}
+.service-compact-field{display:grid;gap:.15rem;min-width:5.25rem}
+.service-compact-field>small{color:#685F65;font-size:.625rem;line-height:1.2}
+.service-compact-field>strong{color:#30292E;font-size:.75rem;line-height:1.25;white-space:nowrap}
+.service-compact-price{min-width:4.5rem}
+.service-compact-action{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;min-height:2.2rem;padding:.4rem .65rem;border:1px solid #BE3045;border-radius:9px;background:#FFFFFF;color:#BE3045;font-size:.6875rem;font-weight:700;white-space:nowrap;transition:background .18s ease,color .18s ease,transform .18s ease}
+.service-compact-action .ico{width:.85rem;height:.85rem;transition:transform .18s ease}
+.service-compact-action:hover{background:#BE3045;color:#FFFFFF;transform:translateY(-1px)}
+.service-compact-action:hover .ico{transform:translateX(2px)}
+.service-compact-action:focus-visible{outline:2px solid #30292E;outline-offset:2px}
+.dx-low-main .queries-card{display:flex;flex-direction:column;min-height:0;overflow:hidden;contain:none;background:#FFFFFF;border:1px solid #E1DAD4;border-radius:14px;box-shadow:0 1px 2px rgba(48,41,46,.04),0 8px 20px -14px rgba(48,41,46,.2);position:relative}
+.dx-low-main .queries-card::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,#E1DAD4 0,#E1DAD4 90%,#BE3045 100%)}
+.dx-low-main .queries-card .panel-header{border-bottom:1px solid #E1DAD4;padding-top:1rem}
+.dx-low-main .queries-card .panel-header h3{color:#30292E;font-weight:700}
+.dx-low-main .queries-card .panel-header p{color:#685F65}
+.dx-low-main .queries-card .query-scroll{flex:none;max-height:22rem}
+.dx-low-main .queries-card .panel-footer{flex:none}
 
 @media(max-width:1280px){
   .dx-row-top,.dx-row-mid,.dx-row-low{grid-template-columns:minmax(0,1fr)}
@@ -498,9 +529,12 @@
   .dx-select{flex:1 1 7rem;min-width:0}
   .dx-chart .large-chart{height:11rem}
   .dx-chart-foot .property-picker{flex-basis:100%}
+  .service-compact-row{grid-template-columns:minmax(0,1fr) auto;gap:.75rem}
+  .service-compact-details{grid-column:1/-1;justify-content:flex-start;flex-wrap:wrap;gap:.75rem}
+  .service-compact-action{grid-column:2;grid-row:1;align-self:center}
 }
 @media(prefers-reduced-motion:reduce){
-  .dx-stat,.dx-stat-go,.dx-notif-item,.dx-btn,.dx-link .ico{transition:none}
+  .dx-stat,.dx-stat-go,.dx-notif-item,.dx-btn,.dx-link .ico,.service-compact-row,.service-compact-action{transition:none}
   .dx-stat:hover,.dx-notif-item:hover,.dx-btn.white:hover{transform:none}
 }
 

@@ -110,6 +110,8 @@ module.exports = {
   'dash.overdueMany': '{n} services are overdue',
   'dash.overdueHint': 'Overdue services may be suspended. Clear the invoice to avoid downtime.',
   'dash.yourServices': 'Your services',
+  'dash.viewOrder': 'View order',
+  'dash.manageHosting': 'Manage hosting',
   'dash.recentInvoices': 'Recent invoices',
   'dash.yourDomains': 'Your domains',
   'dash.noServices': 'No services yet.',
