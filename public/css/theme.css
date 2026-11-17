@@ -70,3 +70,33 @@ input:focus,select:focus,textarea:focus,.list-search:focus{border-color:#BE3045;
 .svc-chart .area{fill:#BE3045}.svc-chart .line{stroke:#BE3045}
 .sc-dot-clicks{background:#BE3045}.sc-country-row .bar i{background:#BE3045}
 .ring{--ring-fg:#42736B}
+
+/* ==========================================================================
+   Collapsed sidebar: a centred icon rail. All dropdowns are closed; clicking a
+   group icon expands the sidebar and opens just that group.
+   ========================================================================== */
+body.nav-collapsed .side{padding-inline:0;align-items:center;row-gap:0}
+body.nav-collapsed .side-head{flex-direction:column;flex-wrap:nowrap;align-items:center;justify-content:center;gap:.75rem;padding:1rem 0 0;margin:0;width:100%}
+body.nav-collapsed .brand{display:block;flex:none;width:2.75rem;height:2.75rem;padding:0;overflow:hidden;background:url(/img/snbd-mark.png) center/cover no-repeat;border-radius:14px;box-shadow:0 6px 14px -8px rgba(190,48,69,.7)}
+body.nav-collapsed .brand img{display:none}
+body.nav-collapsed .side-collapse{margin:0;width:2.75rem;height:2.75rem;border-radius:14px}
+body.nav-collapsed .snav{align-items:center;gap:.75rem;width:100%;padding:.75rem 0 0}
+body.nav-collapsed .snav-home{margin:0;width:2.75rem;height:2.75rem;padding:0;justify-content:center;border-radius:14px;border:1px solid #E1DAD4;background:#FFFFFF}
+body.nav-collapsed .snav-home .ico{color:#685F65}
+body.nav-collapsed .snav-home.active{background:#FBEDEE;border-color:#F0D5D9}
+body.nav-collapsed .snav-home.active .ico{color:#BE3045}
+body.nav-collapsed .snav-link.active::before{display:none}
+body.nav-collapsed .snav-group{width:100%;display:flex;justify-content:center;margin:0;padding:0;background:transparent!important}
+body.nav-collapsed .snav-toggle{width:2.75rem;height:2.75rem;min-height:0;padding:0;justify-content:center;border-radius:14px;background:transparent}
+body.nav-collapsed .snav-gicon{width:2.75rem;height:2.75rem;border-radius:14px;background:#FFFFFF;border:1px solid #E1DAD4;color:#685F65;transition:background .18s,color .18s,border-color .18s,transform .18s}
+body.nav-collapsed .snav-gicon .ico{width:1.2rem;height:1.2rem}
+body.nav-collapsed .snav-toggle:hover .snav-gicon{border-color:#BE3045;color:#BE3045;transform:translateY(-1px)}
+body.nav-collapsed .snav-group[data-active] .snav-gicon{background:#FBEDEE;border-color:#F0D5D9;color:#BE3045}
+body.nav-collapsed .snav-panel{display:none}
+body.nav-collapsed .side-foot{display:flex;flex-direction:column;align-items:center;gap:.75rem;width:100%;padding:.75rem 0 1rem}
+body.nav-collapsed .side-help{width:2.75rem;height:2.75rem;padding:0;border:0;background:transparent;justify-content:center}
+body.nav-collapsed .side-help-ico{width:2.75rem;height:2.75rem;border-radius:14px}
+body.nav-collapsed .side-logout{width:2.75rem;height:2.75rem;padding:0;justify-content:center;border-radius:14px}
+body.nav-collapsed .side-foot .badge{display:none}
+body.nav-collapsed .snav-link:focus-visible,body.nav-collapsed .snav-toggle:focus-visible{outline:2px solid #BE3045;outline-offset:2px}
+@media(max-width:920px){body.nav-collapsed .snav-panel{display:grid}}
