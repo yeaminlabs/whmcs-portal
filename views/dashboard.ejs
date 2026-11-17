@@ -314,17 +314,17 @@ const serviceAction = (service) => {
     <article class="panel queries-card" id="queriesSection">
       <header class="panel-header">
         <div><h3><%= t('dash.topQueries') %></h3><p><%= t('dash.topQueriesSubtitle') %></p></div>
-        <button class="text-button" id="viewQueries" aria-controls="queryScroll" aria-expanded="false" disabled><%- icon('arrow') %><span id="viewQueriesLabel"><%= t('common.viewAll') %></span></button>
+        <button class="text-button" id="viewQueries" aria-controls="queryScroll" aria-expanded="false" disabled><%- icon('arrow') %><span id="viewQueriesLabel"><%= t('sc.viewAllQueries') %></span></button>
       </header>
       <div class="query-scroll" id="queryScroll" role="region" aria-label="Ranking keywords" tabindex="0">
       <table class="sc-query-table" id="queryTable" role="table" aria-label="<%= t('dash.topQueries') %>">
         <thead>
           <tr class="sc-query-row head">
             <th scope="col" class="sc-query-term"><%= t('col.query') %></th>
-            <th scope="col"><%= t('sc.clicks') %></th>
-            <th scope="col"><%= t('sc.impressions') %></th>
-            <th scope="col"><%= t('sc.ctr') %></th>
-            <th scope="col"><%= t('sc.position') %></th>
+            <th scope="col" class="q-pos"><%= t('sc.position') %></th>
+            <th scope="col" class="q-imp"><%= t('sc.impressionsShort') %></th>
+            <th scope="col" class="q-num"><%= t('sc.clicksShort') %></th>
+            <th scope="col" class="q-num"><%= t('sc.ctrShort') %></th>
           </tr>
         </thead>
         <tbody id="queryTableBody"></tbody>
@@ -822,21 +822,26 @@ const serviceAction = (service) => {
     const source = Array.isArray(queries) ? queries : [];
     rankedQueries = source.filter(q => Number(q.position) > 0).slice().sort((a, b) => Number(a.position) - Number(b.position) || Number(b.impressions || 0) - Number(a.impressions || 0));
     const visible = showAllQueries ? rankedQueries : rankedQueries.slice(0, 10);
+    const maxImp = Math.max(0, ...visible.map((q) => Number(q.impressions || 0)));
     queryTableBody.innerHTML = visible.length
-      ? visible.map((q) =>
-          '<tr class="sc-query-row">' +
-          '<td class="sc-query-term" title="' + escapeHtml(q.query) + '"><strong>' + escapeHtml(q.query) + '</strong></td>' +
-          '<td>' + number(q.clicks) + '</td>' +
-          '<td>' + number(q.impressions) + '</td>' +
-          '<td>' + (q.impressions ? (q.clicks / q.impressions * 100).toFixed(2) : 0) + '%</td>' +
-          '<td>' + Number(q.position).toFixed(1) + '</td>' +
-          '</tr>'
-        ).join('')
+      ? visible.map((q) => {
+          const imp = Number(q.impressions || 0);
+          const pct = maxImp ? Math.max(4, Math.round(imp / maxImp * 100)) : 0;
+          const ctr = imp ? q.clicks / imp * 100 : 0;
+          const ctrText = (Number.isInteger(ctr) ? String(ctr) : ctr.toFixed(1)) + '%';
+          return '<tr class="sc-query-row">' +
+            '<td class="sc-query-term" title="' + escapeHtml(q.query) + '"><strong>' + escapeHtml(q.query) + '</strong></td>' +
+            '<td class="q-pos">' + Number(q.position).toFixed(1) + '</td>' +
+            '<td class="q-imp"><span class="q-imp-n">' + number(imp) + '</span><span class="q-bar" aria-hidden="true"><i style="--w:' + pct + '%"></i></span></td>' +
+            '<td class="q-num' + (Number(q.clicks) > 0 ? ' has' : '') + '">' + number(q.clicks) + '</td>' +
+            '<td class="q-num">' + ctrText + '</td>' +
+            '</tr>';
+        }).join('')
       : '<tr class="sc-query-row"><td colspan="5" class="query-empty"><%= t("sc.noQueries") %></td></tr>';
     querySummary.textContent = visible.length + ' / ' + rankedQueries.length;
     if (viewQueries) {
       viewQueries.disabled = rankedQueries.length <= 10;
-      if (viewQueriesLabel) viewQueriesLabel.textContent = showAllQueries ? '<%= t("sc.showTopTen") %>' : '<%= t("common.viewAll") %>';
+      if (viewQueriesLabel) viewQueriesLabel.textContent = showAllQueries ? '<%= t("sc.showTopTen") %>' : '<%= t("sc.viewAllQueries") %>';
       viewQueries.setAttribute('aria-expanded', String(showAllQueries));
     }
   }
