@@ -39,15 +39,23 @@ const isPublic = !(session && session.clientId) && typeof publicPage !== 'undefi
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
-<meta name="theme-color" content="#d0021b">
+<meta name="theme-color" content="#BE3045">
 <title><%= T(ti) %> · <%= t('brand.clientArea') %></title>
 <link rel="icon" type="image/webp" href="/img/favicon.webp">
 <link rel="preload" href="/fonts/inter-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
 <% if (lang === 'bn') { %><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap"><% } %>
 <link rel="stylesheet" href="/css/app.css">
+<link rel="stylesheet" href="/css/theme.css">
 <% if (ti === 'Dashboard') { %><link rel="stylesheet" href="/css/dashboard.css"><% } %>
 </head>
 <body class="lang-<%= lang %>">
+<script>
+(() => {
+  try {
+    if (localStorage.getItem('snbd.nav.collapsed') === 'true') document.body.classList.add('nav-collapsed');
+  } catch (e) { /* storage unavailable */ }
+})();
+</script>
 <a class="skip" href="#main"><%= t('a11y.skip') %></a>
 <% const prefsMenu = () => { %>
 <details class="prefs dd">
@@ -74,14 +82,15 @@ const avatar = (size) => `<span class="avatar" style="--av:${size}px" aria-hidde
 <div class="shell">
   <aside class="side" id="sidebar" aria-label="<%= t('a11y.primary') %>">
     <div class="side-head">
-      <a class="brand" href="/" aria-label="<%= t('brand.home') %>"><img src="/img/snbd-logo.png" alt="SNBD HOST" width="136" height="34"></a>
+      <a class="brand" href="/" aria-label="<%= t('brand.home') %>" title="<%= t('brand.home') %>"><img src="/img/snbd-logo.png" alt="SNBD HOST" width="136" height="34"></a>
+      <button type="button" class="icon-btn side-collapse" data-nav-collapse aria-controls="sidebar" aria-pressed="false" aria-label="<%= t('top.collapseNav') %>" title="<%= t('top.collapseNav') %>"><%- icon('chev', 'side-collapse-ico') %></button>
       <button type="button" class="icon-btn side-close" data-nav-close aria-label="<%= t('top.closeMenu') %>"><%- icon('close') %></button>
     </div>
     <nav class="snav" aria-label="<%= t('brand.clientArea') %>">
-      <a href="<%= HOME.href %>" class="snav-link snav-home<%= HOME.on ? ' active' : '' %>"<% if (HOME.on) { %> aria-current="page"<% } %>><%- icon(HOME.icon) %><span><%= HOME.text %></span></a>
+      <a href="<%= HOME.href %>" class="snav-link snav-home<%= HOME.on ? ' active' : '' %>" title="<%= HOME.text %>"<% if (HOME.on) { %> aria-current="page"<% } %>><%- icon(HOME.icon) %><span><%= HOME.text %></span></a>
       <% NAV.forEach(group => { const hasActive = group.items.some(i => i.on); %>
       <section class="snav-group" data-group="<%= group.id %>" data-open="<%= hasActive %>"<% if (hasActive) { %> data-active<% } %>>
-        <button type="button" class="snav-toggle" aria-expanded="<%= hasActive %>" aria-controls="snav-<%= group.id %>">
+        <button type="button" class="snav-toggle" title="<%= group.label %>" aria-expanded="<%= hasActive %>" aria-controls="snav-<%= group.id %>">
           <span class="snav-gicon"><%- icon(group.icon) %></span>
           <span class="snav-gname"><%= group.label %></span>
           <% if (hasActive) { %><span class="snav-dot" aria-hidden="true"></span><% } %>
@@ -90,7 +99,7 @@ const avatar = (size) => `<span class="avatar" style="--av:${size}px" aria-hidde
         <div class="snav-panel" id="snav-<%= group.id %>">
           <div class="snav-inner">
             <% group.items.forEach((item, i) => { %>
-            <a href="<%= item.href %>" class="snav-link<%= item.on ? ' active' : '' %>" style="--i:<%= i %>"<% if (item.on) { %> aria-current="page"<% } %>><%- icon(item.icon) %><span><%= item.text %></span></a>
+            <a href="<%= item.href %>" class="snav-link<%= item.on ? ' active' : '' %>" style="--i:<%= i %>" title="<%= item.text %>"<% if (item.on) { %> aria-current="page"<% } %>><%- icon(item.icon) %><span><%= item.text %></span></a>
             <% }) %>
           </div>
         </div>
@@ -98,12 +107,12 @@ const avatar = (size) => `<span class="avatar" style="--av:${size}px" aria-hidde
       <% }) %>
     </nav>
     <div class="side-foot">
-      <a class="side-help" href="/tickets/new">
+      <a class="side-help" href="/tickets/new" title="<%= t('dash.needHelp') %>">
         <span class="side-help-ico"><%- icon('chat') %></span>
         <span><strong><%= t('dash.needHelp') %></strong><small><%= t('side.helpText') %></small></span>
       </a>
       <% if (mock) { %><span class="badge"><%= t('top.demo') %></span><% } %>
-      <a class="side-logout" href="/logout"><%- icon('logout') %><span><%= t('top.signOut') %></span></a>
+      <a class="side-logout" href="/logout" title="<%= t('top.signOut') %>"><%- icon('logout') %><span><%= t('top.signOut') %></span></a>
     </div>
   </aside>
   <div class="scrim" data-nav-close hidden></div>
@@ -111,7 +120,7 @@ const avatar = (size) => `<span class="avatar" style="--av:${size}px" aria-hidde
     <header class="top">
       <div class="top-left">
         <button type="button" class="icon-btn menu-btn" data-nav-open aria-controls="sidebar" aria-expanded="false" aria-label="<%= t('top.menu') %>"><%- icon('menu') %></button>
-        <h1 class="page-title"><%= T(ti) %></h1>
+        <% if (ti === 'Dashboard') { %><h1 class="sr-only"><%= T(ti) %></h1><% } %>
       </div>
       <div class="top-actions">
         <a class="live" href="/status"><i aria-hidden="true"></i><%= t('nav.status') %></a>

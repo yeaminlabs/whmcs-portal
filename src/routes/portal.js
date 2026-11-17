@@ -146,16 +146,33 @@ function listOf(obj, key) {
   return Array.isArray(inner) ? inner : [inner];
 }
 
+/** Cheapest monthly n8n plan in the customer's display currency, or null when the catalog has none. */
+async function n8nStartingPlan(currencyCode) {
+  if (!currencyCode) return null;
+  try {
+    const group = await catalog.getGroup('n8n', currencyCode);
+    let best = null;
+    for (const p of group.products) {
+      const monthly = p.pricing.cycles.find((c) => c.id === 'monthly');
+      if (monthly && monthly.price > 0 && (!best || monthly.price < best.price)) best = { price: monthly.price, prefix: p.pricing.prefix };
+    }
+    return best;
+  } catch (e) {
+    return null;
+  }
+}
+
 router.get(['/', '/dashboard'], async (req, res) => {
   try {
     const cid = req.session.clientId;
     const ticketsAllowed = !whmcs.isBlocked('GetSupportTickets');
-    const [details, products, domains, invoices, tickets] = await Promise.all([
+    const [details, products, domains, invoices, tickets, n8nPlan] = await Promise.all([
       getClient(req).catch(() => null),
       whmcs.call('GetClientsProducts', { clientid: cid }).catch(() => null),
       whmcs.call('GetClientsDomains', { clientid: cid }).catch(() => null),
       whmcs.call('GetInvoices', { userid: cid, limitnum: 5 }).catch(() => null),
       ticketsAllowed ? whmcs.call('GetSupportTickets', { clientid: cid }).catch(() => null) : null,
+      n8nStartingPlan(res.locals.displayCurrency && res.locals.displayCurrency.code),
     ]);
     res.render('dashboard', {
       title: 'Dashboard',
@@ -167,6 +184,7 @@ router.get(['/', '/dashboard'], async (req, res) => {
       tickets: listOf(tickets, 'tickets').slice(0, 5),
       ticketsUnavailable: !ticketsAllowed || Boolean(tickets && tickets.blocked),
       gtools: gtokens.tools(cid),
+      n8nPlan,
     });
   } catch (e) {
     res.render('error', { title: 'Dashboard', message: 'Could not load dashboard data.', back: '/login' });

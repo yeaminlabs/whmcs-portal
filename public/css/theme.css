@@ -1,0 +1,72 @@
+/* ==========================================================================
+   SNBD HOST calm theme — site-wide (loaded after app.css on every page).
+   Colour psychology: slate-blue = trust & calm (primary), teal/green = health
+   & success, amber = caution, red = urgency & brand energy — so red is kept
+   as a deliberate HINT (brand dot, active-nav marker, accent strips, errors,
+   overdue) instead of the main colour. The logo image keeps its original red.
+   bg #F8F6F2 · card #FFFFFF · ink #30292E · primary #BE3045 · tint #FBEDEE
+   due #8A550F/#FFF3D9 · overdue #A1263A/#FBEDEE · ok #26704E · brand red #BE3045
+   ========================================================================== */
+:root{
+  --brand-red:#BE3045;
+  --red:#BE3045; --red-hover:#A1263A; --red-dark:#A1263A; --red-50:#FBEDEE; --red-100:#FBEDEE; --red-200:#F0D5D9;
+  --ink:#30292E; --ink-2:#463E44; --g700:#463E44; --g600:#685F65; --g500:#667085;
+  --bg:#F8F6F2; --surface:#FFFFFF; --surface2:#F8F6F2; --line:#E1DAD4;
+  --night:#30292E; --night-2:#3A3238;
+  --ok:#26704E; --ok-bg:#E8F4EE; --ok-line:#BFE0CF;
+  --warn:#8A550F; --warn-bg:#FFF3D9; --warn-line:#F2D9A8;
+  --bad:#A1263A; --bad-bg:#FBEDEE; --bad-line:#F0D5D9;
+  --ns-coral:#BE3045; --ns-coral-deep:#A1263A; --ns-coral-soft:#FBEDEE;
+  --ns-blue:#BE3045; --ns-blue-soft:#FBEDEE; --ns-mint:#26704E; --ns-mint-soft:#E8F4EE;
+  --ns-amber:#8A550F; --ns-amber-soft:#FFF3D9; --ns-bg:#F8F6F2; --ns-surface:#FFFFFF; --ns-ink:#30292E;
+}
+body,.main{background:#F8F6F2;color:#30292E}
+.top,.side,.panel,.card,.ui-card,.plan,.group-card,.attention,.auth,.svc-tile,.usermenu .dd-menu,.prefs .dd-menu{background-color:#FFFFFF}
+.side{border-color:#E1DAD4}
+a{color:#BE3045}a:hover{color:#A1263A}
+:focus-visible{outline-color:#BE3045}
+input:focus,select:focus,textarea:focus,.list-search:focus{border-color:#BE3045;box-shadow:0 0 0 4px rgba(190,48,69,.16)}
+
+/* buttons */
+.btn,.ghostbtn2,button{background:#30292E;border-color:#30292E}
+.btn:hover,button:hover{background:#463E44}
+.btn.gold,.btn.red,.ui-btn.gold,.ui-btn.red{background:#BE3045;border-color:#BE3045;color:#fff;box-shadow:0 1px 2px rgba(48,41,46,.06),0 6px 16px -8px rgba(190,48,69,.55)}
+.btn.gold:hover,.btn.red:hover,.ui-btn.gold:hover,.ui-btn.red:hover{background:#A1263A;border-color:#A1263A}
+.btn.ghost,.ghostbtn2{background:#FFFFFF;color:#BE3045;border-color:#E1DAD4}
+.btn.ghost:hover,.ghostbtn2:hover{background:#FBEDEE;color:#A1263A}
+.filter-btn.red[aria-pressed="true"]{background:#BE3045;border-color:#BE3045}
+
+/* sidebar: pale-blue selected item + a small brand-red marker (the red hint) */
+.snav-link.active,.snav-inner .snav-link.active{position:relative;background:#FBEDEE;color:#BE3045;box-shadow:none;font-weight:600}
+.snav-link.active .ico,.snav-inner .snav-link.active .ico{color:#BE3045}
+.snav-link.active::before{content:"";position:absolute;left:4px;top:25%;bottom:25%;width:3px;border-radius:3px;background:var(--brand-red)}
+.snav-link:hover{background:#F8F6F2}
+.snav-dot{background:var(--brand-red)}
+.side-help-ico{background:#BE3045}
+.side-logout{color:#30292E}.side-logout:hover{background:#FBEDEE;color:#BE3045}
+.um-signout button,.um-signout button .ico{color:#30292E}
+
+/* accents: slate by default, a thin brand-red tip on strips */
+.attention{border-color:#F2D9A8}
+.attention .dot{background:#FFF3D9;color:#8A550F}
+.pill.Unpaid{color:#8A550F;border-color:#F2D9A8;background:#FFF3D9}
+.pill.Overdue,.pill.Suspended,.pill.Expired,.pill.Fraud{color:#A1263A;border-color:#F0D5D9;background:#FBEDEE}
+.pill.Active,.pill.Paid{color:#26704E;border-color:#BFE0CF;background:#E8F4EE}
+.badge,.ui-badge.default{background:#FBEDEE;color:#A1263A;border-color:#F0D5D9}
+.plan-lead{background:#FBEDEE;color:#A1263A;border-color:#F0D5D9}
+.svc-bar.hot i{background:#A1263A}
+.group-icon,.svc-mark,.page-icon,.sc-ico-clicks{background:#FBEDEE;color:#BE3045;border-color:#F0D5D9}
+.svc-tile:hover,.group-card:hover,.plan:hover{border-color:#E1DAD4}
+.plan:hover .plan-cta{background:#BE3045;border-color:#BE3045}
+.seg button[aria-pressed="true"]{color:#A1263A}
+.pub-nav a.active,.pub-sheet>a.active{color:#BE3045;background:#FBEDEE}
+
+/* dark surfaces → deep slate with a faint red glow (the hint) */
+.authwrap{background:radial-gradient(700px 360px at 50% -40px,rgba(190,48,69,.5),transparent 70%),radial-gradient(420px 240px at 92% 108%,rgba(190,48,69,.16),transparent 70%),linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px) 0 0/48px 48px,linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px) 0 0/48px 48px,#30292E}
+.auth{box-shadow:0 24px 64px -16px rgba(0,0,0,.5)}
+.welcome{background:radial-gradient(520px 260px at 92% -30%,rgba(190,48,69,.55),transparent 70%),#30292E}
+.welcome h1 em{color:#E8A6B0}
+.ns-hero[data-state="outage"]{--glow:rgba(161,38,58,.45);--dot:#F04438}
+.svc-chart .area{fill:#BE3045}.svc-chart .line{stroke:#BE3045}
+.sc-dot-clicks{background:#BE3045}.sc-country-row .bar i{background:#BE3045}
+.ring{--ring-fg:#42736B}
