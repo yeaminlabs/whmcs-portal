@@ -33,6 +33,9 @@ const MAX_ATTEMPTS = 2;
 const RETRY_DELAY_MS = 300;
 const BLOCK_MS = 10 * 60 * 1000;
 
+// Current WHMCS names for actions the portal still refers to by their legacy names.
+const WIRE_ACTIONS = { GetSupportTickets: 'GetTickets', GetSupportTicket: 'GetTicket' };
+
 const blocked = new Map();
 
 function isBlocked(action) {
@@ -147,7 +150,7 @@ class WhmcsClient {
     const body = new URLSearchParams({
       identifier: config.whmcsIdentifier,
       secret: config.whmcsSecret,
-      action,
+      action: WIRE_ACTIONS[action] || action,
       responsetype: 'json',
       ...Object.fromEntries(Object.entries(params).map(([k, v]) => [k, v == null ? '' : String(v)])),
     }).toString();
