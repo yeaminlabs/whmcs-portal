@@ -270,10 +270,11 @@ router.post('/tickets/new', async (req, res) => {
     if (!subject || !message) {
       return res.status(400).render('ticket-new', { title: 'Open Ticket', error: 'Subject and message are required.', departments: [] });
     }
+    // Never send `admin`: the client serialises every value as text, and WHMCS (PHP) reads the text
+    // "false" as true, which opens the ticket as the API admin instead of as the customer.
     const data = await whmcs.call('OpenTicket', {
       clientid: req.session.clientId,
       deptid, subject, message, priority,
-      contactid: '', admin: false,
     });
     if (data.result !== 'success') {
       return res.status(400).render('ticket-new', { title: 'Open Ticket', error: data.message || 'Could not open ticket.', departments: [] });
