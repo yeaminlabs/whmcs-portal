@@ -8,6 +8,8 @@ const config = {
   port: parseInt(process.env.PORT || '3000', 10),
   sessionSecret: process.env.SESSION_SECRET || 'dev-only-change-me',
   whmcsUrl: (process.env.WHMCS_URL || '').replace(/\/+$/, ''),
+  // Public WHMCS address for reading store pages; leave empty to use the one in WHMCS's product URLs.
+  whmcsStoreUrl: (process.env.WHMCS_STORE_URL || '').replace(/\/+$/, ''),
   whmcsIdentifier: process.env.WHMCS_IDENTIFIER || '',
   whmcsSecret: process.env.WHMCS_SECRET || '',
   mockMode: String(process.env.MOCK_MODE || 'false').toLowerCase() === 'true',

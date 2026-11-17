@@ -156,8 +156,8 @@ function escapeRe(s) {
  * product links). Anything that does not look like a WHMCS store page throws,
  * so an error page is never mistaken for "everything is hidden".
  */
-async function fetchVisibleSlugs(group) {
-  const res = await axios.get(`${config.whmcsUrl}/store/${encodeURIComponent(group)}`, {
+async function fetchVisibleSlugs(group, base = config.whmcsUrl) {
+  const res = await axios.get(`${base}/store/${encodeURIComponent(group)}`, {
     timeout: 10000, httpsAgent: ipv4, maxRedirects: 0, responseType: 'text',
     validateStatus: (s) => s >= 200 && s < 400,
     headers: { 'User-Agent': 'SNBDHostPortal/1.0' },
@@ -172,6 +172,28 @@ async function fetchVisibleSlugs(group) {
   if (!own.test(html)) throw new Error('response is not a WHMCS store page');
   const re = new RegExp(`href="/store/${escapeRe(group)}/([^"?#/]+)"`, 'g');
   return new Set([...html.matchAll(re)].map((m) => decodeURIComponent(m[1])));
+}
+
+/**
+ * Where to read the public store pages. WHMCS_URL can be an internal origin that
+ * only serves the API (production uses http://127.0.0.1:8081, which answers 403 for
+ * /store), so the public address is taken from the product URLs WHMCS reports, or
+ * from WHMCS_STORE_URL when set.
+ */
+async function storeBase(group) {
+  if (config.whmcsStoreUrl) return config.whmcsStoreUrl;
+  try {
+    const all = await loadProducts();
+    for (const p of all) {
+      const m = String(p.product_url || '').match(/^(https?:\/\/[^/]+)\/store\/([^/?#]+)\//);
+      if (m && decodeURIComponent(m[2]) === group) return m[1];
+    }
+    for (const p of all) {
+      const m = String(p.product_url || '').match(/^(https?:\/\/[^/]+)\/store\//);
+      if (m) return m[1];
+    }
+  } catch (e) { /* fall back to WHMCS_URL */ }
+  return config.whmcsUrl;
 }
 
 const SNAPSHOT_FILE = path.join(__dirname, '..', '..', 'data', 'store-visibility.json');
@@ -204,7 +226,7 @@ function saveSnapshot(group, slugs) {
 }
 
 async function syncVisibleSlugs(group) {
-  const found = await fetchVisibleSlugs(group);
+  const found = await fetchVisibleSlugs(group, await storeBase(group));
   saveSnapshot(group, found);
   return found;
 }
@@ -302,4 +324,4 @@ async function productPrice(pid, currencyCode, billingcycle) {
   return Number.isFinite(v) && v >= 0 ? v : null;
 }
 
-module.exports = { productPrice, siblingsOf, GROUPS, FAMILIES, listGroups, getGroup, getProduct, getTldPrices, paymentMethods, loadProducts, visibleSlugs, fetchVisibleSlugs, parseDescription, pricingFor, storePath };
+module.exports = { productPrice, siblingsOf, GROUPS, FAMILIES, listGroups, getGroup, getProduct, getTldPrices, paymentMethods, loadProducts, visibleSlugs, fetchVisibleSlugs, storeBase, parseDescription, pricingFor, storePath };

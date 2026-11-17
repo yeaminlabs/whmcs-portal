@@ -36,3 +36,12 @@ describe('store visibility sync (hidden / retired WHMCS products)', () => {
     expect([...await catalog.fetchVisibleSlugs('n8n')]).toEqual(['a']);
   });
 });
+
+describe('store page address', () => {
+  const catalogLib = require('../../src/lib/catalog');
+  test('an explicit WHMCS_STORE_URL wins', async () => {
+    config.whmcsStoreUrl = 'https://public.test';
+    expect(await catalogLib.storeBase('n8n')).toBe('https://public.test');
+    config.whmcsStoreUrl = '';
+  });
+});

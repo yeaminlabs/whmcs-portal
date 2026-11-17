@@ -20,7 +20,7 @@ const catalog = require('../src/lib/catalog');
   const report = [];
   for (const [group, products] of byGroup) {
     let visible = null;
-    try { visible = await catalog.fetchVisibleSlugs(group); } catch (e) { report.push({ group, error: e.message }); continue; }
+    try { visible = await catalog.fetchVisibleSlugs(group, await catalog.storeBase(group)); } catch (e) { report.push({ group, error: e.message }); continue; }
     report.push({ group, total: products.length, visible: products.filter((p) => visible.has(p.slug)).length, hidden: products.filter((p) => !visible.has(p.slug)) });
   }
   if (process.argv.includes('--json')) return console.log(JSON.stringify(report, null, 2));
