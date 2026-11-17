@@ -58,22 +58,48 @@ const isPublic = !(session && session.clientId) && typeof publicPage !== 'undefi
 })();
 </script>
 <a class="skip" href="#main"><%= t('a11y.skip') %></a>
-<% const prefsMenu = () => { %>
+<%
+const FLAGS = {
+  bd: '<rect width="60" height="40" fill="#006A4E"/><circle cx="26" cy="20" r="11" fill="#F42A41"/>',
+  gb: '<rect width="60" height="40" fill="#012169"/><path d="M0 0 60 40M60 0 0 40" stroke="#fff" stroke-width="8"/><path d="M0 0 60 40M60 0 0 40" stroke="#C8102E" stroke-width="3"/><path d="M30 0v40M0 20h60" stroke="#fff" stroke-width="14"/><path d="M30 0v40M0 20h60" stroke="#C8102E" stroke-width="8"/>',
+  us: '<rect width="60" height="40" fill="#B22234"/><g fill="#fff"><rect y="3.08" width="60" height="3.08"/><rect y="9.23" width="60" height="3.08"/><rect y="15.38" width="60" height="3.08"/><rect y="21.54" width="60" height="3.08"/><rect y="27.69" width="60" height="3.08"/><rect y="33.85" width="60" height="3.08"/></g><rect width="26" height="21.5" fill="#3C3B6E"/>',
+};
+const flag = (code) => FLAGS[code] ? `<svg class="flag" viewBox="0 0 60 40" width="20" height="14" aria-hidden="true" focusable="false">${FLAGS[code]}</svg>` : '';
+const LANG_FLAG = { en: 'gb', bn: 'bd' };
+const CUR_FLAG = { BDT: 'bd', USD: 'us' };
+const prefsMenu = () => { %>
 <details class="prefs dd">
-  <summary aria-label="<%= t('prefs.aria') %>" class="prefs-summary"><%- icon('globe') %><span><%= curLang.short %></span><span class="prefs-sep" aria-hidden="true">·</span><span class="prefs-cur"><%= displayCurrency.prefix %> <%= displayCurrency.code %></span><%- icon('chev', 'prefs-chev') %></summary>
+  <summary aria-label="<%= t('prefs.aria') %> — <%= curLang.label %>, <%= displayCurrency.code %>" class="prefs-summary prefs-compact" title="<%= curLang.label %> · <%= displayCurrency.prefix %> <%= displayCurrency.code %>">
+    <span class="pc-part"><%- flag(LANG_FLAG[lang]) || icon('globe') %><b><%= curLang.short %></b></span>
+    <span class="pc-sep" aria-hidden="true"></span>
+    <span class="pc-part"><%- flag(CUR_FLAG[displayCurrency.code]) %><b><%= displayCurrency.prefix.trim() || displayCurrency.code %></b></span>
+    <%- icon('chev', 'prefs-chev') %>
+  </summary>
   <form class="prefs-menu dd-menu" method="post" action="/prefs">
     <input type="hidden" name="back" value="<%= currentPath %>">
     <p class="prefs-label"><%= t('prefs.language') %></p>
-    <div class="seg">
-      <% langs.forEach(l => { %><button type="submit" name="lang" value="<%= l.code %>" aria-pressed="<%= l.code === lang %>" lang="<%= l.code %>"><%= l.label %></button><% }) %>
+    <div class="pm-opts">
+      <% langs.forEach(l => { %><button type="submit" name="lang" value="<%= l.code %>" aria-pressed="<%= l.code === lang %>" lang="<%= l.code %>"><%- flag(LANG_FLAG[l.code]) %><span><%= l.label %></span></button><% }) %>
     </div>
     <p class="prefs-label"><%= t('prefs.currency') %></p>
-    <div class="seg">
-      <% currencies.forEach(c => { %><button type="submit" name="cur" value="<%= c.code %>" aria-pressed="<%= c.code === displayCurrency.code %>" lang="<%= lang %>"><%= c.prefix %> <%= c.code %></button><% }) %>
+    <div class="pm-opts">
+      <% currencies.forEach(c => { %><button type="submit" name="cur" value="<%= c.code %>" aria-pressed="<%= c.code === displayCurrency.code %>" lang="<%= lang %>"><%- flag(CUR_FLAG[c.code]) %><span><%= c.prefix %> <%= c.code %></span></button><% }) %>
     </div>
     <% if (accountCurrency) { %><p class="prefs-note"><%= billedDiffers ? t('prefs.billedDiffers', { bill: accountCurrency.code, shown: displayCurrency.code }) : t('prefs.billedIn', { code: accountCurrency.code }) %></p><% } %>
   </form>
 </details>
+<% } %>
+<% const notifBell = () => { %>
+<div class="notif" id="notif" data-client="<%= session.clientId %>">
+  <button type="button" class="icon-btn notif-btn" id="notifBtn" aria-haspopup="true" aria-expanded="false" aria-controls="notifPanel" aria-label="<%= t('notif.aria') %>" title="<%= t('notif.aria') %>">
+    <%- icon('bell') %><span class="notif-badge" id="notifBadge" hidden>0</span>
+  </button>
+  <div class="notif-panel" id="notifPanel" role="dialog" aria-label="<%= t('notif.title') %>" hidden>
+    <div class="notif-head"><strong><%= t('notif.title') %></strong><span class="notif-new" id="notifNew" hidden></span></div>
+    <ul class="notif-list" id="notifList"></ul>
+    <p class="notif-empty" id="notifEmpty" hidden><%- icon('check') %><%= t('notif.empty') %></p>
+  </div>
+</div>
 <% } %>
 <% if (session && session.clientId) { %>
 <%
@@ -125,6 +151,7 @@ const avatar = (size) => `<span class="avatar" style="--av:${size}px" aria-hidde
       </div>
       <div class="top-actions">
         <a class="live" href="/status"><i aria-hidden="true"></i><%= t('nav.status') %></a>
+        <% notifBell() %>
         <% prefsMenu() %>
         <a class="btn ghost top-new" href="/store"><%- icon('plus') %><span><%= t('top.newService') %></span></a>
         <details class="usermenu dd">

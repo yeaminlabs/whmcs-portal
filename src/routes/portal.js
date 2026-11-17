@@ -146,6 +146,78 @@ function listOf(obj, key) {
   return Array.isArray(inner) ? inner : [inner];
 }
 
+
+/**
+ * Notification centre feed for the top bar: invoices that need attention, services/domains renewing soon,
+ * and tickets with a staff reply. Read state lives in the browser (keyed by account); ids change when the
+ * underlying thing changes (status, due date, new reply) so a changed item shows up as new again.
+ */
+const RENEW_WINDOW_DAYS = 30;
+router.get('/notifications.json', async (req, res) => {
+  try {
+    const cid = req.session.clientId;
+    const { t, fmtDate, price } = res.locals;
+    const ticketsAllowed = !whmcs.isBlocked('GetSupportTickets');
+    const [products, domains, invoices, tickets] = await Promise.all([
+      whmcs.call('GetClientsProducts', { clientid: cid }).catch(() => null),
+      whmcs.call('GetClientsDomains', { clientid: cid }).catch(() => null),
+      whmcs.call('GetInvoices', { userid: cid, status: 'Unpaid', limitnum: 20 }).catch(() => null),
+      ticketsAllowed ? whmcs.call('GetSupportTickets', { clientid: cid, status: 'Answered' }).catch(() => null) : null,
+    ]);
+    const today = new Date(new Date().toDateString());
+    const days = (d) => Math.round((new Date(d) - today) / 86400000);
+    const valid = (d) => d && !/^0000/.test(String(d)) && !Number.isNaN(new Date(d).getTime());
+    const items = [];
+
+    for (const i of listOf(invoices, 'invoices')) {
+      if (!['Unpaid', 'Overdue'].includes(i.status)) continue;
+      const overdue = i.status === 'Overdue' || (valid(i.duedate) && days(i.duedate) < 0);
+      const n = i.invoicenum || i.id;
+      items.push({
+        id: `inv:${i.id}:${overdue ? 'overdue' : 'due'}`, type: overdue ? 'overdue' : 'due', rank: overdue ? 0 : 1,
+        title: t(overdue ? 'notif.invOverdue' : 'notif.invDue', { n }),
+        detail: t('notif.invDetail', { amount: price(i.balance || i.total, i.currencycode), date: valid(i.duedate) ? fmtDate(i.duedate) : '' }),
+        date: i.duedate || i.date || '', href: `/invoices/${i.id}`,
+      });
+    }
+    for (const tk of listOf(tickets, 'tickets')) {
+      if (String(tk.status) !== 'Answered') continue;
+      items.push({
+        id: `tix:${tk.id}:${tk.lastreply || ''}`, type: 'ticket', rank: 2,
+        title: t('notif.ticketReply'), detail: `#${tk.tid || tk.id} · ${tk.subject || ''}`.slice(0, 90),
+        date: tk.lastreply || '', href: `/tickets/${tk.id}`,
+      });
+    }
+    for (const s of listOf(products, 'products')) {
+      if (s.status !== 'Active' || !valid(s.nextduedate)) continue;
+      const d = days(s.nextduedate);
+      if (d < 0 || d > RENEW_WINDOW_DAYS) continue;
+      items.push({
+        id: `ren:svc${s.id}:${s.nextduedate}`, type: 'renewal', rank: 3,
+        title: t('notif.renewal', { name: s.name || s.groupname || '' }),
+        detail: t('notif.renewDetail', { amount: price(s.recurringamount || s.amount, ''), date: fmtDate(s.nextduedate), days: d }),
+        date: s.nextduedate, href: `/services/${s.id}`,
+      });
+    }
+    for (const dm of listOf(domains, 'domains')) {
+      const due = dm.expirydate || dm.nextduedate;
+      if (dm.status !== 'Active' || !valid(due)) continue;
+      const d = days(due);
+      if (d < 0 || d > RENEW_WINDOW_DAYS) continue;
+      items.push({
+        id: `ren:dom${dm.id}:${due}`, type: 'renewal', rank: 3,
+        title: t('notif.domainRenews', { name: dm.domainname || dm.domain || '' }),
+        detail: t('notif.domainDetail', { date: fmtDate(due), days: d }),
+        date: due, href: `/domains/${dm.id}`,
+      });
+    }
+    items.sort((a, b) => a.rank - b.rank || String(a.date).localeCompare(String(b.date)));
+    res.set('Cache-Control', 'no-store').json({ items: items.slice(0, 12).map(({ rank, ...rest }) => rest) });
+  } catch (e) {
+    res.status(200).json({ items: [] });
+  }
+});
+
 /** Cheapest monthly n8n plan in the customer's display currency, or null when the catalog has none. */
 async function n8nStartingPlan(currencyCode) {
   if (!currencyCode) return null;

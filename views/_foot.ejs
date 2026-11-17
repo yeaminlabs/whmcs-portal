@@ -75,6 +75,74 @@
     collapseButton.addEventListener('click', () => setCollapsed(!document.body.classList.contains('nav-collapsed')));
   }
 
+  // Notification centre: new items are highlighted while the panel is open; closing it marks them as seen.
+  (() => {
+    const root = document.getElementById('notif');
+    if (!root) return;
+    const btn = document.getElementById('notifBtn'), panel = document.getElementById('notifPanel');
+    const list = document.getElementById('notifList'), badge = document.getElementById('notifBadge');
+    const empty = document.getElementById('notifEmpty'), newTag = document.getElementById('notifNew');
+    const SEEN = 'snbd.notif.seen.' + (root.dataset.client || '0');
+    const newText = '<%= t("notif.newCount", { n: "{n}" }) %>';
+    const ICONS = { overdue: '<%- icon("alert").replace(/\n/g, "") %>', due: '<%- icon("receipt").replace(/\n/g, "") %>', ticket: '<%- icon("mail").replace(/\n/g, "") %>', renewal: '<%- icon("refresh").replace(/\n/g, "") %>' };
+    let items = [], seen = new Set(), highlight = new Set(), open = false;
+    try { seen = new Set(JSON.parse(localStorage.getItem(SEEN) || '[]')); } catch (e) { seen = new Set(); }
+    const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const unseen = () => items.filter((i) => !seen.has(i.id));
+    const persist = () => {
+      const keep = items.map((i) => i.id).concat(Array.from(seen)).slice(0, 200);
+      try { localStorage.setItem(SEEN, JSON.stringify(Array.from(new Set(keep)))); } catch (e) { /* storage unavailable */ }
+    };
+    function render() {
+      const n = unseen().length;
+      badge.hidden = n === 0 || open;
+      badge.textContent = n > 9 ? '9+' : String(n);
+      btn.classList.toggle('has-new', n > 0);
+      newTag.hidden = highlight.size === 0;
+      newTag.textContent = newText.replace('{n}', highlight.size);
+      empty.hidden = items.length > 0;
+      list.innerHTML = items.map((i) =>
+        '<li><a class="notif-item type-' + esc(i.type) + (highlight.has(i.id) ? ' is-new' : '') + '" href="' + esc(i.href) + '" data-id="' + esc(i.id) + '">' +
+        '<span class="notif-ico" aria-hidden="true">' + (ICONS[i.type] || '') + '</span>' +
+        '<span class="notif-copy"><b>' + esc(i.title) + '</b><small>' + esc(i.detail) + '</small></span>' +
+        (highlight.has(i.id) ? '<i class="notif-dot" aria-hidden="true"></i><span class="sr-only"><%= t("notif.newCount", { n: 1 }) %></span>' : '') +
+        '</a></li>').join('');
+    }
+    function setOpen(v) {
+      if (v === open) return;
+      open = v;
+      panel.hidden = !v;
+      btn.setAttribute('aria-expanded', String(v));
+      if (v) {
+        document.querySelectorAll('details.dd[open]').forEach((d) => d.removeAttribute('open'));
+        highlight = new Set(unseen().map((i) => i.id));
+      } else {
+        items.forEach((i) => seen.add(i.id));
+        persist();
+        highlight = new Set();
+      }
+      render();
+    }
+    async function load() {
+      try {
+        const r = await fetch('/notifications.json', { credentials: 'same-origin', headers: { Accept: 'application/json' } });
+        if (!r.ok) return;
+        const j = await r.json();
+        items = Array.isArray(j.items) ? j.items : [];
+        if (open) { unseen().forEach((i) => highlight.add(i.id)); }
+        render();
+      } catch (e) { /* offline: keep what we have */ }
+    }
+    btn.addEventListener('click', () => setOpen(!open));
+    list.addEventListener('click', (e) => { const a = e.target.closest('a[data-id]'); if (a) { seen.add(a.dataset.id); persist(); } });
+    document.addEventListener('click', (e) => { if (open && !root.contains(e.target)) setOpen(false); });
+    document.addEventListener('keydown', (e) => { if (open && e.key === 'Escape') { setOpen(false); btn.focus(); } });
+    document.querySelectorAll('details.dd').forEach((d) => d.addEventListener('toggle', () => { if (d.open && open) setOpen(false); }));
+    load();
+    setInterval(load, 5 * 60 * 1000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
+  })();
+
   // Mobile drawer.
   const body = document.body;
   const side = document.getElementById('sidebar');
