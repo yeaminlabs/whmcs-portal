@@ -1,39 +1,44 @@
 <%- include('_head') %>
 <h1><%= t('auth.welcome') %></h1>
-<p class="sub"><%= t('auth.sub') %></p>
-
-<div class="google-wrap" id="google-wrap">
-  <div id="g_id_onload"
-       data-client_id="<%= googleClientId %>"
-       data-context="signin"
-       data-ux_mode="popup"
-       data-callback="handleGoogleCredential"
-       data-auto_prompt="false"
-       data-itp_support="true"></div>
-  <div class="g_id_signin" id="g-button"
-       data-type="standard"
-       data-shape="rectangular"
-       data-theme="outline"
-       data-text="signin_with"
-       data-locale="<%= lang %>"
-       data-size="large"
-       data-logo_alignment="center"
-       data-width="364"></div>
-  <p class="google-error alert err" id="google-error" role="alert" hidden></p>
-</div>
-
-<div class="or-divider" aria-hidden="true"><span><%= t('auth.or') %></span></div>
+<p class="sub auth-sub"><%= t('auth.sub') %></p>
 
 <% if (mock) { %><p class="alert"><%= t('auth.demo') %> <code>demo@example.com / demo1234</code></p><% } %>
 <% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
-<form method="post" action="/login" class="card" aria-label="Log in">
+<form method="post" action="/login" class="card auth-card" aria-label="Log in">
   <input type="hidden" name="next" value="<%= next || '' %>">
-  <label><%= t('prof.email') %> <input type="email" name="email" required autocomplete="email"></label>
-  <label><%= t('auth.password') %> <input type="password" name="password" required autocomplete="current-password"></label>
-  <button type="submit" class="btn red" style="width:100%"><%= t('auth.login') %></button>
-  <p class="sub" style="margin:14px 0 0;text-align:center;font-size:14px"><%= t('auth.new') %> <a href="/register"><%= t('auth.create') %></a></p>
+  <label class="af-field"><span class="af-label"><%= t('prof.email') %></span>
+    <span class="af"><%- icon('mail') %><input type="email" name="email" required autocomplete="email" placeholder="name@company.com"></span>
+  </label>
+  <label class="af-field"><span class="af-label"><%= t('auth.password') %></span>
+    <span class="af"><%- icon('lock') %><input type="password" name="password" id="pw" required autocomplete="current-password" placeholder="••••••••">
+      <button type="button" class="af-eye" id="pwToggle" aria-label="<%= t('auth.showPassword') %>" aria-pressed="false"><%- icon('eye') %></button></span>
+  </label>
+  <button type="submit" class="auth-submit"><span><%= t('auth.login') %></span><%- icon('arrow') %></button>
+
+  <div class="or-divider" aria-hidden="true"><span><%= t('auth.orContinue') %></span></div>
+  <div class="google-wrap" id="google-wrap">
+    <div id="g_id_onload"
+         data-client_id="<%= googleClientId %>"
+         data-context="signin"
+         data-ux_mode="popup"
+         data-callback="handleGoogleCredential"
+         data-auto_prompt="false"
+         data-itp_support="true"></div>
+    <div class="g_id_signin" id="g-button"
+         data-type="standard"
+         data-shape="pill"
+         data-theme="outline"
+         data-text="signin_with"
+         data-locale="<%= lang %>"
+         data-size="large"
+         data-logo_alignment="center"
+         data-width="360"></div>
+    <p class="google-error alert err" id="google-error" role="alert" hidden></p>
+  </div>
+  <p class="auth-alt"><%= t('auth.new') %> <a href="/register"><%= t('auth.create') %></a></p>
 </form>
 <script>
+(function(){var t=document.getElementById('pwToggle'),p=document.getElementById('pw');if(t&&p)t.addEventListener('click',function(){var show=p.type==='password';p.type=show?'text':'password';t.setAttribute('aria-pressed',String(show));t.setAttribute('aria-label',show?<%- JSON.stringify(t('auth.hidePassword')) %>:<%- JSON.stringify(t('auth.showPassword')) %>)})})();
 function showGoogleError(msg) {
   const el = document.getElementById('google-error');
   el.textContent = msg;

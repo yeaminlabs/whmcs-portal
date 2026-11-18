@@ -1,16 +1,22 @@
 <%- include('_head') %>
 <h1><%= t('reg.title') %></h1>
-<p class="sub"><%= t('reg.sub') %></p>
+<p class="sub auth-sub"><%= t('reg.sub') %></p>
 <% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
-<form method="post" action="/register" class="card">
+<form method="post" action="/register" class="card auth-card">
   <input type="hidden" name="next" value="<%= next || '' %>">
   <div class="field-row">
-    <label><%= t('prof.first') %><input name="firstname" required autocomplete="given-name"></label>
-    <label><%= t('prof.last') %><input name="lastname" required autocomplete="family-name"></label>
+    <label class="af-field"><span class="af-label"><%= t('prof.first') %></span><span class="af"><%- icon('user') %><input name="firstname" required autocomplete="given-name"></span></label>
+    <label class="af-field"><span class="af-label"><%= t('prof.last') %></span><span class="af"><%- icon('user') %><input name="lastname" required autocomplete="family-name"></span></label>
   </div>
-  <label><%= t('prof.email') %><input type="email" name="email" required autocomplete="email"></label>
-  <label><%= t('auth.password') %><input type="password" name="password" required minlength="8" autocomplete="new-password"></label>
-  <button type="submit" class="btn red" style="width:100%"><%= t('auth.create') %></button>
-  <p class="sub" style="margin:14px 0 0;text-align:center;font-size:14px"><%= t('reg.have') %> <a href="/login"><%= t('auth.login') %></a></p>
+  <label class="af-field"><span class="af-label"><%= t('prof.email') %></span><span class="af"><%- icon('mail') %><input type="email" name="email" required autocomplete="email" placeholder="name@company.com"></span></label>
+  <label class="af-field"><span class="af-label"><%= t('auth.password') %></span>
+    <span class="af"><%- icon('lock') %><input type="password" name="password" id="pw" required minlength="8" autocomplete="new-password" placeholder="••••••••">
+      <button type="button" class="af-eye" id="pwToggle" aria-label="<%= t('auth.showPassword') %>" aria-pressed="false"><%- icon('eye') %></button></span>
+  </label>
+  <button type="submit" class="auth-submit"><span><%= t('auth.create') %></span><%- icon('arrow') %></button>
+  <p class="auth-alt"><%= t('reg.have') %> <a href="/login"><%= t('auth.login') %></a></p>
 </form>
+<script>
+(function(){var t=document.getElementById('pwToggle'),p=document.getElementById('pw');if(t&&p)t.addEventListener('click',function(){var show=p.type==='password';p.type=show?'text':'password';t.setAttribute('aria-pressed',String(show));t.setAttribute('aria-label',show?<%- JSON.stringify(t('auth.hidePassword')) %>:<%- JSON.stringify(t('auth.showPassword')) %>)})})();
+</script>
 <%- include('_foot') %>

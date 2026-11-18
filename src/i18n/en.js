@@ -489,6 +489,9 @@ module.exports = {
   'aff.none': 'You do not have an affiliate account yet.',
   'aff.ask': 'Ask us to activate it',
 
+  'auth.orContinue': 'Or continue with',
+  'auth.showPassword': 'Show password',
+  'auth.hidePassword': 'Hide password',
   'auth.welcome': 'Welcome back',
   'auth.sub': 'Sign in to manage your hosting, domains and invoices.',
   'auth.or': 'or sign in with email',
