@@ -85,7 +85,7 @@ const serviceAction = (service) => {
 
 <!-- 2 · Chart (left) + three stat cards (right) -->
 <div class="dx-row dx-row-top">
-  <section class="dx-card dx-chart" id="searchSection" aria-labelledby="scSectionTitle">
+  <section class="dx-card dx-chart" id="searchSection" aria-labelledby="scSectionTitle"<%= googleConnected.searchconsole ? '' : ' hidden' %>>
     <header class="dx-card-head dx-perf-head">
       <div>
         <h2 id="scSectionTitle"><%= t('sc.performanceOverTime') %></h2>
@@ -464,7 +464,8 @@ const serviceAction = (service) => {
   try { localStorage.removeItem(googleHideKey); } catch (e) { /* private mode */ }
 
   function applyGoogleConnectionVisibility() {
-    searchSurfaces.forEach((el) => { if (el) el.hidden = googleConnectHidden; });
+    // Performance and keyword surfaces only appear once Search Console is connected; until then the connect box is shown instead.
+    searchSurfaces.forEach((el) => { if (el) el.hidden = googleConnectHidden || !googleConnections.searchconsole; });
     if (googleConnectPrompt) googleConnectPrompt.hidden = googleConnectHidden || Boolean(googleConnections.searchconsole);
     googleToolActions.forEach((action) => {
       const tool = action.dataset.googleTool;
@@ -914,7 +915,7 @@ const serviceAction = (service) => {
   });
 
   refreshBtn.addEventListener('click', loadData);
-  if (!googleConnectHidden) {
+  if (!googleConnectHidden && googleConnections.searchconsole) {
     loadSites();
     loadData();
     setInterval(loadData, 60 * 60 * 1000);
