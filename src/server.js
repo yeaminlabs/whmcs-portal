@@ -15,7 +15,7 @@ const whmcs = require('./lib/whmcs');
 const currency = require('./lib/currency');
 const { applyPrefs } = require('./lib/prefs');
 const { payLogo } = require('./lib/paylogos');
-const { n8nMark } = require('./lib/brandmarks');
+const brandmarks = require('./lib/brandmarks');
 const { warmup } = require('./lib/warmup');
 const { LANGS, isLang, translator, dateFormatter } = require('./lib/i18n');
 
@@ -102,7 +102,11 @@ app.use((req, res, next) => {
   res.locals.mock = config.useMock;
   res.locals.icon = icon;
   res.locals.payLogo = payLogo;
-  res.locals.n8nMark = n8nMark;
+  res.locals.n8nMark = brandmarks.n8nMark;
+  res.locals.brandMark = brandmarks.brandMark;
+  res.locals.bdixLogo = brandmarks.bdixLogo;
+  res.locals.bdixFlag = brandmarks.bdixFlag;
+  res.locals.brandTile = brandmarks.brandTile;
   res.locals.money = money;
   res.locals.googleClientId = config.googleClientId;
   next();

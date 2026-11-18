@@ -223,7 +223,7 @@ const nextQ = encodeURIComponent(cp);
   <div class="pubtop-in">
     <a class="pub-brand" href="/store" aria-label="SNBD HOST"><img src="/img/snbd-logo.png" alt="SNBD HOST" width="136" height="34"></a>
     <nav class="pub-nav" aria-label="<%= t('pub.navLabel') %>">
-      <% PUB.forEach(i => { %><a href="<%= i.href %>"<% if (i.on) { %> class="active" aria-current="page"<% } %>><%- n8nMark(i.text) %><%= i.text %></a><% }) %>
+      <% PUB.forEach(i => { %><a href="<%= i.href %>"<% if (i.on) { %> class="active" aria-current="page"<% } %>><%- brandMark(i.text) %><%= i.text %></a><% }) %>
     </nav>
     <div class="pub-actions">
       <% prefsMenu() %>
@@ -232,7 +232,7 @@ const nextQ = encodeURIComponent(cp);
       <details class="pub-burger">
         <summary aria-label="<%= t('pub.menu') %>"><%- icon('menu', 'pub-b-open') %><%- icon('close', 'pub-b-close') %></summary>
         <div class="pub-sheet">
-          <% PUB.forEach(i => { %><a href="<%= i.href %>"<% if (i.on) { %> class="active" aria-current="page"<% } %>><%- n8nMark(i.text) %><%= i.text %></a><% }) %>
+          <% PUB.forEach(i => { %><a href="<%= i.href %>"<% if (i.on) { %> class="active" aria-current="page"<% } %>><%- brandMark(i.text) %><%= i.text %></a><% }) %>
           <div class="pub-sheet-btns">
             <a class="btn ghost" href="/login?next=<%= nextQ %>"><%= t('pub.login') %></a>
             <a class="btn red" href="/register?next=<%= nextQ %>"><%= t('pub.create') %></a>
