@@ -14,6 +14,7 @@ const { icon } = require('./lib/icons');
 const whmcs = require('./lib/whmcs');
 const currency = require('./lib/currency');
 const { applyPrefs } = require('./lib/prefs');
+const { payLogo } = require('./lib/paylogos');
 const { warmup } = require('./lib/warmup');
 const { LANGS, isLang, translator, dateFormatter } = require('./lib/i18n');
 
@@ -97,6 +98,7 @@ app.use((req, res, next) => {
   res.locals.session = req.session;
   res.locals.mock = config.useMock;
   res.locals.icon = icon;
+  res.locals.payLogo = payLogo;
   res.locals.money = money;
   res.locals.googleClientId = config.googleClientId;
   next();

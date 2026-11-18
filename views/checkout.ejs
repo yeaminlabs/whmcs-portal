@@ -21,7 +21,7 @@ const pmName = String(o.paymentmethod.name || o.paymentmethod.module).split('|')
         <% if (o.cycle.setup > 0) { %><div><dt><%= t('pub.setupFee') %></dt><dd><%= money(o.cycle.setup, o.prefix) %></dd></div><% } %>
         <% if (o.domainLine) { %><div><dt><%= t('pub.domain') %></dt><dd class="co-wrap"><%= o.domainLine %></dd></div><% } %>
         <% if (o.hostname) { %><div><dt><%= t('pub.hostname') %></dt><dd class="co-wrap"><%= o.hostname %></dd></div><% } %>
-        <div><dt><%= t('pub.payment') %></dt><dd class="co-wrap"><%= pmName %></dd></div>
+        <div><dt><%= t('pub.payment') %></dt><dd class="co-wrap"><span class="pm-inline"><%- payLogo(o.paymentmethod.module) || payLogo(pmName) %><%= pmName %></span></dd></div>
       </dl>
       <div class="sum-total"><span><%= t('pub.total') %></span><strong><%= money(o.total, o.prefix) %></strong></div>
       <% if (billedNote) { %><p class="sum-bill"><%= billedNote %></p><% } %>

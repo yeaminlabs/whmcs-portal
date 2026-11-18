@@ -23,7 +23,12 @@
     <input type="hidden" name="domain" value="<%= result.domain %>">
     <div class="field-row">
       <label><%= t('do.period') %><select name="regperiod"><% [1, 2, 3, 5].forEach(y => { %><option value="<%= y %>"><%= t(y === 1 ? 'do.yearOne' : 'do.yearMany', { n: y }) %></option><% }) %></select></label>
-      <label><%= t('conf.payment') %><select name="paymentmethod"><% paymethods.forEach(m => { %><option value="<%= m.module %>"><%= String(m.displayname || m.module).split('|')[0].trim() %></option><% }) %></select></label>
+    </div>
+    <p class="pay-legend"><%= t('conf.payment') %></p>
+    <div class="pay-list" role="radiogroup" aria-label="<%= t('conf.payment') %>">
+      <% paymethods.forEach((m, i) => { const mName = String(m.displayname || m.module).split('|')[0].trim(); const mLogo = payLogo(m.module) || payLogo(mName); %>
+      <label class="choice pay gw"><input type="radio" name="paymentmethod" value="<%= m.module %>" <%= i === 0 ? 'checked' : '' %>><span><span class="gw-mark<%= mLogo ? ' gw-logo' : '' %>"><% if (mLogo) { %><%- mLogo %><% } else { %><%- icon('wallet') %><% } %></span><b><%= mName %></b></span></label>
+      <% }) %>
     </div>
     <% if (billCode !== displayCurrency.code) { %><p class="hint"><%= t('conf.taxNote', { code: billCode }) %></p><% } %>
     <button type="submit" class="btn red"><%= t('do.register', { domain: result.domain }) %> <%- icon('arrow') %></button>

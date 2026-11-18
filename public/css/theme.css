@@ -239,3 +239,10 @@ body.nav-collapsed .snav-link:focus-visible,body.nav-collapsed .snav-toggle:focu
 /* Payment method logos (bKash, Stripe) sit on a white tile */
 .gw-logo img{padding:2px}
 .gw-logo img[alt="Stripe"]{padding:6px 5px}
+
+/* Payment logos everywhere a method is named */
+.pm-inline{display:inline-flex;align-items:center;gap:.5rem}
+.pm-inline img{width:auto;height:1.5rem;max-width:4.25rem;object-fit:contain;padding:2px 5px;background:#fff;border:1px solid #E1DAD4;border-radius:6px}
+.do-form .pay-list{margin:.25rem 0 1rem}
+.pay-legend{margin:.25rem 0 .4rem;color:#30292E;font-size:.8125rem;font-weight:700}
+.gw > span{align-content:center}

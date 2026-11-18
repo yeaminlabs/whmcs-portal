@@ -83,7 +83,8 @@ let step = 0;
       <div class="step-body">
         <div class="pay-list" role="radiogroup" aria-label="<%= t('conf.payment') %>">
           <% methods.forEach(m => { %>
-          <label class="choice pay"><input type="radio" name="paymentmethod" value="<%= m.module %>" <%= m.module === pm ? 'checked' : '' %>><span><b><%= String(m.displayname || m.module).split('|')[0].trim() %></b><% if (String(m.displayname).includes('|')) { %><small><%= String(m.displayname).split('|').slice(1).join(' ').trim() %></small><% } %></span></label>
+          <% const mName = String(m.displayname || m.module).split('|')[0].trim(); const mDesc = String(m.displayname).includes('|') ? String(m.displayname).split('|').slice(1).join(' ').trim() : ''; const mLogo = payLogo(m.module) || payLogo(mName); %>
+          <label class="choice pay gw"><input type="radio" name="paymentmethod" value="<%= m.module %>" <%= m.module === pm ? 'checked' : '' %>><span><span class="gw-mark<%= mLogo ? ' gw-logo' : '' %>"><% if (mLogo) { %><%- mLogo %><% } else { %><%- icon('wallet') %><% } %></span><b><%= mName %></b><% if (mDesc) { %><small><%= mDesc %></small><% } %></span></label>
           <% }) %>
         </div>
         <label class="promo"><%= t('conf.promo') %> <span class="opt"><%= t('common.optional') %></span><input name="promocode" value="<%= form.promocode || '' %>" autocomplete="off"></label>
