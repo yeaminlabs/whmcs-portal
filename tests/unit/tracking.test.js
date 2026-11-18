@@ -34,3 +34,28 @@ describe('tracking', () => {
     expect(res.locals.tracking.events).toEqual([]);
   });
 });
+
+describe('funnel and purchase events', () => {
+  const cart = {
+    found: { group: { name: 'BDIX Shared Hosting' }, product: { slug: 'starter', name: 'BDIX-01 Starter', pricing: { code: 'BDT' } } },
+    cycle: { label: 'Monthly', price: 97, setup: 0 },
+    method: 'bkashcheckoutUrl',
+  };
+  test('cart events carry plan and price only', () => {
+    const ev = tracking.cartEvent('add_to_cart', { ...cart, found: { ...cart.found, domain: 'secret.example' } });
+    expect(ev.event).toBe('add_to_cart');
+    expect(ev.ecommerce).toMatchObject({ currency: 'BDT', value: 97 });
+    expect(ev.ecommerce.items[0]).toMatchObject({ item_id: 'starter', item_name: 'BDIX-01 Starter', quantity: 1 });
+    expect(JSON.stringify(ev)).not.toContain('secret.example');
+  });
+  test('add_payment_info says how the customer pays', () => {
+    expect(tracking.cartEvent('add_payment_info', cart).ecommerce.payment_type).toBe('bkash');
+    expect(tracking.cartEvent('add_payment_info', { ...cart, method: 'stripe' }).ecommerce.payment_type).toBe('card');
+  });
+  test('a paid invoice becomes one purchase with amounts only', () => {
+    const ev = tracking.invoicePurchaseEvent({ invoiceid: 301, total: '14.99', currencycode: 'USD', items: { item: [{ description: 'Hosting - private-domain.com' }] } });
+    expect(ev.event).toBe('purchase');
+    expect(ev.ecommerce).toMatchObject({ transaction_id: '301', currency: 'USD', value: 14.99 });
+    expect(JSON.stringify(ev)).not.toContain('private-domain');
+  });
+});

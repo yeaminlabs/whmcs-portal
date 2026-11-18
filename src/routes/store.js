@@ -16,6 +16,7 @@ const { cleanStr, cleanInt } = require('../lib/validators');
 const currency = require('../lib/currency');
 const { invalidateClient } = require('../lib/client');
 const { applyPrefs } = require('../lib/prefs');
+const tracking = require('../lib/tracking');
 
 const router = express.Router();
 
@@ -96,10 +97,6 @@ router.get('/store', prefsFromQuery, async (req, res) => {
 router.get('/store/complete', requireLogin, (req, res) => {
   const order = req.session.lastOrder;
   if (!order) return res.redirect('/store');
-  if (req.session.trackedOrder !== order.orderid) {
-    req.session.trackedOrder = order.orderid;
-    require('../lib/tracking').queue(req, require('../lib/tracking').purchaseEvent(order));
-  }
   res.render('store-complete', { title: 'Order Complete', order });
 });
 
@@ -240,6 +237,18 @@ async function validateOrder(t, { group, product: productSlug, form }, currencyC
   return { found, cycle, params };
 }
 
+/** The cart (product, plan, payment method) behind an order form, for funnel tracking; null if it cannot be resolved. */
+async function cartContext(req, order) {
+  try {
+    const { account } = await currencies(req);
+    const found = await catalog.getProduct(order.group, order.product, account.code);
+    const cycle = found && found.product.pricing.cycles.find((c) => c.id === order.form.billingcycle);
+    return found && cycle ? { found, cycle, method: order.form.paymentmethod } : null;
+  } catch (e) {
+    return null;
+  }
+}
+
 const placing = new Map();
 
 /**
@@ -290,9 +299,14 @@ router.post('/store/:group/:product', async (req, res) => {
       const { account } = await currencies(req);
       const { found } = await validateOrder(t, order, account.code);
       req.session.pendingOrder = { group: found.group.slug, product: found.product.slug, form, createdAt: Date.now() };
+      const cart = await cartContext(req, order);
+      if (cart) ['add_to_cart', 'add_payment_info'].forEach((n) => tracking.queue(req, tracking.cartEvent(n, cart)));
       return res.redirect(303, '/checkout');
     }
-    afterOrder(req, res, await placeOrder(req, t, order));
+    const data = await placeOrder(req, t, order);
+    const cart = await cartContext(req, order);
+    if (cart) ['add_to_cart', 'add_payment_info', 'begin_checkout'].forEach((n) => tracking.queue(req, tracking.cartEvent(n, cart)));
+    afterOrder(req, res, data);
   } catch (e) {
     try {
       await renderConfigure(req, res, { form, error: e.message, status: 422 });
@@ -350,6 +364,11 @@ router.get('/checkout', async (req, res) => {
   const pending = pendingOrder(req);
   if (!pending) return res.redirect('/store');
   try {
+    if (!pending.tracked) {
+      pending.tracked = true;
+      const cart = await cartContext(req, { group: pending.group, product: pending.product, form: pending.form || {} });
+      if (cart) ['view_cart', 'begin_checkout'].forEach((n) => tracking.queue(req, tracking.cartEvent(n, cart)));
+    }
     await renderCheckout(req, res, pending);
   } catch (e) {
     res.render('error', { title: 'Checkout', message: res.locals.t('checkout.loadFail'), back: '/store' });

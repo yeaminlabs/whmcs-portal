@@ -42,6 +42,43 @@ function purchaseEvent(order) {
   };
 }
 
+/**
+ * GA4 ecommerce funnel events the GTM container already has tags for:
+ * add_to_cart, view_cart, begin_checkout, add_payment_info. `cart` is { found: {group, product}, cycle, method }.
+ * Only product, plan and price are sent, never the domain, hostname or any form field.
+ */
+function cartEvent(name, cart) {
+  const { found, cycle, method } = cart;
+  const value = (Number(cycle.price) || 0) + (Number(cycle.setup) || 0);
+  const ev = {
+    event: name,
+    ecommerce: {
+      currency: found.product.pricing.code || 'BDT',
+      value,
+      items: [{
+        item_id: String(found.product.slug), item_name: found.product.name, item_category: found.group.name,
+        item_variant: cycle.label, price: value, quantity: 1,
+      }],
+    },
+  };
+  if (name === 'add_payment_info') ev.ecommerce.payment_type = /bkash/i.test(method || '') ? 'bkash' : /stripe/i.test(method || '') ? 'card' : String(method || '');
+  return ev;
+}
+
+/** A purchase is a paid invoice (the order itself only creates the invoice). Amounts only, no item text. */
+function invoicePurchaseEvent(invoice) {
+  const value = Number(invoice.total) || 0;
+  return {
+    event: 'purchase',
+    ecommerce: {
+      transaction_id: String(invoice.invoiceid),
+      currency: invoice.currencycode || 'BDT',
+      value,
+      items: [{ item_id: `invoice-${invoice.invoiceid}`, item_name: 'SNBD HOST order', price: value, quantity: 1 }],
+    },
+  };
+}
+
 function hostOf(req) {
   return String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].split(':')[0].trim().toLowerCase();
 }
@@ -62,4 +99,4 @@ function middleware(req, res, next) {
   next();
 }
 
-module.exports = { GTM_ID, HOSTS, userId, queue, purchaseEvent, middleware };
+module.exports = { GTM_ID, HOSTS, userId, queue, purchaseEvent, cartEvent, invoicePurchaseEvent, middleware };

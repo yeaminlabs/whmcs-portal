@@ -305,6 +305,14 @@ router.get('/invoices/:id', async (req, res) => {
     const invoice = await ownedInvoice(req.session.clientId, cleanInt(req.params.id));
     if (!invoice) return notFound(res, '/invoices');
     const items = invoice.items && invoice.items.item ? (Array.isArray(invoice.items.item) ? invoice.items.item : [invoice.items.item]) : [];
+    // GA4 purchase: once per invoice, only when the invoice really is paid after an in-portal payment.
+    if (['credit', 'card', 'bkash'].includes(req.query.paid) && String(invoice.status).toLowerCase() === 'paid') {
+      const done = Array.isArray(req.session.trackedInvoices) ? req.session.trackedInvoices : [];
+      if (!done.includes(invoice.invoiceid)) {
+        req.session.trackedInvoices = done.concat(invoice.invoiceid).slice(-30);
+        require('../lib/tracking').queue(req, require('../lib/tracking').invoicePurchaseEvent(invoice));
+      }
+    }
     res.render('invoice', { title: `Invoice #${invoice.invoicenum || invoice.invoiceid}`, invoice, items, notice: ['credit', 'card', 'bkash', 'processing', 'check'].includes(req.query.paid) ? req.query.paid : null });
   } catch (e) {
     res.render('error', { title: 'Invoice', message: e.message, back: '/invoices' });
