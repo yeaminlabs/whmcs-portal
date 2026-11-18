@@ -246,3 +246,11 @@ body.nav-collapsed .snav-link:focus-visible,body.nav-collapsed .snav-toggle:focu
 .do-form .pay-list{margin:.25rem 0 1rem}
 .pay-legend{margin:.25rem 0 .4rem;color:#30292E;font-size:.8125rem;font-weight:700}
 .gw > span{align-content:center}
+
+/* Guest checkout: one login form with Google sign-in, create-account as a link */
+.co-box .or-divider{margin:16px 0 0;font-size:.6875rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.co-box .google-wrap{display:grid;justify-items:center;margin:12px 0 0;min-height:2.75rem;min-width:0;max-width:100%;overflow:hidden}
+.co-box .google-wrap .alert{width:100%;margin:8px 0 0}
+.co-newlink{margin:0;padding:14px 20px 18px;border-top:1px solid #F0ECE7;text-align:center;color:#685F65;font-size:14px}
+.co-newlink a{color:#BE3045;font-weight:700;text-decoration:none}
+.co-newlink a:hover{text-decoration:underline}

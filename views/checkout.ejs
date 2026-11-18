@@ -39,22 +39,49 @@ const pmName = String(o.paymentmethod.name || o.paymentmethod.module).split('|')
         <label><%= t('pub.email') %><input type="email" name="email" required autocomplete="email"></label>
         <label><%= t('pub.password') %><input type="password" name="password" required autocomplete="current-password"></label>
         <button type="submit" class="btn red co-btn"><%= t('pub.logInContinue') %> <%- icon('arrow') %></button>
-      </form>
-    </section>
-    <section class="panel co-box" aria-labelledby="co-reg-h">
-      <header><span id="co-reg-h"><%= t('pub.newHere') %></span></header>
-      <form method="post" action="/register" class="co-form">
-        <p class="co-sub"><%= t('pub.newHereSub') %></p>
-        <input type="hidden" name="next" value="<%= nextVal %>">
-        <div class="field-row">
-          <label><%= t('pub.firstName') %><input name="firstname" required autocomplete="given-name"></label>
-          <label><%= t('pub.lastName') %><input name="lastname" required autocomplete="family-name"></label>
+        <div class="or-divider" aria-hidden="true"><span><%= t('auth.orContinue') %></span></div>
+        <div class="google-wrap" id="google-wrap">
+          <div id="g_id_onload"
+               data-client_id="<%= googleClientId %>"
+               data-context="signin"
+               data-ux_mode="popup"
+               data-callback="handleGoogleCredential"
+               data-auto_prompt="false"
+               data-itp_support="true"></div>
+          <div class="g_id_signin" id="g-button"
+               data-type="standard"
+               data-shape="rectangular"
+               data-theme="outline"
+               data-text="signin_with"
+               data-locale="<%= lang %>"
+               data-size="large"
+               data-logo_alignment="center"
+               data-width="320"></div>
+          <p class="google-error alert err" id="google-error" role="alert" hidden></p>
         </div>
-        <label><%= t('pub.email') %><input type="email" name="email" required autocomplete="email"></label>
-        <label><%= t('pub.password') %><input type="password" name="password" required minlength="8" autocomplete="new-password"><small class="hint"><%= t('pub.passwordHint') %></small></label>
-        <button type="submit" class="btn red co-btn"><%= t('pub.createContinue') %> <%- icon('arrow') %></button>
       </form>
+      <p class="co-newlink"><%= t('auth.new') %> <a href="/register?next=<%= encodeURIComponent(nextVal) %>"><%= t('auth.create') %></a></p>
     </section>
+    <script>
+    (function(){var g=document.getElementById('g-button'),f=document.querySelector('.co-box .co-form');if(g&&f){var w=Math.floor(Math.min(400,Math.max(200,f.clientWidth-40)));g.setAttribute('data-width',String(w))}})();
+    function showGoogleError(msg) {
+      const el = document.getElementById('google-error');
+      el.textContent = msg;
+      el.hidden = false;
+    }
+    function handleGoogleCredential(response) {
+      fetch('/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_token: response.credential, next: (document.querySelector('form[action="/login"] input[name="next"]') || {}).value || '' }),
+      }).then(async (r) => {
+        const data = await r.json().catch(() => ({}));
+        if (r.ok && data.ok) { location.href = data.redirect || '/checkout'; return; }
+        showGoogleError(data.error || <%- JSON.stringify(t('auth.googleFail')) %>);
+      }).catch(() => showGoogleError(<%- JSON.stringify(t('auth.googleNet')) %>));
+    }
+    </script>
+    <script src="https://accounts.google.com/gsi/client?hl=<%= lang %>" async defer onerror="showGoogleError(<%= JSON.stringify(t('auth.googleLoad')) %>)"></script>
     <p class="co-trust"><%- icon('lock') %><span><%= t('pub.trust') %></span></p>
     <% } else { %>
     <section class="panel co-box" aria-labelledby="co-in-h">
