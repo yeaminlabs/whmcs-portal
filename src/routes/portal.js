@@ -762,10 +762,7 @@ router.post('/contact', async (req, res) => {
   await whmcs.call('SendContact', { name: cleanStr(req.body.name, 100), email: cleanStr(req.body.email, 190), message: cleanStr(req.body.message, 2000) }).catch(() => null);
   res.render('contact', { title: 'Contact', error: null, done: true });
 });
-router.get('/affiliates', async (req, res) => {
-  const data = await whmcs.call('GetAffiliates', { clientid: req.session.clientId }).catch(() => null);
-  res.render('affiliates', { title: 'Affiliates', info: (data && data.affiliates) || null });
-});
+// Affiliates live in routes/affiliates.js
 
 module.exports = router;
 

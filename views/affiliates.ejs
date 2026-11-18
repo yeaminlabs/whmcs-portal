@@ -1,4 +1,12 @@
 <%- include('_head') %>
+<%
+const state = info.state;
+const prog = info.program || {};
+const acc = (accountCurrency && accountCurrency.code) || 'BDT';
+const minPayout = prog.minPayout || 0;
+const pct = prog.percent || 0;
+const how = [['aff.how1', 'aff.how1t'], ['aff.how2', 'aff.how2t'], ['aff.how3', 'aff.how3t']];
+%>
 <div class="pagehead">
   <div>
     <div class="page-eyebrow"><span class="page-icon"><%- icon('star') %></span><span class="page-label"><%= t('nav.groupAccount') %></span></div>
@@ -6,55 +14,77 @@
     <p class="sub"><%= t('aff.sub') %></p>
   </div>
 </div>
-<% if (info) { %>
-<%
-const affBalance = info.balance || info.earnings || 0;
-const affPaid = info.withdrawn || info.paidout || 0;
-const affClicks = info.visitors || info.clicks || 0;
-const affSignups = info.signups || info.referrals || 0;
-const affLink = info.link || info.referrallink || '';
-%>
+
+<% if (state === 'active') { const a = info.affiliate; const rate = a.terms.kind === 'fixed' ? price(a.terms.value, acc) : a.terms.value + '%'; %>
 <div class="grid aff-stat">
-  <div class="stat"><span><%- icon('wallet') %> Balance</span><strong><%= affBalance %></strong><small>Available to withdraw</small></div>
-  <div class="stat"><span><%- icon('arrow') %> Paid Out</span><strong><%= affPaid %></strong><small>Lifetime earnings</small></div>
-  <div class="stat"><span><%- icon('activity') %> Clicks</span><strong><%= affClicks %></strong><small>Total referral visits</small></div>
-  <div class="stat"><span><%- icon('users') %> Sign-ups</span><strong><%= affSignups %></strong><small>Referred accounts</small></div>
+  <div class="stat"><span><%- icon('wallet') %> <%= t('aff.balance') %></span><strong><%= price(a.balance, acc) %></strong><small><%= t('aff.balanceHint') %></small></div>
+  <div class="stat"><span><%- icon('arrow') %> <%= t('aff.paid') %></span><strong><%= price(a.paidOut, acc) %></strong><small><%= t('aff.paidHint') %></small></div>
+  <div class="stat"><span><%- icon('activity') %> <%= t('aff.clicks') %></span><strong><%= a.clicks %></strong><small><%= t('aff.clicksHint') %></small></div>
+  <div class="stat"><span><%- icon('star') %> <%= t('aff.rate') %></span><strong><%= rate %></strong><small><%= t(a.terms.kind === 'fixed' ? 'aff.rateFixed' : 'aff.rateHint') %></small></div>
 </div>
-<% if (affLink) { %>
-<div class="card">
-  <h2 style="margin-top:0">Your Referral Link</h2>
-  <p class="sub">Share this link to earn commissions on every referral who purchases a service.</p>
+
+<% if (link) { %>
+<section class="card aff-card">
+  <h2><%= t('aff.linkTitle') %></h2>
+  <p class="sub"><%= t('aff.linkText') %></p>
   <div class="aff-link-box">
-    <input type="text" class="mono" value="<%= affLink %>" readonly id="aff-link" style="font-size:13px">
-    <button class="btn ghost" onclick="navigator.clipboard.writeText(document.getElementById('aff-link').value).then(()=>{this.textContent='Copied!'})"><%- icon('copy') %> Copy</button>
+    <input type="text" class="mono" value="<%= link %>" readonly id="aff-link" aria-label="<%= t('aff.linkTitle') %>">
+    <button type="button" class="btn red" id="aff-copy" data-done="<%= t('aff.copied') %>"><%- icon('copy') %><span><%= t('aff.copy') %></span></button>
   </div>
-  <p class="sum-secure" style="margin-top:12px"><%- icon('info') %>Commissions are credited when your referred clients complete a purchase.</p>
-</div>
+  <% if (a.since) { %><p class="aff-small"><%= t('aff.since', { date: fmtDate(a.since) }) %></p><% } %>
+</section>
 <% } %>
-<div class="card">
-  <h2 style="margin-top:0">How it works</h2>
-  <ol style="padding-left:20px;display:grid;gap:8px;color:var(--g600);font-size:14px;margin:0">
-    <li><strong style="color:var(--ink)">Share your link</strong> — post it in your content, website, or social media.</li>
-    <li><strong style="color:var(--ink)">Earn commissions</strong> — get credited when someone signs up and buys through your link.</li>
-    <li><strong style="color:var(--ink)">Withdraw anytime</strong> — request a payout once your balance meets the minimum threshold.</li>
-  </ol>
-</div>
-<% } else { %>
-<div class="ui-empty">
-  <div class="ui-empty-icon"><%- icon('star') %></div>
-  <h3><%= t('aff.none') %></h3>
-  <p>Earn commissions by referring new customers to SNBD HOST. Contact us to get started.</p>
-  <a class="btn red" href="/contact"><%= t('aff.ask') %></a>
-</div>
-<div class="card" style="max-width:620px;margin-top:16px">
-  <h2 style="margin-top:0">About the Affiliate Program</h2>
-  <div class="funds-methods">
-    <div class="funds-method"><%- icon('users') %><span>Refer clients</span></div>
-    <div class="funds-method"><%- icon('wallet') %><span>Earn commission</span></div>
-    <div class="funds-method"><%- icon('arrow') %><span>Get paid out</span></div>
-    <div class="funds-method"><%- icon('activity') %><span>Track referrals</span></div>
+
+<section class="card aff-card">
+  <h2><%= t('aff.payoutTitle') %></h2>
+  <p class="sub"><%= t('aff.payoutText', { amount: price(minPayout, 'BDT') }) %></p>
+  <form method="post" action="/affiliates/payout">
+    <% if (a.balance >= minPayout && a.balance > 0) { %>
+    <button type="submit" class="btn red"><%= t('aff.payoutBtn') %> <%- icon('external') %></button>
+    <% } else { %>
+    <button type="button" class="btn ghost" disabled aria-disabled="true"><%= t('aff.payoutBtn') %></button>
+    <span class="aff-small"><%= t('aff.payoutLocked', { amount: price(minPayout, 'BDT') }) %></span>
+    <% } %>
+  </form>
+</section>
+
+<% } else if (state === 'inactive') { %>
+<section class="card aff-hero">
+  <span class="aff-hero-ico"><%- icon('star') %></span>
+  <div>
+    <h2><%= pct > 0 ? t('aff.joinTitle', { pct }) : t('aff.joinTitleNoPct') %></h2>
+    <p><%= t('aff.joinText') %></p>
+    <p class="aff-small"><%= t('aff.terms', { pct, amount: price(minPayout, 'BDT') }) %></p>
+    <form method="post" action="/affiliates/activate"><button type="submit" class="btn red"><%- icon('check') %> <%= t('aff.activate') %></button></form>
   </div>
-  <p style="font-size:14px;color:var(--g600);margin:8px 0 0">Join our affiliate program to earn recurring commissions on every customer you refer. Contact support to activate your account.</p>
-</div>
+</section>
+
+<% } else if (state === 'disabled') { %>
+<div class="ui-empty"><div class="ui-empty-icon"><%- icon('star') %></div><h3><%= t('aff.offTitle') %></h3><p><%= t('aff.offText') %></p><a class="btn ghost" href="/contact"><%= t('nav.contact') %></a></div>
+
+<% } else { %>
+<div class="ui-empty"><div class="ui-empty-icon"><%- icon('alert') %></div><h3><%= t('aff.unavailableTitle') %></h3><p><%= t('aff.unavailableText') %></p><a class="btn ghost" href="/affiliates"><%= t('aff.retry') %></a></div>
+<% } %>
+
+<% if (state === 'active' || state === 'inactive') { %>
+<section class="card aff-card">
+  <h2><%= t('aff.howTitle') %></h2>
+  <ol class="aff-how"><% how.forEach(h => { %><li><strong><%= t(h[0]) %></strong> — <%= t(h[1]) %></li><% }) %></ol>
+</section>
+<% } %>
+
+<% if (state === 'active' && link) { %>
+<script>
+(() => {
+  const b = document.getElementById('aff-copy'), i = document.getElementById('aff-link');
+  if (!b || !i) return;
+  b.addEventListener('click', async () => {
+    let ok = false;
+    try { await navigator.clipboard.writeText(i.value); ok = true; } catch (e) { i.select(); try { ok = document.execCommand('copy'); } catch (err) { ok = false; } }
+    if (ok) { const s = b.querySelector('span'), t0 = s.textContent; s.textContent = b.dataset.done; setTimeout(() => { s.textContent = t0; }, 1600); }
+  });
+  i.addEventListener('focus', () => i.select());
+})();
+</script>
 <% } %>
 <%- include('_foot') %>

@@ -204,8 +204,26 @@ const handlers = {
     return ok({ totalresults: 1, downloads: { download: [{ id: 1, title: 'Getting started PDF', category: 'Guides' }] } });
   },
   async SendContact() { return ok({}); },
-  async GetAffiliates() {
-    return ok({ affiliates: { affiliate: [{ id: 1, balance: '10.00', referrals: 3 }] } });
+  // Affiliates behave like WHMCS: GetAffiliates {userid} returns that client's record or "Client ID not found".
+  async GetAffiliates(params) {
+    const all = [...affiliateRows.values()];
+    if (params && params.userid != null) {
+      const row = affiliateRows.get(String(params.userid));
+      return row ? ok({ totalresults: 1, numreturned: 1, affiliates: { affiliate: [row] } }) : { result: 'error', message: 'Client ID not found' };
+    }
+    return ok({ totalresults: all.length, numreturned: all.length, affiliates: { affiliate: all } });
+  },
+  async AffiliateActivate(params) {
+    const id = String(params && params.userid);
+    if (!id || id === 'undefined') return { result: 'error', message: 'Client ID not found' };
+    if (!affiliateRows.has(id)) {
+      affiliateRows.set(id, { id: 100 + affiliateRows.size, date: new Date().toISOString().slice(0, 10), clientid: Number(id), visitors: 0, paytype: '', payamount: '0.00', onetime: 0, balance: '0.00', withdrawn: '0.00' });
+    }
+    return ok({ affiliateid: affiliateRows.get(id).id });
+  },
+  async GetConfigurationValue(params) {
+    const v = { AffiliateEnabled: 'on', AffiliateEarningPercent: '10', AffiliatePayout: '500.00' }[params && params.setting];
+    return v === undefined ? { result: 'error', message: 'Invalid name for parameter setting' } : ok({ value: v });
   },
 };
 
@@ -219,6 +237,8 @@ const fresh = {
 };
 const freshCur = () => (fresh.currency === 2 ? { currencycode: 'USD', currencyprefix: '$' } : { currencycode: 'BDT', currencyprefix: '৳' });
 const freshTotal = () => fresh.invoice.items.reduce((n, it) => n + Number(it.amount), 0).toFixed(2);
+// Demo affiliates, keyed by client id. Client 850 is someone else's record.
+const affiliateRows = new Map([['850', { id: 1, date: '2025-07-11', clientid: 850, visitors: 2014, paytype: '', payamount: '0.00', onetime: 0, balance: '487.71', withdrawn: '7954.35' }]]);
 const is2 = (v) => String(v) === '2';
 const base = { ...handlers };
 Object.assign(handlers, {

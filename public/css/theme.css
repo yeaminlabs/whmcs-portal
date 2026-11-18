@@ -303,3 +303,20 @@ h1 .region-flag{height:.62em;margin-right:.55rem;vertical-align:.02em}
 h1 .openclaw-logo{height:1.1em;margin:0 .18em 0 0;vertical-align:-.22em}
 .plan header h2 .openclaw-logo{height:1.2em;vertical-align:-.3em}
 .group-card strong .openclaw-logo{height:1.45em;vertical-align:-.38em;margin-left:0}
+
+/* Affiliates */
+.aff-stat{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:900px){.aff-stat{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.aff-card h2{margin:0 0 4px;font-size:17px;color:#30292E}
+.aff-card .sub{margin:0 0 12px}
+.aff-link-box input{min-width:0}
+.aff-small{margin:8px 0 0;color:#8A7F86;font-size:13px}
+.aff-hero{display:flex;gap:18px;align-items:flex-start;max-width:760px;padding:26px 28px;background:linear-gradient(180deg,#fff 0%,#FFFAFA 100%);border-color:#F0D3D8}
+.aff-hero-ico{display:grid;place-items:center;flex:none;width:52px;height:52px;border-radius:14px;background:#FBEDEE;color:#BE3045}
+.aff-hero-ico .ico{width:26px;height:26px}
+.aff-hero h2{margin:0 0 8px;font-size:21px;line-height:1.3;color:#30292E}
+.aff-hero p{margin:0 0 8px;color:#4A4248;font-size:15px;line-height:1.6}
+.aff-hero form{margin-top:14px}
+.aff-how{padding-left:20px;display:grid;gap:8px;color:#685F65;font-size:14.5px;margin:0}
+.aff-how strong{color:#30292E}
+@media (max-width:560px){.aff-hero{flex-direction:column;padding:20px 18px}}
