@@ -1,0 +1,42 @@
+<%- include('_head') %>
+<nav class="kb-crumb" aria-label="<%= t('kb.back') %>"><a href="/kb"><%- icon('book') %><%= t('kb.back') %></a><span aria-hidden="true">/</span><span><%= article.category %></span></nav>
+<div class="kb-layout">
+  <article class="kb-article">
+    <header>
+      <span class="kb-badge"><%= article.category %></span>
+      <h1><%= article.title %></h1>
+      <% if (article.summary) { %><p class="kb-lead"><%= article.summary %></p><% } %>
+      <p class="kb-meta"><%= fmtDate(article.date) %> · <%= t('kb.minRead', { n: article.minutes }) %></p>
+    </header>
+    <% if (lang === 'bn') { %><p class="kb-note"><%= t('kb.englishOnly') %></p><% } %>
+    <div class="kb-body" id="kbBody"><%- article.html %></div>
+    <aside class="kb-help">
+      <span class="kb-help-ico"><%- icon('headset') %></span>
+      <div><h2><%= t('kb.stillHelp') %></h2><p><%= t('kb.stillHelpText') %></p></div>
+      <div class="kb-help-actions"><a class="btn red" href="/tickets/new"><%= t('dash.openTicket') %></a><a class="btn ghost" href="/contact"><%= t('kb.contact') %></a></div>
+    </aside>
+  </article>
+  <% if (related.length) { %>
+  <aside class="kb-side" aria-label="<%= t('kb.related') %>">
+    <h2><%= t('kb.related') %></h2>
+    <% related.forEach((a) => { %><a class="kb-rel" href="/kb/<%= a.slug %>"><span class="kb-badge"><%= a.category %></span><strong><%= a.title %></strong><small><%= t('kb.minRead', { n: a.minutes }) %></small></a><% }) %>
+  </aside>
+  <% } %>
+</div>
+<script>
+(() => {
+  // Copy button on code blocks.
+  const labels = { copy: '<%= t("kb.copy") %>', done: '<%= t("kb.copied") %>' };
+  document.querySelectorAll('#kbBody pre').forEach((pre) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'kb-copy'; b.textContent = labels.copy;
+    b.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(pre.innerText.replace(/\n$/, '')); b.textContent = labels.done; setTimeout(() => { b.textContent = labels.copy; }, 1600); } catch (e) { /* clipboard blocked */ }
+    });
+    pre.appendChild(b);
+  });
+  // Links inside articles that leave the portal open in a new tab.
+  document.querySelectorAll('#kbBody a[href^="http"]').forEach((a) => { a.target = '_blank'; a.rel = 'noopener noreferrer'; });
+})();
+</script>
+<%- include('_foot') %>

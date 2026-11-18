@@ -16,7 +16,7 @@ const NAV = [
   ]},
   { id: 'support', icon: 'life', label: t('nav.groupSupport'), items: [
     { href: '/tickets', icon: 'mail', text: t('nav.tickets'), on: tl.includes('ticket') },
-    { href: '/kb', icon: 'book', text: t('nav.help'), on: ti === 'Help Center' },
+    { href: '/kb', icon: 'book', text: t('nav.help'), on: ti === 'Help Center' || (typeof kbPage !== 'undefined' && kbPage) },
     { href: '/announcements', icon: 'bell', text: t('nav.announcements'), on: ti === 'Announcements' },
     { href: '/status', icon: 'activity', text: t('nav.status'), on: ti === 'Network Status' },
     { href: '/downloads', icon: 'download', text: t('nav.downloads'), on: ti === 'Downloads' },
@@ -41,13 +41,14 @@ const isPublic = !(session && session.clientId) && typeof publicPage !== 'undefi
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#BE3045">
-<title><%= T(ti) %> · <%= t('brand.clientArea') %></title>
+<title><%= typeof docTitle === 'string' ? docTitle : T(ti) %> · <%= t('brand.clientArea') %></title>
 <link rel="icon" type="image/webp" href="/img/favicon.webp">
 <link rel="preload" href="/fonts/inter-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
 <% if (lang === 'bn') { %><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap"><% } %>
 <link rel="stylesheet" href="/css/app.css">
 <link rel="stylesheet" href="/css/theme.css">
 <% if (ti === 'Dashboard') { %><link rel="stylesheet" href="/css/dashboard.css"><% } %>
+<% if (typeof kbPage !== 'undefined' && kbPage) { %><link rel="stylesheet" href="/css/kb.css"><% } %>
 </head>
 <body class="lang-<%= lang %>">
 <script>

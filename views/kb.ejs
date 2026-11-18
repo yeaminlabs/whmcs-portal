@@ -1,5 +1,55 @@
 <%- include('_head') %>
 <div class="pagehead"><div><h1><%= t('kb.title') %></h1><p class="sub"><%= t('kb.sub') %></p></div></div>
-<% if (!items.length) { %><div class="ui-empty"><h3><%= t('kb.empty') %></h3><p><a href="/tickets/new"><%= t('dash.openTicket') %></a></p></div><% } %>
-<div class="group-grid"><% items.forEach(a => { %><article class="ui-card"><div class="ui-card-header"><span class="ui-badge outline"><%= a.category || t('kb.guide') %></span><h2 class="ui-card-title"><%= a.title %></h2></div><div class="ui-card-footer"><a class="ui-btn" data-variant="outline" href="/tickets/new"><%= t('kb.ask') %></a></div></article><% }) %></div>
+<% if (lang === 'bn') { %><p class="kb-note"><%= t('kb.englishOnly') %></p><% } %>
+<% if (!items.length) { %><div class="ui-empty"><h3><%= t('kb.empty') %></h3><p><a href="/tickets/new"><%= t('dash.openTicket') %></a></p></div><% } else { %>
+<div class="kb-tools">
+  <label class="kb-search">
+    <%- icon('search') %>
+    <span class="sr-only"><%= t('kb.search') %></span>
+    <input type="search" id="kbSearch" placeholder="<%= t('kb.search') %>" autocomplete="off" spellcheck="false">
+  </label>
+  <div class="kb-chips" role="group" aria-label="<%= t('kb.title') %>">
+    <button type="button" class="kb-chip" data-cat="" aria-pressed="true"><%= t('kb.all') %></button>
+    <% categories.forEach((c) => { %><button type="button" class="kb-chip" data-cat="<%= c %>" aria-pressed="false"><%= c %></button><% }) %>
+  </div>
+  <span class="kb-count" id="kbCount" aria-live="polite"><%= t(items.length === 1 ? 'kb.countOne' : 'kb.count', { n: items.length }) %></span>
+</div>
+<div class="kb-grid" id="kbGrid">
+  <% items.forEach((a) => { %>
+  <a class="kb-card" href="/kb/<%= a.slug %>" data-cat="<%= a.category %>" data-search="<%= (a.title + ' ' + a.summary + ' ' + a.category).toLowerCase() %>">
+    <span class="kb-badge"><%= a.category %></span>
+    <h2><%= a.title %></h2>
+    <p><%= a.summary %></p>
+    <span class="kb-meta"><%= fmtDate(a.date) %> · <%= t('kb.minRead', { n: a.minutes }) %><span class="kb-go"><%= t('kb.read') %> <%- icon('arrow') %></span></span>
+  </a>
+  <% }) %>
+</div>
+<p class="kb-empty" id="kbEmpty" hidden><%= t('kb.noMatch') %></p>
+<script>
+(() => {
+  const q = document.getElementById('kbSearch'), grid = document.getElementById('kbGrid');
+  const cards = Array.from(grid.children), chips = Array.from(document.querySelectorAll('.kb-chip'));
+  const count = document.getElementById('kbCount'), none = document.getElementById('kbEmpty');
+  const label = '<%= t("kb.count", { n: "{n}" }) %>', labelOne = '<%= t("kb.countOne") %>';
+  let cat = '';
+  function apply() {
+    const term = q.value.trim().toLowerCase();
+    let shown = 0;
+    cards.forEach((c) => {
+      const ok = (!cat || c.dataset.cat === cat) && (!term || c.dataset.search.includes(term));
+      c.hidden = !ok;
+      if (ok) shown += 1;
+    });
+    count.textContent = shown === 1 ? labelOne : label.replace('{n}', shown);
+    none.hidden = shown !== 0;
+  }
+  q.addEventListener('input', apply);
+  chips.forEach((b) => b.addEventListener('click', () => {
+    cat = b.dataset.cat;
+    chips.forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
+    apply();
+  }));
+})();
+</script>
+<% } %>
 <%- include('_foot') %>

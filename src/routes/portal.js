@@ -15,6 +15,7 @@ const { ownedInvoice, ownedService, ownedDomain, ownedQuote, ownedTicket } = req
 const { cached } = require('../lib/cache');
 const gtokens = require('../lib/google-tokens');
 const { getClient, invalidateClient } = require('../lib/client');
+const kb = require('../lib/kb');
 
 const router = express.Router();
 const GOOGLE_CLIENT_ID = config.googleClientId;
@@ -458,18 +459,14 @@ router.get('/announcements', async (req, res) => {
   }
 });
 
-router.get('/kb', async (req, res) => {
-  try {
-    const data = await globalData('GetKBArticles', 10 * MIN);
-    const items = (() => {
-      if (!data || !data.articles) return [];
-      const v = data.articles.article;
-      return Array.isArray(v) ? v : [v];
-    })();
-    res.render('kb', { title: 'Help Center', items });
-  } catch (e) {
-    res.render('error', { title: 'Help Center', message: e.message, back: '/' });
-  }
+router.get('/kb', (req, res) => {
+  res.render('kb', { title: 'Help Center', kbPage: true, items: kb.list(), categories: kb.categories() });
+});
+
+router.get('/kb/:slug', (req, res) => {
+  const article = kb.get(req.params.slug);
+  if (!article) return res.status(404).render('error', { title: 'Not found', message: res.locals.t('kb.notFound'), back: '/kb' });
+  res.render('kb-article', { title: 'Help Center', docTitle: article.title, kbPage: true, article, related: kb.related(article) });
 });
 
 router.get('/profile', async (req, res) => {
