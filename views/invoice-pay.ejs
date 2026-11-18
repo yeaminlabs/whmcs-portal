@@ -13,7 +13,10 @@ const GATEWAYS = {
 const cc = invoice.currencycode;
 const amt = (v) => price(v, cc);
 const balance = Number(invoice.balance) || 0;
-const selected = paymethods.some(m => m.module === invoice.paymentmethod) ? invoice.paymentmethod : (paymethods[0] && paymethods[0].module);
+// Only bKash and Stripe card payments are offered. If an account has neither, fall back to everything WHMCS returns so checkout is never empty.
+const offered = paymethods.filter(m => /^(bkash|stripe)/i.test(String(m.module)));
+const methods = offered.length ? offered : paymethods;
+const selected = methods.some(m => m.module === invoice.paymentmethod) ? invoice.paymentmethod : (methods[0] && methods[0].module);
 const label = (m) => (GATEWAYS[String(m.module).toLowerCase()] || { name: String(m.displayname || m.module).split('|')[0].trim(), desc: String(m.displayname || '').split('|').slice(1).join(' ').trim(), icon: 'wallet' });
 %>
 <nav class="crumbs" aria-label="Breadcrumb"><a href="/invoices"><%= t('nav.invoices') %></a><%- icon('chev') %><a href="/invoices/<%= invoice.invoiceid %>">#<%= invoice.invoicenum || invoice.invoiceid %></a><%- icon('chev') %><span><%= t('pay.title') %></span></nav>
@@ -30,9 +33,9 @@ const label = (m) => (GATEWAYS[String(m.module).toLowerCase()] || { name: String
           <% if (credit > 0) { %>
           <label class="choice pay gw"><input type="radio" name="paymentmethod" value="credit"><span><span class="gw-mark"><%- icon('wallet') %></span><b><%= t('pay.credit') %></b><small><%= t('pay.creditDesc', { amount: amt(credit) }) %><% if (credit < balance) { %> · <%= t('pay.creditPartial') %><% } %></small></span></label>
           <% } %>
-          <% paymethods.forEach(m => { const g = label(m); %>
-          <% const ch = charges[m.module]; const isBkash = /^bkash/i.test(m.module); %>
-          <label class="choice pay gw"><input type="radio" name="paymentmethod" value="<%= m.module %>" <%= m.module === selected ? 'checked' : '' %>><span><span class="gw-mark<%= isBkash ? ' gw-logo' : '' %>"><% if (isBkash) { %><img src="/img/bkash.png" alt="bKash" width="72" height="40"><% } else { %><%- icon(g.icon) %><% } %></span><b><%= g.name %></b><small><%= g.desc %><% if (!inApp.includes(m.module)) { %><%= g.desc ? ' · ' : '' %><%= t('pay.continuesBilling') %><% } %></small><% if (ch) { %><em class="gw-charge"><%= fmt(ch.amount, ch.code) %><small><%= ch.feePercent ? t('pay.inclFee', { pct: ch.feePercent }) : (ch.code !== cc ? t('pay.chargedIn', { code: ch.code }) : '') %></small></em><% } %></span></label>
+          <% methods.forEach(m => { const g = label(m); %>
+          <% const ch = charges[m.module]; const isBkash = /^bkash/i.test(m.module); const isStripe = /^stripe/i.test(m.module); %>
+          <label class="choice pay gw"><input type="radio" name="paymentmethod" value="<%= m.module %>" <%= m.module === selected ? 'checked' : '' %>><span><span class="gw-mark<%= (isBkash || isStripe) ? ' gw-logo' : '' %>"><% if (isBkash) { %><img src="/img/bkash.png" alt="bKash" width="72" height="40"><% } else if (isStripe) { %><img src="/img/stripe.png" alt="Stripe" width="72" height="30"><% } else { %><%- icon(g.icon) %><% } %></span><b><%= g.name %></b><small><%= g.desc %><% if (!inApp.includes(m.module)) { %><%= g.desc ? ' · ' : '' %><%= t('pay.continuesBilling') %><% } %></small><% if (ch) { %><em class="gw-charge"><%= fmt(ch.amount, ch.code) %><small><%= ch.feePercent ? t('pay.inclFee', { pct: ch.feePercent }) : (ch.code !== cc ? t('pay.chargedIn', { code: ch.code }) : '') %></small></em><% } %></span></label>
           <% }) %>
         </div>
       </div>

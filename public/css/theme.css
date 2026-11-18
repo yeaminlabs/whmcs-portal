@@ -235,3 +235,7 @@ body.nav-collapsed .snav-link:focus-visible,body.nav-collapsed .snav-toggle:focu
 }
 @media(max-width:480px){.authwrap .auth-card .field-row{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.authwrap .auth-card{animation:none}}
+
+/* Payment method logos (bKash, Stripe) sit on a white tile */
+.gw-logo img{padding:2px}
+.gw-logo img[alt="Stripe"]{padding:6px 5px}
