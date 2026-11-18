@@ -25,6 +25,7 @@ const GROUPS = [
   { slug: 'usa-shared-hosting', name: 'USA Shared Hosting', family: 'hosting', blurb: 'NVMe hosting on US servers for global reach.' },
   { slug: 'bdix-shared-hosting', name: 'BDIX Shared Hosting', family: 'hosting', blurb: 'Lightning-fast local hosting for visitors in Bangladesh.' },
   { slug: 'n8n', name: 'n8n Hosting', family: 'automation', blurb: 'Managed n8n instances, deployed instantly. No self-hosting.' },
+  { slug: 'openclaw-hosting', name: 'OpenClaw Hosting', family: 'ai', blurb: 'Your own OpenClaw AI agent instance, deployed instantly on dedicated, isolated resources.' },
   { slug: 'bdix-vps', name: 'BDIX VPS', family: 'vps', blurb: 'Ultra-low-latency servers in Bangladesh with full root access.' },
   { slug: 'usa-vps', name: 'USA VPS', family: 'vps', blurb: 'AMD EPYC power on a premium North American uplink.' },
   { slug: 'sg-vps', name: 'Singapore VPS', family: 'vps', blurb: 'Low-latency routing across South-East Asia.' },
@@ -35,6 +36,7 @@ const FAMILIES = [
   { id: 'hosting', label: 'Shared hosting' },
   { id: 'vps', label: 'VPS servers' },
   { id: 'automation', label: 'n8n automation' },
+  { id: 'ai', label: 'AI agent hosting' },
 ];
 
 const CYCLES = [
