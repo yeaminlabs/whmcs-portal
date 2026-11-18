@@ -1,34 +1,117 @@
 <%- include('_head') %>
-<div class="pagehead">
+<link rel="stylesheet" href="/css/security.css">
+<header class="sc-head">
+  <span class="sc-badge" aria-hidden="true"><%- icon('shield') %></span>
   <div>
-    <div class="page-eyebrow"><span class="page-icon"><%- icon('shield') %></span><span class="page-label"><%= t('nav.groupAccount') %></span></div>
     <h1><%= t('sec.title') %></h1>
-    <p class="sub"><%= t('sec.sub') %></p>
+    <p><%= t('sec.sub') %></p>
   </div>
-</div>
+</header>
+
 <% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
-<% if (done) { %><p class="alert ok" role="status"><%= t('sec.done') %></p><% } %>
-<div style="max-width:620px">
-  <div class="info-box" style="margin-bottom:4px">
-    <%- icon('shield') %>
-    <div class="info-box-body">
-      <strong>Keep your account secure</strong>
-      <p>Use a strong, unique password with at least 8 characters, mixing letters, numbers and symbols.</p>
+<% if (done) { %><p class="sc-done" role="status"><%- icon('check') %><span><%= t('sec.done') %></span></p><% } %>
+
+<div class="sc-grid">
+  <form method="post" action="/security" class="sc-card sc-form" id="pwForm" novalidate>
+    <div class="sc-card-head">
+      <h2><%= t('sec.changePassword') %></h2>
+      <p><%= t('sec.cardSub') %></p>
     </div>
-  </div>
-  <form method="post" action="/security" class="card" style="margin-top:12px">
-    <h2 style="margin-top:0"><%= t('sec.changePassword') || 'Change Password' %></h2>
-    <label><%= t('sec.current') %><input type="password" name="currentpw" required autocomplete="current-password"></label>
-    <label><%= t('sec.new') %><input type="password" name="newpw" required minlength="8" autocomplete="new-password"><small class="hint"><%= t('sec.rule') %></small></label>
-    <label><%= t('sec.confirm') %><input type="password" name="confirmpw" required minlength="8" autocomplete="new-password"></label>
-    <button type="submit" class="btn red"><%- icon('shield') %><%= t('sec.save') %></button>
+
+    <label class="af-field"><span class="af-label"><%= t('sec.current') %></span>
+      <span class="af"><%- icon('lock') %><input type="password" name="currentpw" required autocomplete="current-password">
+        <button type="button" class="af-eye" data-eye aria-label="<%= t('auth.showPassword') %>" aria-pressed="false"><%- icon('eye') %></button></span>
+    </label>
+
+    <label class="af-field"><span class="af-label"><%= t('sec.new') %></span>
+      <span class="af"><%- icon('key') %><input type="password" name="newpw" id="newpw" required minlength="8" autocomplete="new-password" aria-describedby="pwMeter pwRules">
+        <button type="button" class="af-eye" data-eye aria-label="<%= t('auth.showPassword') %>" aria-pressed="false"><%- icon('eye') %></button></span>
+    </label>
+
+    <div class="sc-meter" id="pwMeter" aria-live="polite">
+      <div class="sc-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <span class="sc-meter-label"><span class="sr-only"><%= t('sec.strength') %>: </span><b id="pwLabel"><%= t('sec.s0') %></b></span>
+    </div>
+
+    <ul class="sc-rules" id="pwRules">
+      <li data-rule="len"><i aria-hidden="true"></i><%= t('sec.reqLen') %></li>
+      <li data-rule="letter"><i aria-hidden="true"></i><%= t('sec.reqLetter') %></li>
+      <li data-rule="num"><i aria-hidden="true"></i><%= t('sec.reqNum') %></li>
+      <li data-rule="match"><i aria-hidden="true"></i><%= t('sec.reqMatch') %></li>
+    </ul>
+
+    <label class="af-field"><span class="af-label"><%= t('sec.confirm') %></span>
+      <span class="af"><%- icon('key') %><input type="password" name="confirmpw" id="confirmpw" required minlength="8" autocomplete="new-password">
+        <button type="button" class="af-eye" data-eye aria-label="<%= t('auth.showPassword') %>" aria-pressed="false"><%- icon('eye') %></button></span>
+    </label>
+
+    <button type="submit" class="auth-submit sc-save"><span><%= t('sec.save') %></span><%- icon('arrow') %></button>
   </form>
-  <div class="info-box" style="margin-top:16px">
-    <%- icon('lock') %>
-    <div class="info-box-body">
-      <strong>Need more help?</strong>
-      <p>If you have trouble accessing your account, <a href="/tickets/new">open a support ticket</a> and our team will assist you.</p>
-    </div>
-  </div>
+
+  <aside class="sc-side">
+    <section class="sc-card sc-me">
+      <span class="sc-me-avatar" aria-hidden="true"><%= String(session.clientName || session.clientEmail || '?').trim().charAt(0).toUpperCase() %></span>
+      <div>
+        <small><%= t('sec.signedIn') %></small>
+        <b><%= session.clientName || '' %></b>
+        <span><%= session.clientEmail || '' %></span>
+      </div>
+    </section>
+
+    <section class="sc-card sc-tips">
+      <h2><%- icon('shield') %><%= t('sec.tipsTitle') %></h2>
+      <ul>
+        <li><%- icon('check') %><span><%= t('sec.tip1') %></span></li>
+        <li><%- icon('check') %><span><%= t('sec.tip2') %></span></li>
+        <li><%- icon('check') %><span><%= t('sec.tip3') %></span></li>
+        <li><%- icon('check') %><span><%= t('sec.tip4') %></span></li>
+      </ul>
+    </section>
+
+    <section class="sc-card sc-help">
+      <span class="sc-help-ico" aria-hidden="true"><%- icon('headset') %></span>
+      <div>
+        <b><%= t('sec.helpTitle') %></b>
+        <p><%= t('sec.helpText') %></p>
+        <a href="/tickets/new"><%= t('sec.helpCta') %> <%- icon('arrow') %></a>
+      </div>
+    </section>
+  </aside>
 </div>
+
+<script>
+(function () {
+  var form = document.getElementById('pwForm');
+  if (!form) return;
+  var pw = document.getElementById('newpw'), cf = document.getElementById('confirmpw');
+  var bars = form.querySelectorAll('.sc-bars i'), label = document.getElementById('pwLabel'), meter = document.getElementById('pwMeter');
+  var rules = {}; form.querySelectorAll('[data-rule]').forEach(function (li) { rules[li.dataset.rule] = li; });
+  var names = [<%- JSON.stringify(t('sec.s0')) %>, <%- JSON.stringify(t('sec.s1')) %>, <%- JSON.stringify(t('sec.s2')) %>, <%- JSON.stringify(t('sec.s3')) %>, <%- JSON.stringify(t('sec.s4')) %>];
+  function update() {
+    var v = pw.value;
+    var ok = { len: v.length >= 8, letter: /[a-z]/i.test(v), num: /[0-9]/.test(v), match: v.length > 0 && v === cf.value };
+    Object.keys(ok).forEach(function (k) { rules[k].classList.toggle('is-ok', ok[k]); });
+    var score = 0;
+    if (v.length) {
+      score = 1;
+      if (ok.len) score++;
+      if (ok.letter && ok.num) score++;
+      if (v.length >= 12 && /[^a-z0-9]/i.test(v) && /[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
+      if (!ok.len) score = 1;
+    }
+    bars.forEach(function (b, i) { b.className = i < score ? 'on s' + score : ''; });
+    label.textContent = names[v.length ? Math.min(score, 4) : 0];
+    meter.dataset.score = String(score);
+  }
+  pw.addEventListener('input', update); cf.addEventListener('input', update);
+  form.querySelectorAll('[data-eye]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var input = btn.parentElement.querySelector('input'); var show = input.type === 'password';
+      input.type = show ? 'text' : 'password'; btn.setAttribute('aria-pressed', String(show));
+      btn.setAttribute('aria-label', show ? <%- JSON.stringify(t('auth.hidePassword')) %> : <%- JSON.stringify(t('auth.showPassword')) %>);
+    });
+  });
+  update();
+})();
+</script>
 <%- include('_foot') %>

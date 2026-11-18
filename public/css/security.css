@@ -1,0 +1,53 @@
+/* Security page */
+.sc-head{display:flex;align-items:center;gap:1rem;margin:.25rem 0 1.25rem;animation:scUp .4s cubic-bezier(.2,.8,.2,1) both}
+.sc-badge{display:grid;place-items:center;flex:none;width:3.25rem;height:3.25rem;border-radius:16px;background:#FBEDEE;color:#BE3045;border:1px solid #F0D5D9}
+.sc-badge .ico{width:1.5rem;height:1.5rem}
+.sc-head h1{margin:0;color:#30292E;font-size:1.75rem;font-weight:800;letter-spacing:-.03em}
+.sc-head p{margin:.2rem 0 0;color:#685F65;font-size:.9375rem}
+.sc-done{display:flex;align-items:center;gap:.6rem;margin:0 0 1rem;padding:.8rem 1rem;background:#E8F3EE;border:1px solid #BFE0CF;border-radius:12px;color:#26704E;font-weight:600}
+.sc-done .ico{width:1.1rem;height:1.1rem}
+.sc-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(16rem,1fr);gap:1.25rem;align-items:start;max-width:62rem}
+.sc-card{position:relative;background:#fff;border:1px solid #E1DAD4;border-radius:18px;box-shadow:0 1px 2px rgba(48,41,46,.04),0 14px 30px -24px rgba(48,41,46,.35);overflow:hidden;animation:scUp .45s .06s cubic-bezier(.2,.8,.2,1) both}
+.sc-card::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,#E1DAD4 0,#E1DAD4 88%,#BE3045 100%)}
+.sc-form{display:grid;gap:1rem;padding:1.5rem}
+.sc-card-head h2{margin:0;color:#30292E;font-size:1.125rem;font-weight:800}
+.sc-card-head p{margin:.2rem 0 0;color:#685F65;font-size:.875rem}
+.sc-meter{display:flex;align-items:center;gap:.75rem;margin:-.25rem 0 0}
+.sc-bars{display:grid;grid-template-columns:repeat(4,1fr);gap:.3rem;flex:1}
+.sc-bars i{height:.4rem;border-radius:999px;background:#E9E3DE;transition:background .25s}
+.sc-bars i.on.s1{background:#A1263A}
+.sc-bars i.on.s2{background:#C98A3A}
+.sc-bars i.on.s3{background:#42736B}
+.sc-bars i.on.s4{background:#26704E}
+.sc-meter-label{min-width:4.5rem;text-align:right;color:#30292E;font-size:.8125rem}
+.sc-rules{list-style:none;margin:-.25rem 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:.35rem .75rem}
+.sc-rules li{display:flex;align-items:center;gap:.5rem;color:#685F65;font-size:.8125rem}
+.sc-rules i{position:relative;flex:none;width:1rem;height:1rem;border-radius:50%;border:1.5px solid #CFC6C0;transition:background .2s,border-color .2s}
+.sc-rules li.is-ok{color:#26704E}
+.sc-rules li.is-ok i{background:#26704E;border-color:#26704E}
+.sc-rules li.is-ok i::after{content:"";position:absolute;left:.28rem;top:.1rem;width:.22rem;height:.45rem;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.sc-save{margin-top:.25rem}
+.sc-side{display:grid;gap:1rem}
+.sc-me{display:flex;align-items:center;gap:.9rem;padding:1.1rem 1.25rem}
+.sc-me-avatar{display:grid;place-items:center;flex:none;width:2.75rem;height:2.75rem;border-radius:50%;background:#30292E;color:#fff;font-weight:800}
+.sc-me small{display:block;color:#685F65;font-size:.75rem}
+.sc-me b{display:block;color:#30292E;font-size:.9375rem}
+.sc-me span:not(.sc-me-avatar){display:block;color:#685F65;font-size:.8125rem;overflow-wrap:anywhere}
+.sc-tips{padding:1.15rem 1.25rem}
+.sc-tips h2{display:flex;align-items:center;gap:.5rem;margin:0 0 .75rem;color:#30292E;font-size:.9375rem;font-weight:800}
+.sc-tips h2 .ico{width:1.1rem;height:1.1rem;color:#42736B}
+.sc-tips ul{list-style:none;margin:0;padding:0;display:grid;gap:.6rem}
+.sc-tips li{display:grid;grid-template-columns:auto 1fr;gap:.6rem;color:#4A4348;font-size:.8125rem;line-height:1.5}
+.sc-tips li .ico{width:1rem;height:1rem;margin-top:.15rem;color:#42736B}
+.sc-help{display:flex;gap:.9rem;padding:1.1rem 1.25rem;background:#FBEDEE;border-color:#F0D5D9}
+.sc-help::before{display:none}
+.sc-help-ico{display:grid;place-items:center;flex:none;width:2.5rem;height:2.5rem;border-radius:12px;background:#fff;color:#BE3045}
+.sc-help-ico .ico{width:1.2rem;height:1.2rem}
+.sc-help b{display:block;color:#30292E;font-size:.9375rem}
+.sc-help p{margin:.15rem 0 .5rem;color:#685F65;font-size:.8125rem;line-height:1.5}
+.sc-help a{display:inline-flex;align-items:center;gap:.4rem;color:#BE3045;font-weight:700;font-size:.875rem}
+.sc-help a .ico{width:.95rem;height:.95rem;transition:transform .18s}
+.sc-help a:hover .ico{transform:translateX(3px)}
+@keyframes scUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media(max-width:900px){.sc-grid{grid-template-columns:1fr}.sc-rules{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.sc-head,.sc-card{animation:none}}
