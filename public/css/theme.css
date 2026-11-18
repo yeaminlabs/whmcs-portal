@@ -320,3 +320,19 @@ h1 .openclaw-logo{height:1.1em;margin:0 .18em 0 0;vertical-align:-.22em}
 .aff-how{padding-left:20px;display:grid;gap:8px;color:#685F65;font-size:14.5px;margin:0}
 .aff-how strong{color:#30292E}
 @media (max-width:560px){.aff-hero{flex-direction:column;padding:20px 18px}}
+
+/* Contact page: other ways to reach SNBD HOST, after the form */
+.ct-more{max-width:960px;margin:28px 0 8px}
+.ct-h{margin:0 0 14px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8A7F86}
+.ct-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}
+.ct-card{display:flex;flex-direction:column;gap:6px;padding:20px 22px;border:1px solid #ECE7E1;border-radius:16px;background:#fff;box-shadow:0 1px 2px rgba(48,41,46,.04)}
+.ct-wide{grid-column:1 / -1}
+.ct-ico{display:grid;place-items:center;width:42px;height:42px;margin-bottom:4px;border-radius:12px;background:#FBEDEE;color:#BE3045}
+.ct-ico .ico{width:21px;height:21px}
+.ct-card h3{margin:0;font-size:16px;color:#30292E}
+.ct-card p{margin:0;color:#685F65;font-size:14px;line-height:1.55}
+.ct-strong{color:#30292E!important;font-weight:600;font-size:15px!important}
+.ct-main{color:#A1263A;font-size:18px;font-weight:700;text-decoration:none;overflow-wrap:anywhere}
+.ct-main:hover{text-decoration:underline}
+.ct-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto;padding-top:12px}
+.ct-actions .btn .ico{width:15px;height:15px}

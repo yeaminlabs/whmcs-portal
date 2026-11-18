@@ -757,10 +757,11 @@ router.get('/status.json', async (req, res) => {
   const status = await networkStatus();
   res.set('Cache-Control', 'no-store').json(status);
 });
-router.get('/contact', (req, res) => res.render('contact', { title: 'Contact', error: null, done: false }));
+const contactInfo = require('../content/contact');
+router.get('/contact', (req, res) => res.render('contact', { title: 'Contact', error: null, done: false, info: contactInfo }));
 router.post('/contact', async (req, res) => {
   await whmcs.call('SendContact', { name: cleanStr(req.body.name, 100), email: cleanStr(req.body.email, 190), message: cleanStr(req.body.message, 2000) }).catch(() => null);
-  res.render('contact', { title: 'Contact', error: null, done: true });
+  res.render('contact', { title: 'Contact', error: null, done: true, info: contactInfo });
 });
 // Affiliates live in routes/affiliates.js
 

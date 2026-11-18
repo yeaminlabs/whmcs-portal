@@ -7,4 +7,46 @@
   <label><%= t('tix.message') %><textarea name="message" required rows="6"></textarea></label>
   <button type="submit" class="btn red"><%= t('ct.send') %></button>
 </form>
+
+<section class="ct-more" aria-labelledby="ct-more-h">
+  <h2 class="ct-h" id="ct-more-h"><%= t('ct.moreTitle') %></h2>
+  <div class="ct-grid">
+    <article class="ct-card">
+      <span class="ct-ico"><%- icon('headset') %></span>
+      <h3><%= t('ct.phone') %></h3>
+      <a class="ct-main" href="<%= info.phone.tel %>"><%= info.phone.display %></a>
+      <p><%= t('ct.phoneNote') %></p>
+      <div class="ct-actions">
+        <a class="btn red" href="<%= info.phone.tel %>"><%= t('ct.call') %></a>
+        <a class="btn ghost" href="<%= info.phone.whatsapp %>" target="_blank" rel="noopener noreferrer"><%= t('ct.whatsapp') %> <%- icon('external') %></a>
+      </div>
+    </article>
+    <article class="ct-card">
+      <span class="ct-ico"><%- icon('mail') %></span>
+      <h3><%= t('ct.emailTitle') %></h3>
+      <a class="ct-main" href="<%= info.email.mailto %>"><%= info.email.address %></a>
+      <p><%= t('ct.emailNote') %></p>
+    </article>
+    <article class="ct-card">
+      <span class="ct-ico"><%- icon('chat') %></span>
+      <h3><%= t('ct.chat') %></h3>
+      <p class="ct-strong"><%= t('ct.chatText') %></p>
+      <p><%= t('ct.chatNote') %></p>
+      <div class="ct-actions"><a class="btn ghost" href="<%= info.chatSite %>" target="_blank" rel="noopener noreferrer"><%= t('ct.chatBtn') %> <%- icon('external') %></a></div>
+    </article>
+    <article class="ct-card">
+      <span class="ct-ico"><%- icon('life') %></span>
+      <h3><%= t('ct.ticket') %></h3>
+      <p class="ct-strong"><%= t('ct.ticketText') %></p>
+      <p><%= t('ct.ticketNote') %></p>
+      <div class="ct-actions"><a class="btn ghost" href="/tickets/new"><%= t('ct.ticketBtn') %> <%- icon('arrow') %></a></div>
+    </article>
+    <article class="ct-card ct-wide">
+      <span class="ct-ico"><%- icon('home') %></span>
+      <h3><%= t('ct.office') %></h3>
+      <p class="ct-strong"><%= info.office %></p>
+      <p><%= t('ct.officeNote') %></p>
+    </article>
+  </div>
+</section>
 <%- include('_foot') %>
