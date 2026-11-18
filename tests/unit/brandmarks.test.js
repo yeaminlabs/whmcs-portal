@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { n8nMark, bdixFlag, bdixLogo, brandMark, brandTile, usNetworks, US_NETWORKS } = require('../../src/lib/brandmarks');
+const { n8nMark, flagMark, bdixFlag, bdixLogo, brandMark, brandTile, usNetworks, US_NETWORKS } = require('../../src/lib/brandmarks');
 
 describe('n8n logo helper', () => {
   test('returns the logo for anything that mentions n8n, any case', () => {
@@ -31,12 +31,14 @@ describe('BDIX marks', () => {
   test('brandMark picks the n8n logo or the BD flag', () => {
     expect(brandMark('n8n 1G')).toContain('/img/n8n.png');
     expect(brandMark('BDIX VPS 01')).toContain('/img/bangladesh.png');
-    expect(brandMark('USA VPS 2G')).toBe('');
+    expect(brandMark('USA VPS 2G')).toContain('/img/usa.png');
+    expect(brandMark('Plain Hosting Plan')).toBe('');
   });
   test('brandTile chooses the card tile', () => {
     expect(brandTile('n8n n8n Hosting').cls).toBe('n8n');
     expect(brandTile('bdix-vps BDIX VPS').cls).toBe('bdix');
-    expect(brandTile('usa-vps USA VPS')).toEqual({ cls: '', html: '' });
+    expect(brandTile('usa-vps USA VPS').cls).toBe('flag');
+    expect(brandTile('Plain Hosting Plan')).toEqual({ cls: '', html: '' });
   });
 });
 
@@ -66,5 +68,41 @@ describe('US network logos', () => {
   });
   test('caption text is escaped', () => {
     expect(usNetworks('usa-vps', '<b>"x"</b>')).not.toContain('<b>');
+  });
+});
+
+describe('region flags', () => {
+  const file = (html) => (html.match(/\/img\/(\w+)\.png/) || [])[1];
+  test('USA, Singapore and EU names get their own flag', () => {
+    for (const t of ['USA VPS 2G', 'USA-01 Starter', 'usa-shared-hosting USA Shared Hosting']) expect(file(flagMark(t))).toBe('usa');
+    for (const t of ['SG VPS 2G', 'Singapore VPS', 'sg-vps Singapore VPS']) expect(file(flagMark(t))).toBe('singapore');
+    for (const t of ['EU VPS 4G', 'eu-vps EU VPS']) expect(file(flagMark(t))).toBe('eu');
+  });
+  test('no false matches inside other words', () => {
+    for (const t of ['Queue Mode', 'Business Plan', 'Premium', 'Europa Plan'.replace('Europa', 'Eurasia'), 'DE VPS 4G', 'Basic', '']) expect(flagMark(t)).toBe('');
+  });
+  test('BDIX still wins and keeps its logo; n8n keeps its logo', () => {
+    expect(file(flagMark('BDIX VPS 01'))).toBe('bangladesh');
+    expect(brandMark('n8n 1G')).toContain('/img/n8n.png');
+    expect(bdixFlag('USA VPS 2G')).toBe('');
+  });
+  test('category cards use the flag as their tile for USA, Singapore and EU', () => {
+    for (const t of ['usa-vps USA VPS', 'sg-vps Singapore VPS', 'eu-vps EU VPS']) {
+      const tile = brandTile(t);
+      expect(tile.cls).toBe('flag');
+      expect(tile.html).toContain('tile-flag');
+    }
+  });
+  test('every flag file exists, is a PNG and is small', () => {
+    const fs = require('fs');
+    const path = require('path');
+    for (const f of ['usa', 'singapore', 'eu', 'bangladesh']) {
+      const buf = fs.readFileSync(path.join(__dirname, '..', '..', 'public', 'img', `${f}.png`));
+      expect(buf.subarray(1, 4).toString()).toBe('PNG');
+      expect(buf.length).toBeLessThan(20000);
+    }
+  });
+  test('the USA keeps the same eight network logos on both USA pages', () => {
+    expect(usNetworks('usa-shared-hosting', 'x')).toBe(usNetworks('usa-vps', 'x'));
   });
 });

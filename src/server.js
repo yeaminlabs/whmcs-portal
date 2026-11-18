@@ -106,6 +106,7 @@ app.use((req, res, next) => {
   res.locals.brandMark = brandmarks.brandMark;
   res.locals.bdixLogo = brandmarks.bdixLogo;
   res.locals.bdixFlag = brandmarks.bdixFlag;
+  res.locals.flagMark = brandmarks.flagMark;
   res.locals.brandTile = brandmarks.brandTile;
   res.locals.usNetworks = brandmarks.usNetworks;
   res.locals.money = money;

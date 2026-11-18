@@ -267,10 +267,10 @@ h1 .n8n-mark{height:.9em;margin-right:.5rem;vertical-align:-.1em}
 .group-icon.group-icon-n8n .n8n-mark{display:block;height:auto;width:66%;margin:0;vertical-align:baseline}
 
 /* Bangladesh flag and BDIX logo wherever the store names BDIX */
-.bd-flag{display:inline-block;height:.78em;width:auto;max-width:none;margin-right:.45em;vertical-align:-.05em;border-radius:2px;box-shadow:0 0 0 1px rgba(48,41,46,.18)}
-h1 .bd-flag{height:.62em;margin-right:.55rem;vertical-align:.02em}
-.crumbs .bd-flag{height:.7em;margin-right:.35em}
-.store-tabs .bd-flag{height:.72em}
+.region-flag{display:inline-block;height:.78em;width:auto;max-width:none;margin-right:.45em;vertical-align:-.05em;border-radius:2px;box-shadow:0 0 0 1px rgba(48,41,46,.18)}
+h1 .region-flag{height:.62em;margin-right:.55rem;vertical-align:.02em}
+.crumbs .region-flag{height:.7em;margin-right:.35em}
+.store-tabs .region-flag{height:.72em}
 .group-icon.group-icon-bdix{width:80px;height:50px;border-radius:10px;background:#fff;border:1px solid #ECE7E1;padding:3px 6px}
 .group-icon.group-icon-bdix .bdix-logo{display:block;width:100%;height:100%;object-fit:contain}
 .pagehead-brand{display:grid;place-items:center;padding:6px 14px;border:1px solid #ECE7E1;border-radius:12px;background:#fff}
@@ -283,3 +283,7 @@ h1 .bd-flag{height:.62em;margin-right:.55rem;vertical-align:.02em}
 .net-strip-logos{display:flex;flex-wrap:wrap;align-items:center;gap:14px 30px;min-width:0}
 .net-strip-logos img{display:block;height:26px;width:auto;max-width:118px;object-fit:contain}
 @media (max-width:560px){.net-strip{padding:12px 14px;gap:10px 22px}.net-strip-logos{gap:12px 22px}.net-strip-logos img{height:22px;max-width:96px}}
+
+/* Region flag as the icon of a store category card (USA, Singapore, EU) */
+.group-icon.group-icon-flag{width:64px;height:46px;border-radius:10px;background:#fff;border:1px solid #ECE7E1;padding:7px 10px}
+.group-icon-flag .tile-flag{display:block;width:auto;height:auto;max-width:100%;max-height:100%;margin:0;border-radius:2px;box-shadow:0 0 0 1px rgba(48,41,46,.2)}

@@ -3,9 +3,10 @@
 /**
  * Brand marks for the store. Each helper takes any text (a plan, a category, a menu label)
  * and returns an <img> when it mentions the brand, or '' for anything else.
- *   brandMark(text)  small logo/flag printed before a name: n8n logo for n8n, Bangladesh flag for BDIX
+ *   brandMark(text)  small logo/flag printed before a name: n8n logo for n8n, else the region flag
+ *   flagMark(text)   region flag only: Bangladesh (BDIX), USA, Singapore (SG), EU
  *   bdixLogo(text)   the BDIX (Bangladesh Internet Exchange) logo, BDIX names only
- *   brandTile(text)  { cls, html } for a card icon tile: n8n logo or BDIX logo, else { cls: '', html: '' }
+ *   brandTile(text)  { cls, html } for a card icon tile: n8n logo, BDIX logo or the region flag, else { cls: '', html: '' }
  * The images are decorative (alt is empty) because the name is always printed next to them,
  * except the standalone BDIX logo, which names itself.
  */
@@ -18,9 +19,32 @@ function n8nMark(text, cls = '') {
   return `<img class="n8n-mark${cls ? ` ${cls}` : ''}" src="/img/n8n.png" alt="" width="24" height="13" decoding="async">`;
 }
 
+/**
+ * Regions the store recognises in a plan or category name, first match wins (BDIX before the rest).
+ * `flag` is public/img/<flag>.png; w/h are its display size in a name.
+ */
+const REGIONS = [
+  { key: 'bdix', re: /bdix/i, flag: 'bangladesh', name: 'Bangladesh', w: 20, h: 12 },
+  { key: 'usa', re: /(^|[^a-z])usa([^a-z]|$)/i, flag: 'usa', name: 'USA', w: 20, h: 11 },
+  { key: 'sg', re: /singapore|(^|[^a-z])sg([^a-z]|$)/i, flag: 'singapore', name: 'Singapore', w: 20, h: 13 },
+  { key: 'eu', re: /(^|[^a-z])eu([^a-z]|$)|europe/i, flag: 'eu', name: 'EU', w: 20, h: 13 },
+];
+const regionOf = (text) => REGIONS.find((r) => r.re.test(str(text))) || null;
+
+function flagImg(r, cls) {
+  return `<img class="region-flag${cls ? ` ${cls}` : ''}" src="/img/${r.flag}.png" alt="" width="${r.w}" height="${r.h}" decoding="async">`;
+}
+
+/** Region flag for a name, or ''. */
+function flagMark(text, cls = '') {
+  const r = regionOf(text);
+  return r ? flagImg(r, cls) : '';
+}
+
+/** Bangladesh flag for BDIX names only. */
 function bdixFlag(text, cls = '') {
-  if (!BDIX.test(str(text))) return '';
-  return `<img class="bd-flag${cls ? ` ${cls}` : ''}" src="/img/bangladesh.png" alt="" width="20" height="12" decoding="async">`;
+  const r = regionOf(text);
+  return r && r.key === 'bdix' ? flagImg(r, cls) : '';
 }
 
 function bdixLogo(text, cls = '') {
@@ -28,12 +52,14 @@ function bdixLogo(text, cls = '') {
   return `<img class="bdix-logo${cls ? ` ${cls}` : ''}" src="/img/bdix.png" alt="BDIX" width="200" height="125" decoding="async">`;
 }
 
-const brandMark = (text, cls = '') => n8nMark(text, cls) || bdixFlag(text, cls);
+const brandMark = (text, cls = '') => n8nMark(text, cls) || flagMark(text, cls);
 
 function brandTile(text) {
   if (N8N.test(str(text))) return { cls: 'n8n', html: n8nMark(text) };
-  if (BDIX.test(str(text))) return { cls: 'bdix', html: bdixLogo(text) };
-  return { cls: '', html: '' };
+  const r = regionOf(text);
+  if (!r) return { cls: '', html: '' };
+  if (r.key === 'bdix') return { cls: 'bdix', html: bdixLogo(text) };
+  return { cls: 'flag', html: flagImg(r, 'tile-flag') };
 }
 
 /**
@@ -60,4 +86,4 @@ function usNetworks(groupSlug, label = '') {
   return `<div class="net-strip" role="group" aria-label="${attr(label)}">${label ? `<p class="net-strip-label">${attr(label)}</p>` : ''}<div class="net-strip-logos">${logos}</div></div>`;
 }
 
-module.exports = { n8nMark, bdixFlag, bdixLogo, brandMark, brandTile, usNetworks, US_NETWORKS };
+module.exports = { n8nMark, flagMark, bdixFlag, bdixLogo, brandMark, brandTile, usNetworks, US_NETWORKS };
