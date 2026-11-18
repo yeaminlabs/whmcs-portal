@@ -9,6 +9,7 @@ const express = require('express');
 const whmcs = require('../lib/whmcs');
 const { requireLogin } = require('../middleware/auth');
 const kits = require('../content/setup-kits');
+const dev = require('../content/dev-downloads');
 
 const router = express.Router();
 
@@ -35,17 +36,22 @@ function langHelpers(lang) {
 
 const renderKit = (res, view, extra) => res.render(view, { title: 'Downloads', kitsPage: true, ...langHelpers(res.locals.lang), ...extra });
 
+/** The customer's own active n8n services, to link from the n8n download. */
+async function n8nServices(req) {
+  const data = await whmcs.call('GetClientsProducts', { clientid: req.session.clientId }).catch(() => null);
+  return arr(data && data.products && data.products.product)
+    .filter((s) => /n8n/i.test(String(s.groupname || '')) && s.status === 'Active')
+    .map(brief);
+}
+
 router.get('/downloads', requireLogin, async (req, res) => {
-  const [hosting, legacy] = await Promise.all([
-    hostingServices(req).catch(() => []),
-    whmcs.isBlocked('GetDownloads') ? null : whmcs.call('GetDownloads', {}).catch(() => null),
-  ]);
-  const files = arr(legacy && legacy.downloads && legacy.downloads.download);
+  const mine = await n8nServices(req).catch(() => []);
   renderKit(res, 'downloads', {
-    featured: kits.CARDS.filter((c) => c.featured),
-    more: kits.CARDS.filter((c) => !c.featured),
-    hosting: hosting.map(brief).filter((s) => s.status === 'Active'),
-    items: files,
+    categories: dev.CATEGORIES,
+    dev: dev.DEV,
+    trending: dev.TRENDING,
+    checked: dev.TRENDING_CHECKED,
+    n8n: mine,
   });
 });
 

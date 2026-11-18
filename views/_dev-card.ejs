@@ -1,0 +1,22 @@
+<%# One download card. Locals: c (item), pick, other, L, O, n8n (customer's n8n services), trending (bool) %>
+<% const mine = c.personal && c.personal.kind === 'n8n' && n8n.length; %>
+<article class="kit-card dev-card"<% if (c.cat) { %> data-cat="<%= c.cat %>"<% } %>>
+  <div class="kit-top">
+    <% if (c.logo === 'n8n') { %><span class="dev-logo"><%- n8nMark('n8n') %></span><% } else { %><span class="kit-ico"><%- icon(c.icon) %></span><% } %>
+    <span class="kit-badge kit-badge-official"><%- icon('check') %><%= c.host %></span>
+  </div>
+  <h2><%= pick(c.title) %></h2>
+  <p class="kit-text"><%= pick(c.text) %></p>
+  <% if (c.tags && c.tags.length) { %><ul class="dev-tags"><% c.tags.forEach(tag => { %><li><%= pick(tag) %></li><% }) %></ul><% } %>
+  <% if (c.tip) { %><p class="dev-tip"><%- icon('info') %><span><%= pick(c.tip) %></span></p><% } %>
+  <div class="kit-actions">
+    <a class="btn red" href="<%= c.href %>" target="_blank" rel="noopener noreferrer"><%= pick(c.button) %> <%- icon('external') %></a>
+    <% if (c.secondary) { %><a class="btn ghost" href="<%= c.secondary.href %>" target="_blank" rel="noopener noreferrer"><%= pick(c.secondary.label) %> <%- icon('external') %></a><% } %>
+    <% if (mine) { %>
+    <span class="kit-mine" data-dev-service>
+      <% if (n8n.length > 1) { %><label class="sr-only" for="n8n-pick"><%= t('dl.chooseService') %></label><select id="n8n-pick"><% n8n.forEach(s => { %><option value="<%= s.id %>"><%= s.domain || s.name %></option><% }) %></select><% } %>
+      <a class="btn ghost" href="/services/<%= n8n[0].id %>"><%= pick(c.personal.label) %> <%- icon('arrow') %></a>
+    </span>
+    <% } %>
+  </div>
+</article>

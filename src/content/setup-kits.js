@@ -1,90 +1,9 @@
 'use strict';
 
 /**
- * Content for the Downloads & setup kits page and its three SNBD guides.
- * Every outside link was opened and checked before it was added; external cards say where they lead.
+ * Content of the three SNBD guide pages (email on a phone, domain connection sheet, bKash payment).
  * Text is bilingual: { en, bn }. The Bangla is an unreviewed translation.
  */
-
-const CARDS = [
-  // ---- featured: first things a customer wants to do after buying
-  {
-    id: 'email', featured: true, icon: 'mail', badge: 'guide', href: '/downloads/email-setup', needs: 'hosting',
-    title: { en: 'Set up business email on my phone', bn: 'মোবাইলে অফিসের ইমেইল সেটআপ' },
-    text: {
-      en: 'Find your mailbox’s real settings in cPanel and add it to your Android phone or iPhone, step by step. Perfect for sales@yourbusiness.com.',
-      bn: 'cPanel থেকে আপনার মেইলবক্সের আসল সেটিংস খুঁজে নিয়ে অ্যান্ড্রয়েড ফোন বা আইফোনে ধাপে ধাপে যোগ করুন। sales@yourbusiness.com-এর মতো ইমেইলের জন্য উপযুক্ত।',
-    },
-    button: { en: 'Open email setup guide', bn: 'ইমেইল সেটআপ গাইড খুলুন' },
-    personal: { app: 'Email_Accounts', label: { en: 'Open my Email Accounts', bn: 'আমার ইমেইল অ্যাকাউন্টস খুলুন' } },
-  },
-  {
-    id: 'wordpress', featured: true, icon: 'globe', badge: 'official', href: 'https://bn.wordpress.org/download/', host: 'bn.wordpress.org',
-    title: { en: 'Download WordPress in Bangla', bn: 'বাংলা ওয়ার্ডপ্রেস ডাউনলোড' },
-    text: {
-      en: 'The official Bengali WordPress download, with installation resources. For web hosting customers launching a site in Bangla.',
-      bn: 'অফিশিয়াল বাংলা ওয়ার্ডপ্রেস ডাউনলোড ও ইনস্টলেশনের তথ্য। বাংলায় ওয়েবসাইট চালু করতে চাওয়া ওয়েব হোস্টিং গ্রাহকদের জন্য।',
-    },
-    button: { en: 'Get WordPress বাংলা', bn: 'WordPress বাংলা নামান' },
-  },
-  {
-    id: 'domain', featured: true, icon: 'plug', badge: 'guide', href: '/downloads/domain-connection', needs: 'hosting',
-    title: { en: 'My domain connection sheet', bn: 'আমার ডোমেইন কানেক্ট করার তথ্য' },
-    text: {
-      en: 'A one-page sheet with your domain, nameservers and DNS records for your hosting. Copy any value, or send everything to your developer from your phone.',
-      bn: 'আপনার হোস্টিংয়ের জন্য ডোমেইন, নেমসার্ভার ও ডিএনএস রেকর্ডের এক পাতার তথ্য। যেকোনো মান কপি করুন, অথবা সবকিছু ফোন থেকেই আপনার ডেভেলপারকে পাঠান।',
-    },
-    button: { en: 'Open my connection sheet', bn: 'আমার কানেকশন শিট খুলুন' },
-  },
-  // ---- more
-  {
-    id: 'bkash', icon: 'receipt', badge: 'guide', href: '/downloads/bkash-invoice',
-    title: { en: 'Pay an SNBD invoice with bKash and save the receipt', bn: 'বিকাশে বিল পরিশোধ ও রসিদ ডাউনলোড' },
-    text: {
-      en: 'A short visual guide: open an invoice, pay with bKash, see it marked Paid, and save your receipt.',
-      bn: 'ছোট ছবি-সহ গাইড: ইনভয়েস খুলুন, বিকাশে পরিশোধ করুন, “Paid” দেখুন এবং রসিদ সংরক্ষণ করুন।',
-    },
-    button: { en: 'Open the bKash guide', bn: 'বিকাশ গাইড দেখুন' },
-  },
-  {
-    id: 'backup', icon: 'archive', badge: 'official', href: 'https://docs.cpanel.net/cpanel/files/backup-wizard/', host: 'docs.cpanel.net', needs: 'hosting',
-    title: { en: 'Download a website backup', bn: 'ওয়েবসাইটের ব্যাকআপ নিন' },
-    text: {
-      en: 'cPanel’s Backup Wizard walks you through downloading a copy of your website. If your plan includes it, you can open your own backups in one click.',
-      bn: 'cPanel-এর ব্যাকআপ উইজার্ড ধাপে ধাপে আপনার ওয়েবসাইটের একটি কপি ডাউনলোড করতে সাহায্য করে। আপনার প্ল্যানে থাকলে এক ক্লিকে নিজের ব্যাকআপ খুলতে পারবেন।',
-    },
-    button: { en: 'Read the backup guide', bn: 'ব্যাকআপ গাইড পড়ুন' },
-    personal: { app: 'Backups_Home', label: { en: 'Open my backups', bn: 'আমার ব্যাকআপ খুলুন' } },
-  },
-  {
-    id: 'btcl', icon: 'shield', badge: 'official', href: 'https://bdia.btcl.com.bd/', host: 'bdia.btcl.com.bd',
-    title: { en: 'Register a .bd or .বাংলা domain', bn: 'ডোমেইনের জন্য কী কী লাগবে' },
-    text: {
-      en: 'BTCL runs the official .bd and .বাংলা registry. Check what a registration needs, and contact BTCL if a registered domain is still not live.',
-      bn: 'BTCL-ই অফিশিয়াল .bd ও .বাংলা রেজিস্ট্রি চালায়। রেজিস্ট্রেশনে কী লাগে দেখুন, আর নিবন্ধিত ডোমেইন চালু না হলে BTCL-এর সাথে যোগাযোগ করুন।',
-    },
-    note: { en: 'BTCL domain desk: domain@btcl.gov.bd · 16402', bn: 'BTCL ডোমেইন ডেস্ক: domain@btcl.gov.bd · 16402' },
-    button: { en: 'Check BTCL requirements', bn: 'BTCL-এর শর্ত দেখুন' },
-  },
-  {
-    id: 'winscp', icon: 'download', badge: 'official', href: 'https://winscp.net/eng/download.php', host: 'winscp.net', needs: 'hosting',
-    title: { en: 'Upload website files from Windows', bn: 'উইন্ডোজ থেকে ওয়েবসাইটের ফাইল আপলোড' },
-    text: {
-      en: 'WinSCP is a free file-transfer tool. Download it from the official site, then connect with the details from your hosting plan.',
-      bn: 'WinSCP একটি বিনামূল্যের ফাইল ট্রান্সফার টুল। অফিশিয়াল সাইট থেকে নামান, তারপর আপনার হোস্টিং প্ল্যানের তথ্য দিয়ে কানেক্ট করুন।',
-    },
-    button: { en: 'Download WinSCP', bn: 'WinSCP নামান' },
-  },
-  {
-    id: 'n8n', icon: 'bolt', badge: 'official', href: 'https://n8n.io/workflows/11643-manage-contact-form-submissions-with-google-sheets-slack-alerts-and-gmail-replies/', host: 'n8n.io',
-    title: { en: 'Send website leads to Google Sheets', bn: 'ওয়েবসাইটের লিড গুগল শিটে পাঠান' },
-    text: {
-      en: 'A ready-made n8n workflow: it saves contact-form submissions to Google Sheets, alerts a Slack channel and replies by Gmail.',
-      bn: 'তৈরি করা একটি n8n ওয়ার্কফ্লো: কন্টাক্ট ফর্মের তথ্য Google Sheets-এ জমা করে, Slack চ্যানেলে জানায় এবং Gmail-এ উত্তর পাঠায়।',
-    },
-    button: { en: 'Get the n8n workflow', bn: 'n8n ওয়ার্কফ্লো নিন' },
-  },
-];
 
 /** Step-by-step guide: Business email on Android and iPhone. */
 const EMAIL_GUIDE = {
@@ -173,4 +92,4 @@ const DOMAIN_SHEET = {
 // Nameservers SNBD tells customers to use (SNBD HOST knowledge-base article "How to Point Your Domain to SNBD HOST").
 const DEFAULT_NAMESERVERS = ['ns1.snbdhost.com', 'ns2.snbdhost.com'];
 
-module.exports = { CARDS, EMAIL_GUIDE, BKASH_GUIDE, DOMAIN_SHEET, DEFAULT_NAMESERVERS };
+module.exports = { EMAIL_GUIDE, BKASH_GUIDE, DOMAIN_SHEET, DEFAULT_NAMESERVERS };

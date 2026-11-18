@@ -1,34 +1,38 @@
 <%- include('_head') %>
 <div class="pagehead"><div><h1><%= t('dl.title') %></h1><p class="sub"><%= t('dl.sub') %></p></div></div>
 
-<section class="kit-section" aria-labelledby="kit-start">
-  <h2 class="kit-h" id="kit-start"><%= t('dl.startHere') %></h2>
-  <div class="kit-grid kit-grid-3">
-    <% featured.forEach(c => { %><%- include('_kit-card', { c }) %><% }) %>
+<section class="kit-section" aria-labelledby="dev-h">
+  <div class="dev-head">
+    <h2 class="kit-h" id="dev-h"><%= t('dl.devTitle') %></h2>
+    <div class="dev-chips" role="group" aria-label="<%= t('dl.devTitle') %>">
+      <button type="button" class="dev-chip" data-cat="" aria-pressed="true"><%= t('dl.all') %></button>
+      <% categories.forEach(c => { %><button type="button" class="dev-chip" data-cat="<%= c.id %>" aria-pressed="false"><%= pick(c.label) %></button><% }) %>
+    </div>
+  </div>
+  <p class="dev-note"><%= t('dl.devNote') %></p>
+  <div class="kit-grid" id="devGrid">
+    <% dev.forEach(c => { %><%- include('_dev-card', { c }) %><% }) %>
   </div>
 </section>
 
-<section class="kit-section" aria-labelledby="kit-more">
-  <h2 class="kit-h" id="kit-more"><%= t('dl.moreKits') %></h2>
-  <div class="kit-grid">
-    <% more.forEach(c => { %><%- include('_kit-card', { c }) %><% }) %>
+<section class="kit-section" aria-labelledby="trend-h">
+  <h2 class="kit-h" id="trend-h"><%- icon('activity') %> <%= t('dl.trendTitle') %></h2>
+  <p class="dev-note"><%= t('dl.trendNote', { date: fmtDate(checked) }) %></p>
+  <div class="kit-grid kit-grid-4">
+    <% trending.forEach(c => { %><%- include('_dev-card', { c }) %><% }) %>
   </div>
 </section>
-
-<% if (items.length) { %>
-<section class="kit-section" aria-labelledby="kit-acct">
-  <h2 class="kit-h" id="kit-acct"><%= t('dl.fromAccount') %></h2>
-  <div class="kit-grid">
-    <% items.forEach(d => { %><article class="kit-card"><h2><%= d.title %></h2><% if (d.description) { %><p class="kit-text"><%= d.description %></p><% } %></article><% }) %>
-  </div>
-</section>
-<% } %>
 
 <script>
 (() => {
-  document.querySelectorAll('[data-kit-sso]').forEach((f) => {
-    const sel = f.querySelector('[data-kit-service]');
-    if (sel) sel.addEventListener('change', () => { f.action = '/services/' + encodeURIComponent(sel.value) + '/sso'; });
+  const grid = document.getElementById('devGrid'), chips = Array.from(document.querySelectorAll('.dev-chip'));
+  chips.forEach((b) => b.addEventListener('click', () => {
+    chips.forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
+    Array.from(grid.children).forEach((c) => { c.hidden = Boolean(b.dataset.cat) && c.dataset.cat !== b.dataset.cat; });
+  }));
+  document.querySelectorAll('[data-dev-service]').forEach((w) => {
+    const sel = w.querySelector('select'), a = w.querySelector('a');
+    if (sel && a) sel.addEventListener('change', () => { a.href = '/services/' + encodeURIComponent(sel.value); });
   });
 })();
 </script>
