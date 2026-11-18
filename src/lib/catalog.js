@@ -293,13 +293,21 @@ async function getTldPrices(currencyId) {
   return cached(`tld:${key}`, TLD_TTL, () => loadTldPrices(key), { staleMs: 6 * HOUR }).catch(() => ({}));
 }
 
-/** Payment gateways enabled in WHMCS (GetPaymentMethods), or [] when unavailable. */
+/**
+ * Payment gateways the portal offers: only Stripe (credit/debit card) and bKash, whatever else is
+ * enabled in WHMCS (PayPal, bank transfer, ...). Matched on the WHMCS module name, e.g. `stripe`
+ * and `bkashcheckoutUrl`.
+ */
+const ALLOWED_GATEWAY = /^(stripe|bkash)/i;
+const isAllowedGateway = (m) => ALLOWED_GATEWAY.test(String((m && m.module) || ''));
+
+/** Allowed payment gateways enabled in WHMCS (GetPaymentMethods), or [] when unavailable. */
 async function paymentMethods() {
   const data = await cached('paymentmethods', PAYMENT_METHODS_TTL, async () => whmcs.assertSuccess(
     await whmcs.call('GetPaymentMethods', {}),
   )).catch(() => null);
   const v = data && data.paymentmethods && data.paymentmethods.paymentmethod;
-  return arr(v);
+  return arr(v).filter(isAllowedGateway);
 }
 
 async function siblingsOf(pid, currencyCode) {
@@ -324,4 +332,4 @@ async function productPrice(pid, currencyCode, billingcycle) {
   return Number.isFinite(v) && v >= 0 ? v : null;
 }
 
-module.exports = { productPrice, siblingsOf, GROUPS, FAMILIES, listGroups, getGroup, getProduct, getTldPrices, paymentMethods, loadProducts, visibleSlugs, fetchVisibleSlugs, storeBase, parseDescription, pricingFor, storePath };
+module.exports = { productPrice, siblingsOf, GROUPS, FAMILIES, listGroups, getGroup, getProduct, getTldPrices, paymentMethods, loadProducts, visibleSlugs, fetchVisibleSlugs, storeBase, isAllowedGateway, parseDescription, pricingFor, storePath };

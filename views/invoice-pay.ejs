@@ -13,9 +13,8 @@ const GATEWAYS = {
 const cc = invoice.currencycode;
 const amt = (v) => price(v, cc);
 const balance = Number(invoice.balance) || 0;
-// Only bKash and Stripe card payments are offered. If an account has neither, fall back to everything WHMCS returns so checkout is never empty.
-const offered = paymethods.filter(m => /^(bkash|stripe)/i.test(String(m.module)));
-const methods = offered.length ? offered : paymethods;
+// paymethods is already limited to bKash and Stripe card payments by the catalog.
+const methods = paymethods;
 const selected = methods.some(m => m.module === invoice.paymentmethod) ? invoice.paymentmethod : (methods[0] && methods[0].module);
 const label = (m) => (GATEWAYS[String(m.module).toLowerCase()] || { name: String(m.displayname || m.module).split('|')[0].trim(), desc: String(m.displayname || '').split('|').slice(1).join(' ').trim(), icon: 'wallet' });
 %>
