@@ -49,8 +49,38 @@ const isPublic = !(session && session.clientId) && typeof publicPage !== 'undefi
 <link rel="stylesheet" href="/css/theme.css">
 <% if (ti === 'Dashboard') { %><link rel="stylesheet" href="/css/dashboard.css"><% } %>
 <% if (typeof kbPage !== 'undefined' && kbPage) { %><link rel="stylesheet" href="/css/kb.css"><% } %>
+<% const trk = (typeof tracking === 'object' && tracking) || null; if (trk && trk.gtmId) { %>
+<!-- Google Tag Manager: GA4 (G-WZP9CRYG6B) is fired by this container only, as on snbdhost.com. Production host only. -->
+<script>
+(function(){
+  var hosts = <%- JSON.stringify(trk.hosts) %>;
+  if (hosts.indexOf(location.hostname) === -1) return;
+  window.snbdTrackingEnabled = true;
+  var dl = window.dataLayer = window.dataLayer || [];
+  <% if (trk.userId) { %>dl.push({ user_id: <%- JSON.stringify(trk.userId) %> });<% } %>
+  <% (trk.events || []).forEach(function (ev) { %>dl.push(<%- JSON.stringify(ev).replace(/</g, '\u003c') %>);
+  <% }) %>
+  var loaded = false;
+  function load() {
+    if (loaded) return; loaded = true;
+    dl.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+    var s = document.createElement('script'); s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtm.js?id=<%= trk.gtmId %>';
+    document.head.appendChild(s);
+    // Seed the GA4 client_id so GTM can stitch sessions across snbdhost.com and this portal.
+    setTimeout(function () {
+      var m = document.cookie.match(/_ga=GA\d+\.\d+\.(\d+\.\d+)/);
+      if (m) dl.push({ client_id: m[1] });
+    }, 2000);
+  }
+  window.addEventListener('load', function () { (window.requestIdleCallback || function (cb) { setTimeout(cb, 1500); })(load); });
+  ['scroll', 'mousemove', 'touchstart', 'keydown'].forEach(function (e) { window.addEventListener(e, load, { once: true, passive: true }); });
+})();
+</script>
+<% } %>
 </head>
 <body class="lang-<%= lang %>">
+<% if (trk && trk.gtmId && trk.onHost) { %><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<%= trk.gtmId %>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><% } %>
 <script>
 (() => {
   try {

@@ -94,6 +94,8 @@ app.use(session({
 
 app.use(rateLimit({ windowMs: 60 * 1000, max: 120 }));
 
+app.use(require('./lib/tracking').middleware);
+
 app.use((req, res, next) => {
   res.locals.session = req.session;
   res.locals.mock = config.useMock;

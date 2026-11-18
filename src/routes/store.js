@@ -96,6 +96,10 @@ router.get('/store', prefsFromQuery, async (req, res) => {
 router.get('/store/complete', requireLogin, (req, res) => {
   const order = req.session.lastOrder;
   if (!order) return res.redirect('/store');
+  if (req.session.trackedOrder !== order.orderid) {
+    req.session.trackedOrder = order.orderid;
+    require('../lib/tracking').queue(req, require('../lib/tracking').purchaseEvent(order));
+  }
   res.render('store-complete', { title: 'Order Complete', order });
 });
 

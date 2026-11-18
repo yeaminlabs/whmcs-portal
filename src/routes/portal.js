@@ -61,7 +61,7 @@ router.post('/register', async (req, res) => {
       clientName: `${firstname} ${lastname}`.trim(),
       clientEmail: email,
       clientPicture: avatars.get(clientId),
-    });
+    }, 'password', true);
     res.redirect(303, safeNext(next));
   } catch (e) { fail(500, t('checkout.regFailed')); }
 });
@@ -124,7 +124,7 @@ router.post('/auth/google', async (req, res) => {
         clientName: `${client.firstname || ''} ${client.lastname || ''}`.trim() || email,
         clientEmail: client.email || email,
         clientPicture: googlePicture(payload.picture) || avatars.get(clientId),
-      });
+      }, 'Google');
     } catch (err) {
       return res.status(500).json({ error: 'Could not start session.' });
     }
