@@ -6,7 +6,7 @@
 <div class="checkout">
   <div class="checkout-main">
     <section class="panel step">
-      <header><span><%- icon('lock') %> <%= t('card.details') %></span><small><%= t('card.poweredBy') %></small></header>
+      <header><span><%- icon('lock') %> <%= t('card.details') %></span><small class="pm-inline"><%= t('card.poweredBy') %> <%- payLogo('stripe') %></small></header>
       <form id="card-form" class="step-body">
         <div id="payment-element" class="card-element"><p class="hint"><%= t('card.loading') %></p></div>
         <p id="card-error" class="alert err" role="alert" hidden></p>

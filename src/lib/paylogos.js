@@ -7,7 +7,7 @@
  */
 const LOGOS = [
   { test: /bkash/i, src: '/img/bkash.png', alt: 'bKash', w: 72, h: 40 },
-  { test: /stripe|credit\s*\/?\s*debit|card/i, src: '/img/stripe.png', alt: 'Stripe', w: 72, h: 30 },
+  { test: /stripe/i, src: '/img/stripe.png', alt: 'Stripe', w: 72, h: 30 },
 ];
 
 function logoFor(key) {
