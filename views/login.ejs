@@ -26,18 +26,19 @@
          data-itp_support="true"></div>
     <div class="g_id_signin" id="g-button"
          data-type="standard"
-         data-shape="pill"
+         data-shape="rectangular"
          data-theme="outline"
          data-text="signin_with"
          data-locale="<%= lang %>"
          data-size="large"
          data-logo_alignment="center"
-         data-width="360"></div>
+         data-width="384"></div>
     <p class="google-error alert err" id="google-error" role="alert" hidden></p>
   </div>
   <p class="auth-alt"><%= t('auth.new') %> <a href="/register"><%= t('auth.create') %></a></p>
 </form>
 <script>
+(function(){var g=document.getElementById('g-button'),c=document.querySelector('.auth-card');if(g&&c){var w=Math.floor(Math.min(384,Math.max(200,c.clientWidth)));g.setAttribute('data-width',String(w))}})();
 (function(){var t=document.getElementById('pwToggle'),p=document.getElementById('pw');if(t&&p)t.addEventListener('click',function(){var show=p.type==='password';p.type=show?'text':'password';t.setAttribute('aria-pressed',String(show));t.setAttribute('aria-label',show?<%- JSON.stringify(t('auth.hidePassword')) %>:<%- JSON.stringify(t('auth.showPassword')) %>)})})();
 function showGoogleError(msg) {
   const el = document.getElementById('google-error');

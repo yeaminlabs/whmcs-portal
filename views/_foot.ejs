@@ -12,7 +12,9 @@
   </div>
 </footer>
 <% } else { %>
-  </main>
+    </main>
+    <footer class="auth-foot"><span>© <%= new Date().getFullYear() %> SNBD HOST</span><a href="/store"><%= t('pub.footStore') %></a></footer>
+  </div>
 </div>
 <% } %>
 <script>
