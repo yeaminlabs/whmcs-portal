@@ -887,3 +887,8 @@ a{color:#BE3045}a:hover{color:#A1263A}
 .dx-chart-foot .control-button{min-height:2.5rem;padding:.4rem 1rem;border-radius:12px;font-weight:700;color:#30292E;background:#fff;border:1px solid #E1DAD4}
 .dx-chart-foot .control-button:hover{border-color:#BE3045;color:#BE3045}
 @media(max-width:760px){.dx-chart .dx-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dx-chart .dx-kpi:nth-child(3){border-left:0}.dx-chart .dx-kpi:nth-child(n+3){border-top:1px solid #E1DAD4}.dx-chart .large-chart{height:19rem;margin-inline:1rem}.dx-perf-head{padding-inline:1rem}.dx-chart .dx-kpis{margin-inline:1rem}.dx-chart-foot{margin-inline:1rem}}
+
+/* Google connect prompt: the hide control was removed, so the box has two columns */
+.google-connect-prompt{grid-template-columns:minmax(13rem,.75fr) minmax(0,2.25fr)}
+@media(max-width:900px){.google-connect-prompt{grid-template-columns:minmax(10rem,.7fr) minmax(0,1.3fr)}}
+@media(max-width:680px){.google-connect-prompt{grid-template-columns:1fr}}

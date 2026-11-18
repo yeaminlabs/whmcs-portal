@@ -80,10 +80,6 @@ const serviceAction = (service) => {
       </a>
     </div>
   </div>
-  <div class="google-connect-controls">
-    <button class="google-connect-hide" id="hideGoogleConnect" type="button"><%= t('google.hidePrompt') %></button>
-    <span class="google-connect-hint"><%= t('google.hidePromptHint') %></span>
-  </div>
   <p class="sr-only" id="googleConnectStatus" role="status" aria-live="polite"></p>
 </section>
 
@@ -456,7 +452,6 @@ const serviceAction = (service) => {
   const viewQueriesLabel = document.getElementById('viewQueriesLabel');
   const searchSurfaces = [document.getElementById('searchSection'), document.getElementById('searchInsights'), document.getElementById('queriesSection')];
   const googleConnectPrompt = document.getElementById('googleConnectPrompt');
-  const hideGoogleConnect = document.getElementById('hideGoogleConnect');
   const googleConnectStatus = document.getElementById('googleConnectStatus');
   const googleToolActions = document.querySelectorAll('[data-google-tool]');
   const googleHideKey = <%- JSON.stringify('snbd.dashboard.searchconsole.hidden.' + String(session.clientId || session.clientEmail || 'account').replace(/[^a-zA-Z0-9_-]/g, '_')) %>;
@@ -465,7 +460,8 @@ const serviceAction = (service) => {
   let googleConnections = <%- JSON.stringify(googleConnected) %>;
   let googleConnectHidden = false;
 
-  try { googleConnectHidden = localStorage.getItem(googleHideKey) === '1'; } catch (e) { /* private mode */ }
+  // The hide option was removed: drop any saved preference so Search Console always shows again.
+  try { localStorage.removeItem(googleHideKey); } catch (e) { /* private mode */ }
 
   function applyGoogleConnectionVisibility() {
     searchSurfaces.forEach((el) => { if (el) el.hidden = googleConnectHidden; });
@@ -482,13 +478,6 @@ const serviceAction = (service) => {
   }
 
   applyGoogleConnectionVisibility();
-
-  if (hideGoogleConnect) hideGoogleConnect.addEventListener('click', () => {
-    googleConnectHidden = true;
-    try { localStorage.setItem(googleHideKey, '1'); } catch (e) { /* private mode */ }
-    applyGoogleConnectionVisibility();
-    if (googleConnectStatus) googleConnectStatus.textContent = '<%= t("google.hiddenStatus") %>';
-  });
 
   if (!refreshBtn || !chartEl) return;
 
