@@ -6,7 +6,7 @@ const gname = tr('group.' + o.group.slug, o.group.name);
 const nextVal = (typeof next === 'string' && next) ? next : '/checkout';
 const pmName = String(o.paymentmethod.name || o.paymentmethod.module).split('|')[0].trim();
 %>
-<nav class="crumbs" aria-label="Breadcrumb"><a href="/store"><%= t('store.crumb') %></a><%- icon('chev') %><a href="/store/<%= o.group.slug %>"><%- brandMark(o.group.slug + ' ' + o.group.name) %><%= gname %></a><%- icon('chev') %><span><%= t('pub.checkoutTitle') %></span></nav>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/store"><%= t('store.crumb') %></a><%- icon('chev') %><a href="/store/<%= o.group.slug %>"><%- brandMark(o.group.slug + ' ' + o.group.name) %><%- brandText(gname) %></a><%- icon('chev') %><span><%= t('pub.checkoutTitle') %></span></nav>
 <div class="pagehead"><div><h1><%= t('pub.checkoutTitle') %></h1><p class="sub"><%= t(loggedIn ? 'pub.checkoutSubIn' : 'pub.checkoutSub') %></p></div></div>
 
 <% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
@@ -15,7 +15,7 @@ const pmName = String(o.paymentmethod.name || o.paymentmethod.module).split('|')
   <section class="panel co-sum" aria-labelledby="co-sum-h">
     <header><span id="co-sum-h"><%= t('pub.summary') %></span><a href="<%= o.editUrl %>"><%= t('pub.editOrder') %></a></header>
     <div class="sum-body">
-      <div class="sum-product"><b><%- brandMark(o.product.name) %><%= o.product.name %></b><small><%= gname %></small></div>
+      <div class="sum-product"><b><%- brandMark(o.product.name) %><%- brandText(o.product.name) %></b><small><%- brandText(gname) %></small></div>
       <dl>
         <div><dt><%= st(o.cycle.label) %></dt><dd><%= money(o.cycle.price, o.prefix) %></dd></div>
         <% if (o.cycle.setup > 0) { %><div><dt><%= t('pub.setupFee') %></dt><dd><%= money(o.cycle.setup, o.prefix) %></dd></div><% } %>

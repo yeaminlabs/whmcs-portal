@@ -108,6 +108,7 @@ app.use((req, res, next) => {
   res.locals.bdixFlag = brandmarks.bdixFlag;
   res.locals.flagMark = brandmarks.flagMark;
   res.locals.brandTile = brandmarks.brandTile;
+  res.locals.brandText = brandmarks.brandText;
   res.locals.usNetworks = brandmarks.usNetworks;
   res.locals.money = money;
   res.locals.googleClientId = config.googleClientId;

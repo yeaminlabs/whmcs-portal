@@ -1,16 +1,16 @@
 <%- include('_head') %>
 <% const tr = (k, fb) => { const v = t(k); return v === k ? fb : v; }; %>
-<nav class="crumbs" aria-label="Breadcrumb"><a href="/store"><%= t('store.crumb') %></a><%- icon('chev') %><span><%= tr('group.' + group.slug, group.name) %></span></nav>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/store"><%= t('store.crumb') %></a><%- icon('chev') %><span><%- brandText(tr('group.' + group.slug, group.name)) %></span></nav>
 <div class="pagehead">
   <% const headLogo = bdixLogo(group.slug + ' ' + group.name); %>
-  <div><h1><%- brandMark(group.slug + ' ' + group.name) %><%= tr('group.' + group.slug, group.name) %></h1><p class="sub"><%= tr('groupBlurb.' + group.slug, group.blurb) %></p></div>
+  <div><h1><%- brandMark(group.slug + ' ' + group.name) %><%- brandText(tr('group.' + group.slug, group.name)) %></h1><p class="sub"><%- brandText(tr('groupBlurb.' + group.slug, group.blurb)) %></p></div>
   <% if (headLogo) { %><div class="pagehead-brand"><%- headLogo %></div><% } %>
 </div>
 
 <%- usNetworks(group.slug, t('store.usNetworks')) %>
 
 <nav class="ui-tabs store-tabs" aria-label="<%= t('store.categories') %>">
-  <% groups.forEach(g => { %><a href="/store/<%= g.slug %>"<% if (g.slug === group.slug) { %> aria-current="page"<% } %>><%- brandMark(g.slug + ' ' + g.name) %><%= tr('group.' + g.slug, g.name) %></a><% }) %>
+  <% groups.forEach(g => { %><a href="/store/<%= g.slug %>"<% if (g.slug === group.slug) { %> aria-current="page"<% } %>><%- brandMark(g.slug + ' ' + g.name) %><%- brandText(tr('group.' + g.slug, g.name)) %></a><% }) %>
 </nav>
 
 <div class="plan-grid">
@@ -18,8 +18,8 @@
        const longest = p.pricing.cycles.filter(c => c.save > 0).sort((a, b) => b.save - a.save)[0]; %>
   <article class="plan reveal" style="animation-delay:<%= Math.min(i, 8) * 40 %>ms">
     <header>
-      <h2><%- brandMark(p.name) %><%= p.name %></h2>
-      <% if (p.lead) { %><span class="plan-lead"><%- icon('bolt') %><%= p.lead %></span><% } %>
+      <h2><%- brandMark(p.name) %><%- brandText(p.name) %></h2>
+      <% if (p.lead) { %><span class="plan-lead"><%- icon('bolt') %><%- brandText(p.lead) %></span><% } %>
     </header>
     <div class="plan-price">
       <% if (p.from) { %>
@@ -29,9 +29,9 @@
       <% } %>
     </div>
     <ul class="plan-features">
-      <% p.features.forEach(f => { %><li><%- icon('check') %><span><b><%= f.main %></b><% if (f.note) { %> <%= f.note %><% } %></span></li><% }) %>
+      <% p.features.forEach(f => { %><li><%- icon('check') %><span><b><%- brandText(f.main) %></b><% if (f.note) { %> <%- brandText(f.note) %><% } %></span></li><% }) %>
     </ul>
-    <% if (p.tagline) { %><p class="plan-tagline"><%= p.tagline %></p><% } %>
+    <% if (p.tagline) { %><p class="plan-tagline"><%- brandText(p.tagline) %></p><% } %>
     <a class="btn plan-cta" href="<%= p.url %>"><%= t('store.orderNow') %> <%- icon('arrow') %></a>
   </article>
   <% }) %>

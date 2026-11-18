@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { n8nMark, flagMark, bdixFlag, bdixLogo, brandMark, brandTile, usNetworks, US_NETWORKS } = require('../../src/lib/brandmarks');
+const { n8nMark, flagMark, bdixFlag, bdixLogo, brandMark, brandText, brandTile, usNetworks, US_NETWORKS } = require('../../src/lib/brandmarks');
 
 describe('n8n logo helper', () => {
   test('returns the logo for anything that mentions n8n, any case', () => {
@@ -104,5 +104,44 @@ describe('region flags', () => {
   });
   test('the USA keeps the same eight network logos on both USA pages', () => {
     expect(usNetworks('usa-shared-hosting', 'x')).toBe(usNetworks('usa-vps', 'x'));
+  });
+});
+
+describe('OpenClaw logo replaces the word', () => {
+  test('any capitalisation becomes the logo and the rest of the text stays', () => {
+    for (const t of ['OpenClaw 6G', 'Openclaw 4G', 'OPENCLAW 8G']) {
+      const html = brandText(t);
+      expect(html).toContain('src="/img/openclaw.png"');
+      expect(html).toContain('alt="OpenClaw"');
+      expect(html.replace(/<img[^>]*>/, '').trim()).toMatch(/^\d+G$/);
+    }
+    expect(brandText('Automated One-Click OpenClaw Setup')).toMatch(/^Automated One-Click <img[^>]*> Setup$/);
+  });
+  test('the written word is gone from the output apart from the image alt', () => {
+    const html = brandText('Instant Deploy OpenClaw Hosting and openclaw again');
+    expect(html.replace(/alt="OpenClaw"/g, '').toLowerCase()).not.toContain('openclaw hosting');
+    expect((html.match(/<img/g) || []).length).toBe(2);
+  });
+  test('other text is escaped, so it cannot inject markup', () => {
+    const html = brandText('<script>alert(1)</script> & "q" OpenClaw');
+    expect(html).not.toContain('<script');
+    expect(html).toContain('&lt;script&gt;');
+    expect(html).toContain('&amp;');
+  });
+  test('plain names and empty input pass through unchanged', () => {
+    expect(brandText('USA VPS 2G')).toBe('USA VPS 2G');
+    expect(brandText(null)).toBe('');
+    expect(brandText(undefined)).toBe('');
+  });
+  test('the OpenClaw group has no icon tile; the logo file is a small transparent PNG', () => {
+    expect(brandTile('openclaw-hosting OpenClaw Hosting').cls).toBe('none');
+    const fs = require('fs');
+    const path = require('path');
+    const buf = fs.readFileSync(path.join(__dirname, '..', '..', 'public', 'img', 'openclaw.png'));
+    expect(buf.subarray(1, 4).toString()).toBe('PNG');
+    expect(buf.readUInt32BE(16)).toBe(468);
+    expect(buf.readUInt32BE(20)).toBe(96);
+    expect(buf[25]).toBe(6);
+    expect(buf.length).toBeLessThan(60000);
   });
 });

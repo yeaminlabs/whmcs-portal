@@ -6,6 +6,7 @@
  *   brandMark(text)  small logo/flag printed before a name: n8n logo for n8n, else the region flag
  *   flagMark(text)   region flag only: Bangladesh (BDIX), USA, Singapore (SG), EU
  *   bdixLogo(text)   the BDIX (Bangladesh Internet Exchange) logo, BDIX names only
+ *   brandText(text)  safe HTML for a name or sentence where the word OpenClaw is replaced by the OpenClaw logo
  *   brandTile(text)  { cls, html } for a card icon tile: n8n logo, BDIX logo or the region flag, else { cls: '', html: '' }
  * The images are decorative (alt is empty) because the name is always printed next to them,
  * except the standalone BDIX logo, which names itself.
@@ -54,8 +55,22 @@ function bdixLogo(text, cls = '') {
 
 const brandMark = (text, cls = '') => n8nMark(text, cls) || flagMark(text, cls);
 
+const OPENCLAW = /openclaw/gi;
+const escapeHtml = (v) => str(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+const OPENCLAW_IMG = '<img class="openclaw-logo" src="/img/openclaw.png" alt="OpenClaw" width="468" height="96" decoding="async">';
+
+/**
+ * The text, HTML-escaped, with every "OpenClaw" (any capitalisation) replaced by the OpenClaw logo,
+ * which already spells the name. Use with <%- %>. Everything else is plain escaped text.
+ */
+function brandText(text) {
+  return escapeHtml(text).replace(OPENCLAW, OPENCLAW_IMG);
+}
+
 function brandTile(text) {
   if (N8N.test(str(text))) return { cls: 'n8n', html: n8nMark(text) };
+  // OpenClaw has no icon tile: its logo is printed in the name itself (see brandText).
+  if (/openclaw/i.test(str(text))) return { cls: 'none', html: '' };
   const r = regionOf(text);
   if (!r) return { cls: '', html: '' };
   if (r.key === 'bdix') return { cls: 'bdix', html: bdixLogo(text) };
@@ -86,4 +101,4 @@ function usNetworks(groupSlug, label = '') {
   return `<div class="net-strip" role="group" aria-label="${attr(label)}">${label ? `<p class="net-strip-label">${attr(label)}</p>` : ''}<div class="net-strip-logos">${logos}</div></div>`;
 }
 
-module.exports = { n8nMark, flagMark, bdixFlag, bdixLogo, brandMark, brandTile, usNetworks, US_NETWORKS };
+module.exports = { n8nMark, flagMark, bdixFlag, bdixLogo, brandMark, brandText, brandTile, usNetworks, US_NETWORKS };
