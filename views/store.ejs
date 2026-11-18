@@ -13,7 +13,7 @@
     <a class="group-card" href="/store/<%= g.slug %>">
       <% const tile = brandTile(g.slug + ' ' + g.name); %><% if (tile.cls !== 'none') { %><span class="group-icon<%= tile.cls ? ' group-icon-' + tile.cls : '' %>"><%- tile.html || icon(f.id === 'vps' ? 'server' : f.id === 'automation' ? 'bolt' : f.id === 'ai' ? 'cpu' : 'globe') %></span><% } %>
       <strong><%- bdixFlag(g.slug + ' ' + g.name) %><%- brandText(tr('group.' + g.slug, g.name)) %></strong>
-      <p><%- brandText(tr('groupBlurb.' + g.slug, g.blurb)) %></p>
+      <p><%= tr('groupBlurb.' + g.slug, g.blurb) %></p>
       <span class="group-meta">
         <span><%= t(g.products.length === 1 ? 'store.planOne' : 'store.planMany', { n: g.products.length }) %></span>
         <% if (cheapest && cheapest.from) { %><span><%- t('store.from', { price: '<b>' + money(cheapest.from.perMonth, cheapest.pricing.prefix) + '</b>' }) %></span><% } %>
