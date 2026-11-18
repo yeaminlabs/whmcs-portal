@@ -1,0 +1,90 @@
+/* Contact: one focused conversation, then the customer's choice of channel. */
+.contact-page{--ct-berry:#BE3045;--ct-deep:#8F2438;--ct-muted:#685F65;max-width:1060px;margin:0 auto}
+.contact-page .ct-heading{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:6px 0 28px}
+.contact-page .ct-heading h1{font-size:clamp(30px,3.5vw,44px);line-height:1.15;letter-spacing:-.045em;margin:0 0 10px}
+.contact-page .ct-heading p{margin:0;color:var(--ct-muted);font-size:15px;max-width:56ch}
+.contact-page .ct-help{display:inline-flex;align-items:center;gap:9px;flex-shrink:0;color:var(--ink);font-size:14px;font-weight:600;min-height:44px}
+.contact-page .ct-help:hover{color:var(--ct-berry);text-decoration:underline}
+.contact-page .ct-compose{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.6fr);border:1px solid var(--line);border-radius:22px;background:#fff;overflow:hidden;box-shadow:0 10px 30px -22px rgba(48,41,46,.2)}
+.contact-page .ct-intro{display:flex;flex-direction:column;align-items:flex-start;background:var(--ct-deep);color:#fff;padding:34px 30px}
+.contact-page .ct-conversation{width:210px;max-width:100%;height:140px;margin:0 0 26px}
+.contact-page .ct-intro h2{font-size:clamp(23px,2.3vw,30px);font-weight:650;line-height:1.2;letter-spacing:-.025em;color:#fff;max-width:13ch;margin:0 0 16px}
+.contact-page .ct-intro>p{font-size:14px;line-height:1.75;color:#FBEDEE;margin:0 0 32px;max-width:32ch}
+.contact-page .ct-intro-note{display:flex;gap:10px;border-top:1px solid #b96372;padding-top:20px;margin-top:auto;font-size:12px;line-height:1.7;color:#FBEDEE}
+.contact-page .ct-intro-note .ico{margin-top:2px}
+.contact-page .ct-form{padding:32px;min-width:0}
+.contact-page .ct-form-heading{margin-bottom:24px}
+.contact-page .ct-form-heading h2{font-size:22px;line-height:1.3;letter-spacing:-.025em;margin:0 0 8px}
+.contact-page .ct-form-heading p{color:var(--ct-muted);font-size:13px;line-height:1.65;margin:0}
+.contact-page .ct-fields{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.contact-page .ct-form label{margin:0 0 20px;gap:9px;color:var(--ink);font-size:13px;font-weight:600}
+.contact-page .ct-form input,.contact-page .ct-form textarea{font-family:inherit;font-size:16px;border-color:#D5CDD0;border-radius:9px;box-shadow:none;min-height:48px;padding:12px}
+.contact-page .ct-form textarea{resize:vertical;min-height:140px;line-height:1.6}
+.contact-page .ct-form input:focus,.contact-page .ct-form textarea:focus{border-color:var(--ct-berry);box-shadow:0 0 0 3px #FBEDEE}
+.contact-page .ct-field-hint{font-size:12px;color:var(--ct-muted);line-height:1.6;margin:-10px 0 24px}
+.contact-page .ct-send-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border-top:1px solid #ECE7E1;padding-top:20px}
+.contact-page .ct-send-row p{display:flex;align-items:center;gap:8px;max-width:26ch;color:var(--ct-muted);font-size:12px;margin:0}
+.contact-page .btn{min-height:44px;font-family:inherit;line-height:1.4}
+.contact-page .ct-send-row .btn{padding:12px 18px}
+.contact-page .ct-more{max-width:none;margin:36px 0 8px}
+.contact-page .ct-section-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:18px}
+.contact-page .ct-section-heading h2{font-size:21px;letter-spacing:-.025em;line-height:1.3;margin:0}
+.contact-page .ct-section-heading p{font-size:13px;color:var(--ct-muted);margin:0}
+.contact-page .ct-direct{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);border:1px solid #E9CFD5;border-radius:16px;background:#FCF3F4}
+.contact-page .ct-phone,.contact-page .ct-email{display:flex;align-items:flex-start;gap:16px;padding:26px}
+.contact-page .ct-email{border-left:1px solid #E9CFD5}
+.contact-page .ct-ico{flex:none;width:40px;height:40px;display:grid;place-items:center;background:#fff;color:var(--ct-berry);border-radius:12px;margin:0}
+.contact-page .ct-ico .ico{width:20px;height:20px}
+.contact-page h3{color:var(--ink);font-size:14px;line-height:1.5;font-weight:600;margin:0 0 8px}
+.contact-page .ct-channel-content{min-width:0}
+.contact-page .ct-main{display:inline-block;font-size:clamp(18px,1.8vw,23px);line-height:1.4;letter-spacing:-.025em;color:var(--ct-deep);font-weight:650;margin-bottom:8px;overflow-wrap:anywhere}
+.contact-page .ct-main:hover{text-decoration:underline;text-underline-offset:4px}
+.contact-page .ct-channel-content p,.contact-page .ct-support-item p{font-size:13px;line-height:1.7;color:var(--ct-muted);margin:0;max-width:42ch}
+.contact-page .ct-actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 0;padding:0}
+.contact-page .ct-actions .btn{font-size:13px;padding:9px 17px}
+.contact-page .ct-support{display:grid;grid-template-columns:1.1fr 1fr;margin-top:14px;border:1px solid var(--line);border-radius:16px;background:#fff}
+.contact-page .ct-support-item{display:flex;gap:16px;padding:25px}
+.contact-page .ct-support-item+article{border-left:1px solid var(--line)}
+.contact-page .ct-support-item .ct-ico{background:#F8F6F2;color:var(--ink)}
+.contact-page .ct-text-link{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:13px;min-height:44px;margin-top:5px;text-decoration:underline;text-underline-offset:4px}
+.contact-page .ct-text-link .ico{width:15px;height:15px}
+.contact-page .ct-office{display:grid;grid-template-columns:40px minmax(180px,.85fr) minmax(0,1.4fr);align-items:start;gap:16px;margin-top:24px;padding:24px 0 0;border-top:1px solid var(--line)}
+.contact-page .ct-office .ct-ico{background:transparent;color:var(--ct-muted)}
+.contact-page .ct-office h3{font-size:12px;color:var(--ct-muted);margin:0 0 5px}
+.contact-page .ct-office-name{font-weight:500;font-size:13px;margin:0}
+.contact-page .ct-office-note{font-size:12px;line-height:1.8;color:var(--ct-muted);margin:0}
+.contact-page .alert.ok{display:flex;align-items:center;gap:8px;margin-bottom:20px}
+.lang-bn .contact-page .ct-intro h2{max-width:18ch;line-height:1.5}
+.lang-bn .contact-page .ct-heading h1{line-height:1.4}
+@media(min-width:921px) and (max-width:1190px){
+  .contact-page .ct-form{padding:26px}.contact-page .ct-intro{padding:28px 22px}
+  .contact-page .ct-fields{grid-template-columns:1fr;gap:0}
+  .contact-page .ct-phone,.contact-page .ct-email{padding:22px 18px;gap:10px}
+  .contact-page .ct-main{font-size:18px}
+}
+@media(max-width:700px){
+  .contact-page .ct-heading{align-items:flex-start;gap:12px;margin:4px 0 22px;flex-direction:column}
+  .contact-page .ct-heading h1{font-size:34px}.contact-page .ct-heading p{font-size:14px}
+  .contact-page .ct-compose{grid-template-columns:1fr;border-radius:18px}
+  .contact-page .ct-intro{padding:24px;display:grid;grid-template-columns:1fr 90px;column-gap:12px}
+  .contact-page .ct-conversation{grid-column:2;grid-row:1 / 3;width:90px;height:70px;margin:0;align-self:center}
+  .contact-page .ct-intro h2{font-size:24px;max-width:18ch;grid-column:1;margin-bottom:10px}
+  .contact-page .ct-intro>p{grid-column:1;max-width:none;margin:0;font-size:13px}
+  .contact-page .ct-intro-note{grid-column:1 / -1;margin-top:20px;padding-top:14px}
+  .contact-page .ct-form{padding:24px}
+  .contact-page .ct-section-heading{display:block}.contact-page .ct-section-heading p{margin-top:8px}
+  .contact-page .ct-direct,.contact-page .ct-support{grid-template-columns:1fr}
+  .contact-page .ct-email,.contact-page .ct-support-item+article{border-left:0;border-top:1px solid var(--line)}
+  .contact-page .ct-phone,.contact-page .ct-email,.contact-page .ct-support-item{padding:22px;gap:14px}
+  .contact-page .ct-office{grid-template-columns:30px 1fr;gap:12px}.contact-page .ct-office .ct-ico{width:30px}
+  .contact-page .ct-office-note{grid-column:2}
+}
+@media(max-width:420px){
+  .contact-page .ct-intro,.contact-page .ct-form{padding:20px}
+  .contact-page .ct-fields{grid-template-columns:1fr;gap:0}
+  .contact-page .ct-send-row{flex-direction:column-reverse;align-items:stretch}
+  .contact-page .ct-send-row p{max-width:none;justify-content:center}
+  .contact-page .ct-phone,.contact-page .ct-email,.contact-page .ct-support-item{padding:20px 16px;gap:10px}
+  .contact-page .ct-main{font-size:18px}.contact-page .ct-ico{width:32px;height:36px}
+}
+@media(prefers-reduced-motion:reduce){.contact-page *{transition:none!important}}

@@ -1,52 +1,65 @@
 <%- include('_head') %>
-<div class="pagehead"><div><h1><%= t('ct.title') %></h1><p class="sub"><%= t('ct.sub') %></p></div></div>
-<% if (done) { %><p class="alert ok" role="status"><%= t('ct.done') %></p><% } %>
-<form method="post" action="/contact" class="card narrow-card">
-  <label><%= t('con.name') %><input name="name" required value="<%= session.clientName || '' %>"></label>
-  <label><%= t('prof.email') %><input type="email" name="email" required value="<%= session.clientEmail || '' %>"></label>
-  <label><%= t('tix.message') %><textarea name="message" required rows="6"></textarea></label>
-  <button type="submit" class="btn red"><%= t('ct.send') %></button>
-</form>
+<div class="contact-page">
+  <header class="ct-heading">
+    <div><h1><%= t('ct.title') %></h1><p><%= t('ct.sub') %></p></div>
+    <a class="ct-help" href="/kb"><%- icon('book') %><%= t('nav.help') %><%- icon('arrow') %></a>
+  </header>
 
-<section class="ct-more" aria-labelledby="ct-more-h">
-  <h2 class="ct-h" id="ct-more-h"><%= t('ct.moreTitle') %></h2>
-  <div class="ct-grid">
-    <article class="ct-card">
-      <span class="ct-ico"><%- icon('headset') %></span>
-      <h3><%= t('ct.phone') %></h3>
-      <a class="ct-main" href="<%= info.phone.tel %>"><%= info.phone.display %></a>
-      <p><%= t('ct.phoneNote') %></p>
-      <div class="ct-actions">
-        <a class="btn red" href="<%= info.phone.tel %>"><%= t('ct.call') %></a>
-        <a class="btn ghost" href="<%= info.phone.whatsapp %>" target="_blank" rel="noopener noreferrer"><%= t('ct.whatsapp') %> <%- icon('external') %></a>
+  <% if (done) { %><p class="alert ok" role="status"><%- icon('check') %> <%= t('ct.done') %></p><% } %>
+
+  <section class="ct-compose" aria-labelledby="ct-form-title">
+    <aside class="ct-intro">
+      <svg class="ct-conversation" viewBox="0 0 240 150" fill="none" aria-hidden="true" focusable="false">
+        <path d="M19 30a16 16 0 0 1 16-16h132a16 16 0 0 1 16 16v51a16 16 0 0 1-16 16H65l-28 22V97h-2a16 16 0 0 1-16-16Z" fill="white" fill-opacity=".1" stroke="white" stroke-opacity=".45"/>
+        <path d="M46 42h91M46 57h67" stroke="white" stroke-width="4" stroke-linecap="round"/>
+        <path d="M109 85a13 13 0 0 1 13-13h83a13 13 0 0 1 13 13v33a13 13 0 0 1-13 13h-7v15l-21-15h-55a13 13 0 0 1-13-13Z" fill="#FBEDEE"/>
+        <circle cx="142" cy="102" r="4" fill="#BE3045"/><circle cx="163" cy="102" r="4" fill="#BE3045"/><circle cx="184" cy="102" r="4" fill="#BE3045"/>
+      </svg>
+      <h2><%= t('ct.introTitle') %></h2>
+      <p><%= t('ct.introText') %></p>
+      <div class="ct-intro-note"><%- icon('shield') %><span><%= t('ct.safetyNote') %></span></div>
+    </aside>
+    <form method="post" action="/contact" class="ct-form">
+      <div class="ct-form-heading"><h2 id="ct-form-title"><%= t('ct.formTitle') %></h2><p><%= t('ct.formNote') %></p></div>
+      <div class="ct-fields">
+        <label for="ct-name"><%= t('con.name') %><input id="ct-name" name="name" autocomplete="name" required maxlength="100" value="<%= session.clientName || '' %>"></label>
+        <label for="ct-email"><%= t('prof.email') %><input id="ct-email" type="email" name="email" autocomplete="email" required maxlength="190" value="<%= session.clientEmail || '' %>"></label>
       </div>
+      <label for="ct-message"><%= t('tix.message') %><textarea id="ct-message" name="message" required rows="5" maxlength="2000" aria-describedby="ct-message-hint" placeholder="<%= t('ct.messagePlaceholder') %>"></textarea></label>
+      <p class="ct-field-hint" id="ct-message-hint"><%= t('ct.messageHint') %></p>
+      <div class="ct-send-row"><p><%- icon('mail') %><%= t('ct.replyNote') %></p><button type="submit" class="btn red"><%= t('ct.send') %><%- icon('arrow') %></button></div>
+    </form>
+  </section>
+
+  <section class="ct-more" aria-labelledby="ct-more-h">
+    <div class="ct-section-heading"><h2 id="ct-more-h"><%= t('ct.moreTitle') %></h2><p><%= t('ct.moreNote') %></p></div>
+    <div class="ct-direct">
+      <article class="ct-phone">
+        <span class="ct-ico" aria-hidden="true"><%- icon('headset') %></span>
+        <div class="ct-channel-content"><h3><%= t('ct.phone') %></h3><a class="ct-main" href="<%= info.phone.tel %>" dir="ltr"><%= info.phone.display %></a><p><%= t('ct.phoneNote') %></p>
+          <div class="ct-actions"><a class="btn red" href="<%= info.phone.tel %>"><%= t('ct.call') %></a><a class="btn ghost" href="<%= info.phone.whatsapp %>" target="_blank" rel="noopener noreferrer"><%= t('ct.whatsapp') %><%- icon('external') %></a></div>
+        </div>
+      </article>
+      <article class="ct-email">
+        <span class="ct-ico" aria-hidden="true"><%- icon('mail') %></span>
+        <div class="ct-channel-content"><h3><%= t('ct.emailTitle') %></h3><a class="ct-main" href="<%= info.email.mailto %>" dir="ltr"><%= info.email.address %></a><p><%= t('ct.emailNote') %></p></div>
+      </article>
+    </div>
+    <div class="ct-support">
+      <article class="ct-support-item">
+        <span class="ct-ico" aria-hidden="true"><%- icon('chat') %></span>
+        <div><h3><%= t('ct.chat') %></h3><p><%= t('ct.chatNote') %></p><a class="ct-text-link" href="<%= info.chatSite %>" target="_blank" rel="noopener noreferrer"><%= t('ct.chatBtn') %><%- icon('external') %></a></div>
+      </article>
+      <article class="ct-support-item">
+        <span class="ct-ico" aria-hidden="true"><%- icon('life') %></span>
+        <div><h3><%= t('ct.ticket') %></h3><p><%= t('ct.ticketNote') %></p><a class="ct-text-link" href="/tickets/new"><%= t('ct.ticketBtn') %><%- icon('arrow') %></a></div>
+      </article>
+    </div>
+    <article class="ct-office">
+      <span class="ct-ico" aria-hidden="true"><%- icon('home') %></span>
+      <div><h3><%= t('ct.office') %></h3><p class="ct-office-name"><%= info.office %></p></div>
+      <p class="ct-office-note"><%= t('ct.officeNote') %></p>
     </article>
-    <article class="ct-card">
-      <span class="ct-ico"><%- icon('mail') %></span>
-      <h3><%= t('ct.emailTitle') %></h3>
-      <a class="ct-main" href="<%= info.email.mailto %>"><%= info.email.address %></a>
-      <p><%= t('ct.emailNote') %></p>
-    </article>
-    <article class="ct-card">
-      <span class="ct-ico"><%- icon('chat') %></span>
-      <h3><%= t('ct.chat') %></h3>
-      <p class="ct-strong"><%= t('ct.chatText') %></p>
-      <p><%= t('ct.chatNote') %></p>
-      <div class="ct-actions"><a class="btn ghost" href="<%= info.chatSite %>" target="_blank" rel="noopener noreferrer"><%= t('ct.chatBtn') %> <%- icon('external') %></a></div>
-    </article>
-    <article class="ct-card">
-      <span class="ct-ico"><%- icon('life') %></span>
-      <h3><%= t('ct.ticket') %></h3>
-      <p class="ct-strong"><%= t('ct.ticketText') %></p>
-      <p><%= t('ct.ticketNote') %></p>
-      <div class="ct-actions"><a class="btn ghost" href="/tickets/new"><%= t('ct.ticketBtn') %> <%- icon('arrow') %></a></div>
-    </article>
-    <article class="ct-card ct-wide">
-      <span class="ct-ico"><%- icon('home') %></span>
-      <h3><%= t('ct.office') %></h3>
-      <p class="ct-strong"><%= info.office %></p>
-      <p><%= t('ct.officeNote') %></p>
-    </article>
-  </div>
-</section>
+  </section>
+</div>
 <%- include('_foot') %>

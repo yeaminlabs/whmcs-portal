@@ -47,6 +47,7 @@ const isPublic = !(session && session.clientId) && typeof publicPage !== 'undefi
 <% if (lang === 'bn') { %><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap"><% } %>
 <link rel="stylesheet" href="/css/app.css">
 <link rel="stylesheet" href="/css/theme.css">
+<% if (ti === 'Contact') { %><link rel="stylesheet" href="/css/contact.css"><% } %>
 <% if (ti === 'Dashboard') { %><link rel="stylesheet" href="/css/dashboard.css"><% } %>
 <% if (typeof kbPage !== 'undefined' && kbPage) { %><link rel="stylesheet" href="/css/kb.css"><% } %>
 <% if (typeof kitsPage !== 'undefined' && kitsPage) { %><link rel="stylesheet" href="/css/kits.css"><% } %>
