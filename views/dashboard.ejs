@@ -87,10 +87,10 @@ const serviceAction = (service) => {
 <div class="dx-row dx-row-top">
   <section class="dx-card dx-chart" id="searchSection" aria-labelledby="scSectionTitle"<%= googleConnected.searchconsole ? '' : ' hidden' %>>
     <header class="dx-card-head dx-perf-head">
-      <div>
-        <h2 id="scSectionTitle"><%= t('sc.performanceOverTime') %></h2>
-        <p class="dx-perf-sub"><img src="/img/google-search-console.png" alt="" width="16" height="16" decoding="async"><%= t('gt.searchconsole') %></p>
-      </div>
+      <h2 id="scSectionTitle" class="dx-perf-logo" title="<%= t('gt.searchconsole') %>">
+        <img src="/img/google-search-console.png" alt="" width="36" height="36" decoding="async">
+        <span class="sr-only"><%= t('sc.performanceOverTime') %> — <%= t('gt.searchconsole') %></span>
+      </h2>
       <select class="dx-select" id="scRange" aria-label="<%= t('sc.dateRange') %>">
         <option value="1"><%= t('sc.range1') %></option>
         <option value="7"><%= t('sc.range7') %></option>

@@ -892,3 +892,8 @@ a{color:#BE3045}a:hover{color:#A1263A}
 .google-connect-prompt{grid-template-columns:minmax(13rem,.75fr) minmax(0,2.25fr)}
 @media(max-width:900px){.google-connect-prompt{grid-template-columns:minmax(10rem,.7fr) minmax(0,1.3fr)}}
 @media(max-width:680px){.google-connect-prompt{grid-template-columns:1fr}}
+
+/* Performance card: just the Search Console logo as the identity (no title/subtitle text) */
+.dx-perf-head{align-items:center}
+.dx-perf-head .dx-perf-logo{display:grid;place-items:center;width:3rem;height:3rem;margin:0;border-radius:14px;background:#FFFFFF;border:1px solid #E1DAD4;box-shadow:0 6px 14px -10px rgba(48,41,46,.5)}
+.dx-perf-head .dx-perf-logo img{display:block;width:2rem;height:2rem;object-fit:contain}
