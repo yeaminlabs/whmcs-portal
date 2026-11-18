@@ -49,7 +49,7 @@ function bdixFlag(text, cls = '') {
 
 function bdixLogo(text, cls = '') {
   if (!BDIX.test(str(text))) return '';
-  return `<img class="bdix-logo${cls ? ` ${cls}` : ''}" src="/img/bdix.png" alt="BDIX" width="200" height="125" decoding="async">`;
+  return `<img class="bdix-logo${cls ? ` ${cls}` : ''}" src="/img/bdix.png" alt="BDIX" width="195" height="125" decoding="async">`;
 }
 
 const brandMark = (text, cls = '') => n8nMark(text, cls) || flagMark(text, cls);

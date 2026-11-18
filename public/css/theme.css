@@ -237,12 +237,13 @@ body.nav-collapsed .snav-link:focus-visible,body.nav-collapsed .snav-toggle:focu
 @media(prefers-reduced-motion:reduce){.authwrap .auth-card{animation:none}}
 
 /* Payment method logos (bKash, Stripe) sit on a white tile */
-.gw-logo img{padding:2px}
-.gw-logo img[alt="Stripe"]{padding:6px 5px}
+.gw-logo,.gw input:checked + span .gw-mark.gw-logo{background:none;border:0;border-radius:0;padding:0}
+.gw-logo img{padding:0}
+.gw-logo img[alt="Stripe"]{padding:5px 2px}
 
 /* Payment logos everywhere a method is named */
 .pm-inline{display:inline-flex;align-items:center;gap:.5rem}
-.pm-inline img{width:auto;height:1.5rem;max-width:4.25rem;object-fit:contain;padding:2px 5px;background:#fff;border:1px solid #E1DAD4;border-radius:6px}
+.pm-inline img{width:auto;height:1.5rem;max-width:4.25rem;object-fit:contain;padding:0;background:none;border:0;border-radius:0}
 .do-form .pay-list{margin:.25rem 0 1rem}
 .pay-legend{margin:.25rem 0 .4rem;color:#30292E;font-size:.8125rem;font-weight:700}
 .gw > span{align-content:center}
@@ -263,33 +264,36 @@ h1 .n8n-mark{height:.9em;margin-right:.5rem;vertical-align:-.1em}
 .store-tabs .n8n-mark{height:.95em;margin-right:.4em}
 .crumbs .n8n-mark{height:.85em;margin-right:.35em;vertical-align:-.08em}
 .sum-product .n8n-mark{height:.95em}
-.group-icon.group-icon-n8n{background:#fff;border:1px solid #ECE7E1;width:48px;height:48px}
-.group-icon.group-icon-n8n .n8n-mark{display:block;height:auto;width:66%;margin:0;vertical-align:baseline}
+.group-icon.group-icon-n8n{display:flex;align-items:center;width:auto;height:42px;padding:0;border:0;border-radius:0;background:none}
+.group-icon.group-icon-n8n .n8n-mark{display:block;height:100%;width:auto;margin:0;vertical-align:baseline}
 
 /* Bangladesh flag and BDIX logo wherever the store names BDIX */
-.region-flag{display:inline-block;height:.78em;width:auto;max-width:none;margin-right:.45em;vertical-align:-.05em;border-radius:2px;box-shadow:0 0 0 1px rgba(48,41,46,.18)}
+.region-flag{display:inline-block;height:.78em;width:auto;max-width:none;margin-right:.45em;vertical-align:-.05em;border-radius:2px;box-shadow:none}
 h1 .region-flag{height:.62em;margin-right:.55rem;vertical-align:.02em}
 .crumbs .region-flag{height:.7em;margin-right:.35em}
 .store-tabs .region-flag{height:.72em}
-.group-icon.group-icon-bdix{width:80px;height:50px;border-radius:10px;background:#fff;border:1px solid #ECE7E1;padding:3px 6px}
-.group-icon.group-icon-bdix .bdix-logo{display:block;width:100%;height:100%;object-fit:contain}
-.pagehead-brand{display:grid;place-items:center;padding:6px 14px;border:1px solid #ECE7E1;border-radius:12px;background:#fff}
-.pagehead-brand .bdix-logo{display:block;height:56px;width:auto}
+.group-icon.group-icon-bdix{display:flex;align-items:center;width:auto;height:58px;padding:0;border:0;border-radius:0;background:none}
+.group-icon.group-icon-bdix .bdix-logo{display:block;height:100%;width:auto}
+.pagehead-brand{display:block;padding:0;border:0;border-radius:0;background:none}
+.pagehead-brand .bdix-logo{display:block;height:64px;width:auto}
 @media (max-width:560px){.pagehead-brand .bdix-logo{height:42px}}
 
 /* US network logos on the USA Shared Hosting and USA VPS category pages */
-.net-strip{display:flex;flex-wrap:wrap;align-items:center;gap:12px 32px;margin:0 0 18px;padding:14px 22px;border:1px solid #ECE7E1;border-radius:14px;background:#fff}
+.net-strip{display:flex;flex-wrap:wrap;align-items:center;gap:12px 32px;margin:0 0 22px;padding:0;border:0;border-radius:0;background:none}
 .net-strip-label{flex:0 0 100%;margin:0;color:#8A7F86;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
 .net-strip-logos{display:flex;flex-wrap:wrap;align-items:center;gap:14px 30px;min-width:0}
 .net-strip-logos img{display:block;height:26px;width:auto;max-width:118px;object-fit:contain}
-@media (max-width:560px){.net-strip{padding:12px 14px;gap:10px 22px}.net-strip-logos{gap:12px 22px}.net-strip-logos img{height:22px;max-width:96px}}
+@media (max-width:560px){.net-strip{gap:10px 22px}.net-strip-logos{gap:12px 22px}.net-strip-logos img{height:22px;max-width:96px}}
 
 /* Region flag as the icon of a store category card (USA, Singapore, EU) */
-.group-icon.group-icon-flag{width:64px;height:46px;border-radius:10px;background:#fff;border:1px solid #ECE7E1;padding:7px 10px}
-.group-icon-flag .tile-flag{display:block;width:auto;height:auto;max-width:100%;max-height:100%;margin:0;border-radius:2px;box-shadow:0 0 0 1px rgba(48,41,46,.2)}
+.group-icon.group-icon-flag{display:flex;align-items:center;width:auto;height:42px;padding:0;border:0;border-radius:0;background:none}
+.group-icon-flag .tile-flag{display:block;width:auto;height:34px;max-width:none;max-height:none;margin:0;border-radius:2px;box-shadow:none}
 
 /* link to the bKash payment guide beside unpaid invoices */
 .kit-help-link{display:inline-block;margin-top:8px;color:#A1263A;font-size:13px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
 .kit-help-link:hover{color:#BE3045}
 .kit-help-wrap{margin:-4px 0 12px}
 .kit-help-wrap .kit-help-link{margin-top:0}
+
+/* Singapore's flag is half white: a hairline keeps its shape on a white card. */
+.region-flag[src*="singapore"],.tile-flag[src*="singapore"]{box-shadow:0 0 0 1px rgba(48,41,46,.14)!important}

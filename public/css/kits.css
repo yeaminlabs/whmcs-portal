@@ -46,7 +46,7 @@
 .shot-row small{color:#8A7F86}
 .shot-ico{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:#fff;border:1px solid #ECE7E1;color:#BE3045}
 .shot-ico .ico{width:16px;height:16px}
-.shot-sel .gw-mark{width:64px;height:36px}
+.shot-sel .gw-mark{width:64px;height:36px;background:none;border:0}
 .shot-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:10px;background:#BE3045;color:#fff;font-weight:700;font-size:14px}
 .shot-btn .ico{width:15px;height:15px}
 .shot-btn-ghost{background:#fff;color:#30292E;border:1px solid #E3DDD6}
