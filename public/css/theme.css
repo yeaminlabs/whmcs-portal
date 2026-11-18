@@ -254,3 +254,14 @@ body.nav-collapsed .snav-link:focus-visible,body.nav-collapsed .snav-toggle:focu
 .co-newlink{margin:0;padding:14px 20px 18px;border-top:1px solid #F0ECE7;text-align:center;color:#685F65;font-size:14px}
 .co-newlink a{color:#BE3045;font-weight:700;text-decoration:none}
 .co-newlink a:hover{text-decoration:underline}
+
+/* n8n logo wherever the store names n8n */
+.n8n-mark{display:inline-block;height:1em;width:auto;max-width:none;margin-right:.4em;vertical-align:-.14em}
+h1 .n8n-mark{height:.9em;margin-right:.5rem;vertical-align:-.1em}
+.plan header h2 .n8n-mark{height:.95em}
+.pub-nav .n8n-mark,.pub-sheet .n8n-mark{height:.95em;margin-right:.35em;vertical-align:-.12em}
+.store-tabs .n8n-mark{height:.95em;margin-right:.4em}
+.crumbs .n8n-mark{height:.85em;margin-right:.35em;vertical-align:-.08em}
+.sum-product .n8n-mark{height:.95em}
+.group-icon.group-icon-n8n{background:#fff;border:1px solid #ECE7E1;width:48px;height:48px}
+.group-icon.group-icon-n8n .n8n-mark{display:block;height:auto;width:66%;margin:0;vertical-align:baseline}

@@ -11,8 +11,8 @@ const gname = tr('group.' + group.slug, group.name);
 const js = (v) => JSON.stringify(v).replace(/</g, '\\u003c');
 let step = 0;
 %>
-<nav class="crumbs" aria-label="Breadcrumb"><a href="/store"><%= t('store.crumb') %></a><%- icon('chev') %><a href="/store/<%= group.slug %>"><%= gname %></a><%- icon('chev') %><span><%= product.name %></span></nav>
-<div class="pagehead"><div><h1><%= t('conf.title', { name: product.name }) %></h1><p class="sub"><%= t(product.kind === 'hosting' ? 'conf.subHosting' : product.kind === 'server' ? 'conf.subServer' : 'conf.subOther') %></p></div></div>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/store"><%= t('store.crumb') %></a><%- icon('chev') %><a href="/store/<%= group.slug %>"><%- n8nMark(group.slug + ' ' + group.name) %><%= gname %></a><%- icon('chev') %><span><%= product.name %></span></nav>
+<div class="pagehead"><div><h1><%- n8nMark(product.name) %><%= t('conf.title', { name: product.name }) %></h1><p class="sub"><%= t(product.kind === 'hosting' ? 'conf.subHosting' : product.kind === 'server' ? 'conf.subServer' : 'conf.subOther') %></p></div></div>
 
 <% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
 
@@ -96,7 +96,7 @@ let step = 0;
     <div class="panel summary-card">
       <header><%= t('conf.summary') %></header>
       <div class="sum-body">
-        <div class="sum-product"><b><%= product.name %></b><small><%= gname %></small></div>
+        <div class="sum-product"><b><%- n8nMark(product.name) %><%= product.name %></b><small><%= gname %></small></div>
         <dl>
           <div><dt id="sum-cycle"><%= st(selected.label) %></dt><dd id="sum-price"><%= money(selected.price, prefix) %></dd></div>
           <div id="sum-setup-row"<% if (!selected.setup) { %> hidden<% } %>><dt><%= t('conf.setup') %></dt><dd id="sum-setup"><%= money(selected.setup, prefix) %></dd></div>

@@ -2,11 +2,11 @@
 <% const tr = (k, fb) => { const v = t(k); return v === k ? fb : v; }; %>
 <nav class="crumbs" aria-label="Breadcrumb"><a href="/store"><%= t('store.crumb') %></a><%- icon('chev') %><span><%= tr('group.' + group.slug, group.name) %></span></nav>
 <div class="pagehead">
-  <div><h1><%= tr('group.' + group.slug, group.name) %></h1><p class="sub"><%= tr('groupBlurb.' + group.slug, group.blurb) %></p></div>
+  <div><h1><%- n8nMark(group.slug + ' ' + group.name) %><%= tr('group.' + group.slug, group.name) %></h1><p class="sub"><%= tr('groupBlurb.' + group.slug, group.blurb) %></p></div>
 </div>
 
 <nav class="ui-tabs store-tabs" aria-label="<%= t('store.categories') %>">
-  <% groups.forEach(g => { %><a href="/store/<%= g.slug %>"<% if (g.slug === group.slug) { %> aria-current="page"<% } %>><%= tr('group.' + g.slug, g.name) %></a><% }) %>
+  <% groups.forEach(g => { %><a href="/store/<%= g.slug %>"<% if (g.slug === group.slug) { %> aria-current="page"<% } %>><%- n8nMark(g.slug + ' ' + g.name) %><%= tr('group.' + g.slug, g.name) %></a><% }) %>
 </nav>
 
 <div class="plan-grid">
@@ -14,7 +14,7 @@
        const longest = p.pricing.cycles.filter(c => c.save > 0).sort((a, b) => b.save - a.save)[0]; %>
   <article class="plan reveal" style="animation-delay:<%= Math.min(i, 8) * 40 %>ms">
     <header>
-      <h2><%= p.name %></h2>
+      <h2><%- n8nMark(p.name) %><%= p.name %></h2>
       <% if (p.lead) { %><span class="plan-lead"><%- icon('bolt') %><%= p.lead %></span><% } %>
     </header>
     <div class="plan-price">

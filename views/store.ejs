@@ -7,11 +7,11 @@
 
 <% families.forEach(f => { const list = groups.filter(g => g.family === f.id); if (!list.length) return; %>
 <section class="store-family reveal" aria-labelledby="fam-<%= f.id %>">
-  <h2 id="fam-<%= f.id %>"><%= tr('family.' + f.id, f.label) %></h2>
+  <h2 id="fam-<%= f.id %>"><%- n8nMark(f.id === 'automation' ? 'n8n' : '') %><%= tr('family.' + f.id, f.label) %></h2>
   <div class="group-grid">
     <% list.forEach(g => { const cheapest = g.products.find(p => p.from); %>
     <a class="group-card" href="/store/<%= g.slug %>">
-      <span class="group-icon"><%- icon(f.id === 'vps' ? 'server' : f.id === 'automation' ? 'bolt' : 'globe') %></span>
+      <span class="group-icon<%= n8nMark(g.slug + ' ' + g.name) ? ' group-icon-n8n' : '' %>"><%- n8nMark(g.slug + ' ' + g.name) || icon(f.id === 'vps' ? 'server' : f.id === 'automation' ? 'bolt' : 'globe') %></span>
       <strong><%= tr('group.' + g.slug, g.name) %></strong>
       <p><%= tr('groupBlurb.' + g.slug, g.blurb) %></p>
       <span class="group-meta">
