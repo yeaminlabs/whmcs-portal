@@ -740,12 +740,7 @@ router.post('/tickets/:id/close', async (req, res) => {
   } catch (e) { res.render('error', { title: 'Ticket', message: e.message, back: '/tickets' }); }
 });
 
-// Downloads, status, contact, affiliates (parity with live theme)
-router.get('/downloads', async (req, res) => {
-  const data = await globalData('GetDownloads', 60 * MIN);
-  const list = data && data.downloads ? (Array.isArray(data.downloads.download) ? data.downloads.download : [data.downloads.download]) : [];
-  res.render('downloads', { title: 'Downloads', items: list });
-});
+// Status, contact, affiliates (parity with live theme); Downloads lives in routes/downloads.js
 const uptimerobot = require('../lib/uptimerobot');
 const mockUptime = require('../lib/mock-uptime');
 

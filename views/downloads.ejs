@@ -1,5 +1,35 @@
 <%- include('_head') %>
 <div class="pagehead"><div><h1><%= t('dl.title') %></h1><p class="sub"><%= t('dl.sub') %></p></div></div>
-<% if (!items.length) { %><div class="ui-empty"><h3><%= t('dl.empty') %></h3></div><% } %>
-<div class="group-grid"><% items.forEach(d => { %><article class="ui-card"><div class="ui-card-header"><span class="ui-badge outline"><%= d.category || t('dl.file') %></span><h2 class="ui-card-title"><%= d.title %></h2><% if (d.description) { %><p class="ui-card-desc"><%= d.description %></p><% } %></div></article><% }) %></div>
+
+<section class="kit-section" aria-labelledby="kit-start">
+  <h2 class="kit-h" id="kit-start"><%= t('dl.startHere') %></h2>
+  <div class="kit-grid kit-grid-3">
+    <% featured.forEach(c => { %><%- include('_kit-card', { c }) %><% }) %>
+  </div>
+</section>
+
+<section class="kit-section" aria-labelledby="kit-more">
+  <h2 class="kit-h" id="kit-more"><%= t('dl.moreKits') %></h2>
+  <div class="kit-grid">
+    <% more.forEach(c => { %><%- include('_kit-card', { c }) %><% }) %>
+  </div>
+</section>
+
+<% if (items.length) { %>
+<section class="kit-section" aria-labelledby="kit-acct">
+  <h2 class="kit-h" id="kit-acct"><%= t('dl.fromAccount') %></h2>
+  <div class="kit-grid">
+    <% items.forEach(d => { %><article class="kit-card"><h2><%= d.title %></h2><% if (d.description) { %><p class="kit-text"><%= d.description %></p><% } %></article><% }) %>
+  </div>
+</section>
+<% } %>
+
+<script>
+(() => {
+  document.querySelectorAll('[data-kit-sso]').forEach((f) => {
+    const sel = f.querySelector('[data-kit-service]');
+    if (sel) sel.addEventListener('change', () => { f.action = '/services/' + encodeURIComponent(sel.value) + '/sso'; });
+  });
+})();
+</script>
 <%- include('_foot') %>

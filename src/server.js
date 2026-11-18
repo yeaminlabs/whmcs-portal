@@ -158,6 +158,7 @@ app.use('/', require('./routes/store'));
 app.use('/', require('./routes/services'));
 app.use('/', require('./routes/pay').router);
 app.use('/api/react', require('./routes/react-api'));
+app.use('/', require('./routes/downloads'));
 app.use('/', require('./routes/portal'));
 app.use('/google', require('./routes/google'));
 

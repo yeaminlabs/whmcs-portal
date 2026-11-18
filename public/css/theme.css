@@ -287,3 +287,9 @@ h1 .region-flag{height:.62em;margin-right:.55rem;vertical-align:.02em}
 /* Region flag as the icon of a store category card (USA, Singapore, EU) */
 .group-icon.group-icon-flag{width:64px;height:46px;border-radius:10px;background:#fff;border:1px solid #ECE7E1;padding:7px 10px}
 .group-icon-flag .tile-flag{display:block;width:auto;height:auto;max-width:100%;max-height:100%;margin:0;border-radius:2px;box-shadow:0 0 0 1px rgba(48,41,46,.2)}
+
+/* link to the bKash payment guide beside unpaid invoices */
+.kit-help-link{display:inline-block;margin-top:8px;color:#A1263A;font-size:13px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.kit-help-link:hover{color:#BE3045}
+.kit-help-wrap{margin:-4px 0 12px}
+.kit-help-wrap .kit-help-link{margin-top:0}

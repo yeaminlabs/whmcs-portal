@@ -1,0 +1,43 @@
+<%- include('_head') %>
+<nav class="crumbs kit-noprint" aria-label="Breadcrumb"><a href="/downloads"><%= t('nav.downloads') %></a><%- icon('chev') %><span><%= pick(guide.title) %></span></nav>
+<div class="pagehead"><div><h1><%= pick(guide.title) %></h1><p class="sub kit-alt-sub" lang="<%= O %>"><%= other(guide.title) %></p><p class="sub"><%= pick(guide.intro) %></p></div></div>
+
+<article class="kit-guide">
+  <section class="kit-need"><h2><%= t('dl.youNeed') %></h2><ul><% pick(guide.need).forEach(n => { %><li><%- icon('check') %><span><%= n %></span></li><% }) %></ul></section>
+
+  <ol class="kit-steps">
+    <% guide.steps.forEach((s, i) => { %>
+    <li class="kit-step">
+      <span class="kit-n"><%= i + 1 %></span>
+      <div>
+        <h2><%= pick(s.title) %></h2>
+        <ol class="kit-sub"><% pick(s.body).forEach(line => { %><li><%= line %></li><% }) %></ol>
+        <% if (i === 0 && hosting.length) { %>
+        <form method="post" action="/services/<%= hosting[0].id %>/sso" class="kit-mine kit-noprint" data-kit-sso>
+          <input type="hidden" name="app" value="Email_Accounts">
+          <% if (hosting.length > 1) { %><label class="sr-only" for="sso-mail"><%= t('dl.chooseService') %></label><select id="sso-mail" data-kit-service><% hosting.forEach(h => { %><option value="<%= h.id %>"><%= h.domain || h.name %></option><% }) %></select><% } %>
+          <button type="submit" class="btn red"><%= pick({ en: 'Open my Email Accounts', bn: 'আমার ইমেইল অ্যাকাউন্টস খুলুন' }) %> <%- icon('external') %></button>
+        </form>
+        <% } %>
+      </div>
+    </li>
+    <% }) %>
+  </ol>
+
+  <section class="kit-help"><h2><%= pick(guide.help.title) %></h2><ul><% pick(guide.help.items).forEach(n => { %><li><%= n %></li><% }) %></ul></section>
+</article>
+
+<div class="kit-bar kit-noprint">
+  <button type="button" class="btn ghost" onclick="window.print()"><%- icon('download') %><span><%= t('dl.print') %></span></button>
+  <a class="btn ghost" href="<%= guide.docs.href %>" target="_blank" rel="noopener noreferrer"><%= pick(guide.docs.label) %> <%- icon('external') %></a>
+  <a class="btn ghost" href="/tickets/new"><%- icon('headset') %><%= t('dl.needHelp') %></a>
+</div>
+<script>
+(() => {
+  document.querySelectorAll('[data-kit-sso]').forEach((f) => {
+    const sel = f.querySelector('[data-kit-service]');
+    if (sel) sel.addEventListener('change', () => { f.action = '/services/' + encodeURIComponent(sel.value) + '/sso'; });
+  });
+})();
+</script>
+<%- include('_foot') %>

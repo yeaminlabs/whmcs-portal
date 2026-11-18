@@ -49,6 +49,7 @@ const isPublic = !(session && session.clientId) && typeof publicPage !== 'undefi
 <link rel="stylesheet" href="/css/theme.css">
 <% if (ti === 'Dashboard') { %><link rel="stylesheet" href="/css/dashboard.css"><% } %>
 <% if (typeof kbPage !== 'undefined' && kbPage) { %><link rel="stylesheet" href="/css/kb.css"><% } %>
+<% if (typeof kitsPage !== 'undefined' && kitsPage) { %><link rel="stylesheet" href="/css/kits.css"><% } %>
 <% const trk = (typeof tracking === 'object' && tracking) || null; if (trk && trk.gtmId) { %>
 <!-- Google Tag Manager: GA4 (G-WZP9CRYG6B) is fired by this container only, as on snbdhost.com. Production host only. -->
 <script>

@@ -21,6 +21,7 @@ const label = (m) => (GATEWAYS[String(m.module).toLowerCase()] || { name: String
 <nav class="crumbs" aria-label="Breadcrumb"><a href="/invoices"><%= t('nav.invoices') %></a><%- icon('chev') %><a href="/invoices/<%= invoice.invoiceid %>">#<%= invoice.invoicenum || invoice.invoiceid %></a><%- icon('chev') %><span><%= t('pay.title') %></span></nav>
 <div class="pagehead"><div><h1><%= t('pay.heading', { n: invoice.invoicenum || invoice.invoiceid }) %></h1><p class="sub"><%= t('pay.due', { date: fmtDate(invoice.duedate) }) %></p></div></div>
 <% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+<% if (methods.some(m => /^bkash/i.test(String(m.module)))) { %><p class="kit-help-wrap"><a class="kit-help-link" href="/downloads/bkash-invoice"><%= t('dl.bkashHelp') %></a></p><% } %>
 <% if (failed) { %><p class="alert err" role="alert"><%= t(failed === 'bkash-cancel' ? 'pay.bkashCancelled' : failed === 'bkash' ? 'pay.bkashFailed' : 'pay.cardFailed') %></p><% } %>
 
 <form method="post" action="/invoices/<%= invoice.invoiceid %>/pay" class="checkout" id="payform">

@@ -1,0 +1,66 @@
+<%- include('_head') %>
+<nav class="crumbs kit-noprint" aria-label="Breadcrumb"><a href="/downloads"><%= t('nav.downloads') %></a><%- icon('chev') %><span><%= pick(guide.title) %></span></nav>
+<div class="pagehead kit-noprint"><div><h1><%= pick(guide.title) %></h1><p class="sub kit-alt-sub" lang="<%= O %>"><%= other(guide.title) %></p><p class="sub"><%= pick(guide.intro) %></p></div></div>
+
+<% if (!sheet) { %>
+<div class="ui-empty"><h3><%= t('dl.noHosting') %></h3><p><%= t('dl.noHostingText') %> <a href="/store"><%= t('nav.order') %></a></p></div>
+<% } else { %>
+<% if (services.length > 1) { %>
+<form method="get" action="/downloads/domain-connection" class="kit-pick kit-noprint">
+  <label for="kit-service"><%= t('dl.chooseService') %></label>
+  <select id="kit-service" name="service" onchange="this.form.submit()"><% services.forEach(s => { %><option value="<%= s.id %>"<%= s.id === selected ? ' selected' : '' %>><%= s.domain %> · <%= s.name %></option><% }) %></select>
+  <noscript><button class="btn ghost" type="submit"><%= t('common.search') %></button></noscript>
+</form>
+<% } %>
+
+<article class="kit-sheet" id="kit-sheet">
+  <header class="kit-sheet-head">
+    <img class="kit-sheet-logo" src="/img/snbd-logo.png" alt="SNBD HOST" width="136" height="34">
+    <div><span class="kit-sheet-label"><%= t('dl.domain') %></span>
+      <div class="kit-row kit-row-lg"><b class="mono"><%= sheet.domain %></b><button type="button" class="kit-copy kit-noprint" data-copy="<%= sheet.domain %>" aria-label="<%= t('dl.copy') %> <%= sheet.domain %>"><%- icon('copy') %><span><%= t('dl.copy') %></span></button></div>
+      <small><%= sheet.plan %></small></div>
+  </header>
+
+  <section class="kit-opt">
+    <h2><%= pick(guide.optionA) %></h2>
+    <p class="kit-note"><%= pick(guide.noteA) %></p>
+    <% sheet.nameservers.forEach((ns, i) => { %>
+    <div class="kit-row"><span class="kit-k">NS<%= i + 1 %></span><b class="mono"><%= ns %></b><button type="button" class="kit-copy kit-noprint" data-copy="<%= ns %>" aria-label="<%= t('dl.copy') %> <%= ns %>"><%- icon('copy') %><span><%= t('dl.copy') %></span></button></div>
+    <% }) %>
+  </section>
+
+  <% if (sheet.ip) { %>
+  <section class="kit-opt">
+    <h2><%= pick(guide.optionB) %></h2>
+    <p class="kit-note"><%= pick(guide.noteB) %></p>
+    <div class="kit-row"><span class="kit-k">A</span><span class="kit-name mono">@</span><b class="mono"><%= sheet.ip %></b><button type="button" class="kit-copy kit-noprint" data-copy="<%= sheet.ip %>" aria-label="<%= t('dl.copy') %> <%= sheet.ip %>"><%- icon('copy') %><span><%= t('dl.copy') %></span></button></div>
+    <div class="kit-row"><span class="kit-k">CNAME</span><span class="kit-name mono">www</span><b class="mono"><%= sheet.domain %></b><button type="button" class="kit-copy kit-noprint" data-copy="<%= sheet.domain %>" aria-label="<%= t('dl.copy') %> <%= sheet.domain %>"><%- icon('copy') %><span><%= t('dl.copy') %></span></button></div>
+  </section>
+  <% } %>
+
+  <p class="kit-wait"><%- icon('alert') %><span><%= pick(guide.wait) %></span></p>
+  <p class="kit-bd"><%= pick(guide.bdNote) %></p>
+</article>
+
+<div class="kit-bar kit-noprint">
+  <button type="button" class="btn red" data-copy="<%= sheet.copyAll %>" data-copy-label="<%= t('dl.copyAll') %>"><%- icon('copy') %><span><%= t('dl.copyAll') %></span></button>
+  <button type="button" class="btn ghost" onclick="window.print()"><%- icon('download') %><span><%= t('dl.print') %></span></button>
+  <a class="btn ghost" href="/tickets/new"><%- icon('headset') %><%= t('dl.needHelp') %></a>
+</div>
+<% } %>
+<script>
+(() => {
+  const copy = async (text) => {
+    try { await navigator.clipboard.writeText(text); return true; } catch (e) {
+      const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+      let ok = false; try { ok = document.execCommand('copy'); } catch (err) { ok = false; } ta.remove(); return ok;
+    }
+  };
+  const done = <%- JSON.stringify(t('dl.copied')).replace(/</g, '\\u003c') %>;
+  document.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
+    const label = b.querySelector('span'); const before = label ? label.textContent : '';
+    if (await copy(b.dataset.copy)) { b.classList.add('is-done'); if (label) label.textContent = done; setTimeout(() => { b.classList.remove('is-done'); if (label) label.textContent = before; }, 1600); }
+  }));
+})();
+</script>
+<%- include('_foot') %>

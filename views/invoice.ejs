@@ -18,6 +18,7 @@
     <small><%= t('pay.balance') %></small>
     <strong><%= amt(balance) %></strong>
     <% if (isOpen) { %><a class="inv-pay" href="/invoices/<%= invoice.invoiceid %>/pay"><%= t('dash.pay', { amount: amt(balance) }) %><%- icon('arrow') %></a>
+    <a class="kit-help-link" href="/downloads/bkash-invoice"><%= t('dl.bkashHelp') %></a>
     <% } else if (isPaid) { %><span class="inv-paid-badge"><%- icon('check') %><%= st('Paid') %></span><% } %>
     <button type="button" class="inv-print" onclick="window.print()"><%- icon('download') %><span>Print</span></button>
   </div>

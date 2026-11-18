@@ -1,0 +1,40 @@
+<%- include('_head') %>
+<nav class="crumbs kit-noprint" aria-label="Breadcrumb"><a href="/downloads"><%= t('nav.downloads') %></a><%- icon('chev') %><span><%= pick(guide.title) %></span></nav>
+<div class="pagehead"><div><h1><%= pick(guide.title) %></h1><p class="sub kit-alt-sub" lang="<%= O %>"><%= other(guide.title) %></p><p class="sub"><%= pick(guide.intro) %></p></div></div>
+
+<article class="kit-guide">
+  <ol class="kit-steps kit-visual">
+    <% guide.steps.forEach((s, i) => { %>
+    <li class="kit-step">
+      <span class="kit-n"><%= i + 1 %></span>
+      <div class="kit-step-main">
+        <h2><%= pick(s.title) %></h2>
+        <p><%= pick(s.body) %></p>
+      </div>
+      <div class="kit-shot" aria-hidden="true">
+        <% if (s.key === 'open') { %>
+          <div class="shot-row"><span class="shot-ico"><%- icon('receipt') %></span><b>#1001</b><span class="pill Unpaid"><%= st('Unpaid') %></span></div>
+        <% } else if (s.key === 'pay') { %>
+          <span class="shot-btn"><%= t('dash.pay', { amount: '৳…' }) %> <%- icon('arrow') %></span>
+        <% } else if (s.key === 'choose') { %>
+          <div class="shot-row shot-sel"><span class="gw-mark gw-logo"><%- payLogo('bkash') %></span><b>bKash</b></div>
+        <% } else if (s.key === 'confirm') { %>
+          <div class="shot-row"><span class="shot-ico"><%- icon('lock') %></span><b>bKash</b><small><%= pick({ en: 'secure page', bn: 'সুরক্ষিত পেজ' }) %></small></div>
+        <% } else if (s.key === 'paid') { %>
+          <div class="shot-row"><b>#1001</b><span class="pill Paid"><%= st('Paid') %></span></div>
+        <% } else { %>
+          <span class="shot-btn shot-btn-ghost"><%- icon('download') %> Print</span>
+        <% } %>
+      </div>
+    </li>
+    <% }) %>
+  </ol>
+  <p class="kit-tip"><%- icon('alert') %><span><%= pick(guide.tip) %></span></p>
+</article>
+
+<div class="kit-bar kit-noprint">
+  <a class="btn red" href="/invoices"><%- icon('receipt') %><%= pick({ en: 'Go to my invoices', bn: 'আমার ইনভয়েসে যান' }) %></a>
+  <button type="button" class="btn ghost" onclick="window.print()"><%- icon('download') %><span><%= t('dl.print') %></span></button>
+  <a class="btn ghost" href="/tickets/new"><%- icon('headset') %><%= t('dl.needHelp') %></a>
+</div>
+<%- include('_foot') %>
