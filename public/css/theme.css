@@ -276,3 +276,10 @@ h1 .bd-flag{height:.62em;margin-right:.55rem;vertical-align:.02em}
 .pagehead-brand{display:grid;place-items:center;padding:6px 14px;border:1px solid #ECE7E1;border-radius:12px;background:#fff}
 .pagehead-brand .bdix-logo{display:block;height:56px;width:auto}
 @media (max-width:560px){.pagehead-brand .bdix-logo{height:42px}}
+
+/* US network logos on the USA Shared Hosting and USA VPS category pages */
+.net-strip{display:flex;flex-wrap:wrap;align-items:center;gap:12px 32px;margin:0 0 18px;padding:14px 22px;border:1px solid #ECE7E1;border-radius:14px;background:#fff}
+.net-strip-label{flex:0 0 100%;margin:0;color:#8A7F86;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.net-strip-logos{display:flex;flex-wrap:wrap;align-items:center;gap:14px 30px;min-width:0}
+.net-strip-logos img{display:block;height:26px;width:auto;max-width:118px;object-fit:contain}
+@media (max-width:560px){.net-strip{padding:12px 14px;gap:10px 22px}.net-strip-logos{gap:12px 22px}.net-strip-logos img{height:22px;max-width:96px}}

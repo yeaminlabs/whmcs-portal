@@ -195,6 +195,7 @@ module.exports = {
 
   'store.title': 'নতুন সার্ভিস অর্ডার করুন',
   'store.sub': 'হোস্টিং, VPS ও ম্যানেজড অটোমেশন। প্রতিটি প্ল্যানে ফ্রি SSL ও লোকাল সাপোর্ট।',
+  'store.usNetworks': 'প্রধান মার্কিন নেটওয়ার্ক',
   'store.crumb': 'স্টোর',
   'store.categories': 'প্রোডাক্ট ক্যাটাগরি',
   'store.planOne': '১টি প্ল্যান',

@@ -195,6 +195,7 @@ module.exports = {
 
   'store.title': 'Order a new service',
   'store.sub': 'Hosting, VPS and managed automation. Free SSL and local support on every plan.',
+  'store.usNetworks': 'Major US networks',
   'store.crumb': 'Store',
   'store.categories': 'Product categories',
   'store.planOne': '1 plan',

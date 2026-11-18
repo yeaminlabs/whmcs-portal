@@ -36,4 +36,28 @@ function brandTile(text) {
   return { cls: '', html: '' };
 }
 
-module.exports = { n8nMark, bdixFlag, bdixLogo, brandMark, brandTile };
+/**
+ * The US networks strip shown on the USA Shared Hosting and USA VPS category pages.
+ * Each logo is its own transparent PNG (public/img/networks/<key>.png), shown in this order.
+ */
+const US_NETWORK_GROUPS = new Set(['usa-shared-hosting', 'usa-vps']);
+const US_NETWORKS = [
+  { key: 'att', name: 'AT&T', w: 151, h: 70 },
+  { key: 'centurylink', name: 'CenturyLink', w: 291, h: 71 },
+  { key: 'cox', name: 'Cox', w: 162, h: 61 },
+  { key: 'frontier', name: 'Frontier', w: 192, h: 50 },
+  { key: 'mediacom', name: 'Mediacom', w: 251, h: 61 },
+  { key: 'spectrum', name: 'Spectrum', w: 235, h: 60 },
+  { key: 'verizon', name: 'Verizon', w: 219, h: 56 },
+  { key: 'xfinity', name: 'Xfinity', w: 169, h: 68 },
+];
+const attr = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+/** Strip of US network logos for a USA category page, '' for any other group. `label` is the printed caption. */
+function usNetworks(groupSlug, label = '') {
+  if (!US_NETWORK_GROUPS.has(str(groupSlug))) return '';
+  const logos = US_NETWORKS.map((n) => `<img src="/img/networks/${n.key}.png" alt="${attr(n.name)}" width="${n.w}" height="${n.h}" loading="lazy" decoding="async">`).join('');
+  return `<div class="net-strip" role="group" aria-label="${attr(label)}">${label ? `<p class="net-strip-label">${attr(label)}</p>` : ''}<div class="net-strip-logos">${logos}</div></div>`;
+}
+
+module.exports = { n8nMark, bdixFlag, bdixLogo, brandMark, brandTile, usNetworks, US_NETWORKS };

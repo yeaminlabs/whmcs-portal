@@ -107,6 +107,7 @@ app.use((req, res, next) => {
   res.locals.bdixLogo = brandmarks.bdixLogo;
   res.locals.bdixFlag = brandmarks.bdixFlag;
   res.locals.brandTile = brandmarks.brandTile;
+  res.locals.usNetworks = brandmarks.usNetworks;
   res.locals.money = money;
   res.locals.googleClientId = config.googleClientId;
   next();
