@@ -1,0 +1,31 @@
+/* Native two-factor (TOTP) screens. Shares tokens with security.css. */
+.sc-2fa-top{display:flex;align-items:center;gap:.8rem}
+.sc-2fa-ico{display:grid;place-items:center;flex:none;width:2.6rem;height:2.6rem;border-radius:12px;background:#EEF6F4;color:#42736B}
+.sc-2fa-ico .ico{width:1.2rem;height:1.2rem}
+.sc-2fa h2{display:block;margin:0;color:#30292E;font-size:1rem;font-weight:800}
+.sc-status{display:inline-block;margin-top:.25rem;padding:.15rem .6rem;border-radius:999px;font-size:.75rem;font-weight:800;letter-spacing:.01em}
+.sc-status.is-on{background:#E4F2EE;color:#2E6259}
+.sc-status.is-off{background:#F1ECE8;color:#6B6066}
+.sc-2fa-desc{margin:0;color:#4A4348;font-size:.875rem;line-height:1.5;font-weight:500}
+.sc-2fa .sc-card-note b{color:#30292E}
+.sc-btn{display:inline-flex;align-items:center;justify-self:start;gap:.45rem;padding:.7rem 1.1rem;border-radius:12px;border:1px solid #30292E;background:#30292E;color:#fff;font:inherit;font-size:.9rem;font-weight:700;text-decoration:none;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.sc-btn:hover{transform:translateY(-1px);box-shadow:0 8px 18px -12px rgba(48,41,46,.6)}
+.sc-btn .ico{width:.95rem;height:.95rem}
+.sc-btn-danger{background:#fff;color:#A1263A;border-color:#E7B9C1}
+.sc-btn-danger:hover{background:#FDF2F4}
+.sc-2fa .sc-btn{margin-top:.25rem}
+.tf-grid{display:grid;max-width:34rem;gap:1.25rem}
+.tf-card{display:grid;gap:1.1rem;padding:1.5rem}
+.tf-steps{display:grid;gap:.7rem;margin:0;padding:0;list-style:none}
+.tf-steps li{display:flex;gap:.7rem;align-items:flex-start;color:#4A4348;font-size:.9rem;line-height:1.5}
+.tf-n{display:grid;place-items:center;flex:none;width:1.5rem;height:1.5rem;border-radius:999px;background:#F6EEF0;color:#A1263A;font-size:.8rem;font-weight:800}
+.tf-qr{display:grid;place-items:center;padding:.9rem;border:1px dashed #D9CFC8;border-radius:14px;background:#FCFAF8}
+.tf-qr img{display:block;width:220px;height:220px;max-width:100%}
+.tf-key-label{margin:0;color:#685F65;font-size:.8125rem;font-weight:700}
+.tf-key{display:block;padding:.6rem .8rem;border-radius:10px;background:#F6F2EF;color:#30292E;font-size:.9rem;letter-spacing:.06em;word-break:break-all}
+.tf-form{display:grid;gap:1rem}
+.tf-actions{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.tf-cancel{color:#685F65;font-size:.9rem;font-weight:700}
+.tf-codes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem;margin:0;padding:0;list-style:none}
+.tf-codes code{display:block;padding:.6rem .7rem;border-radius:10px;background:#F6F2EF;color:#30292E;font-size:1rem;letter-spacing:.08em;text-align:center}
+@media(max-width:520px){.tf-codes{grid-template-columns:1fr}}

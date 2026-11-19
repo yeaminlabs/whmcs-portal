@@ -1,0 +1,20 @@
+<%- include('_head') %>
+<link rel="stylesheet" href="/css/security.css">
+<link rel="stylesheet" href="/css/twofactor.css">
+<header class="sc-head">
+  <span class="sc-badge" aria-hidden="true"><%- icon('key') %></span>
+  <div>
+    <h1><%= t('tf.backupTitle') %></h1>
+    <p><%= t('tf.backupSub') %></p>
+  </div>
+</header>
+
+<div class="tf-grid">
+  <section class="sc-card tf-card">
+    <ul class="tf-codes" aria-label="<%= t('tf.backupTitle') %>">
+      <% codes.forEach(function (c) { %><li><code><%= c %></code></li><% }) %>
+    </ul>
+    <a class="sc-btn" href="/security?tf=on"><%= t('tf.backupDone') %> <%- icon('check') %></a>
+  </section>
+</div>
+<%- include('_foot') %>

@@ -29,6 +29,7 @@
     "i18n-iso-countries": "^7.14.0",
     "mailgun.js": "^14.1.1",
     "morgan": "^1.10.0",
+    "qrcode": "^1.5.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "whmcs": "^1.2.2"

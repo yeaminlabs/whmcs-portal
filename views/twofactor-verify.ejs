@@ -1,0 +1,13 @@
+<%- include('_head') %>
+<h1><%= t('tf.verifyTitle') %></h1>
+<p class="sub auth-sub"><%= t('tf.verifySub') %></p>
+<% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+
+<form method="post" action="/login/2fa" class="card auth-card" aria-label="<%= t('tf.verifyTitle') %>" novalidate>
+  <label class="af-field"><span class="af-label"><%= t('tf.verifyCodeLabel') %></span>
+    <span class="af"><%- icon('key') %><input type="text" name="code" inputmode="text" autocomplete="one-time-code" required maxlength="20" autofocus placeholder="123456"></span>
+  </label>
+  <button type="submit" class="auth-submit"><span><%= t('tf.verify') %></span><%- icon('arrow') %></button>
+</form>
+<p class="auth-alt"><a href="/login/2fa/cancel"><%= t('tf.cancel') %></a></p>
+<%- include('_foot') %>

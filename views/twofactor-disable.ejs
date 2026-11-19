@@ -1,0 +1,27 @@
+<%- include('_head') %>
+<link rel="stylesheet" href="/css/security.css">
+<link rel="stylesheet" href="/css/twofactor.css">
+<header class="sc-head">
+  <span class="sc-badge" aria-hidden="true"><%- icon('alert') %></span>
+  <div>
+    <h1><%= t('tf.removeTitle') %></h1>
+    <p><%= t('tf.removeSub') %></p>
+  </div>
+</header>
+
+<% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+
+<div class="tf-grid">
+  <section class="sc-card tf-card">
+    <form method="post" action="/security/2fa/disable" class="tf-form" novalidate>
+      <label class="af-field"><span class="af-label"><%= t('tf.removeCodeLabel') %></span>
+        <span class="af"><%- icon('key') %><input type="text" name="code" autocomplete="one-time-code" required maxlength="20" autofocus></span>
+      </label>
+      <div class="tf-actions">
+        <button type="submit" class="sc-btn sc-btn-danger"><%= t('tf.removeConfirm') %></button>
+        <a class="tf-cancel" href="/security"><%= t('tf.cancel') %></a>
+      </div>
+    </form>
+  </section>
+</div>
+<%- include('_foot') %>

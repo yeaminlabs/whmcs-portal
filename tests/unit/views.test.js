@@ -22,8 +22,13 @@ const t = (k, v) => {
     'sec.twoFactor': 'Two-factor authentication',
     'sec.twoFactorEnabled': 'Enabled',
     'sec.twoFactorDisabled': 'Not enabled',
-    'sec.manageTwoFactor': 'Manage two-factor in WHMCS',
-    'sec.twoFactorNote': 'Two-factor authentication is managed in your WHMCS client area.',
+    'sec.tfSetup': 'Set up two-factor',
+    'sec.tfRemove': 'Remove two-factor',
+    'sec.twoFactorDesc': 'Add a one-time code from an authenticator app.',
+    'tf.setupTitle': 'Set up two-factor authentication',
+    'tf.verifyTitle': 'Two-factor verification',
+    'tf.removeTitle': 'Remove two-factor authentication',
+    'tf.backupTitle': 'Save your backup codes',
     'sec.forgotTitle': 'Forgot your password?',
     'sec.forgotSub': 'Send yourself a secure reset link through WHMCS.',
     'sec.forgotCta': 'Reset password',
@@ -74,11 +79,34 @@ describe('new views compile and render', () => {
     expect(html).toContain('value="abcd1234"');
   });
 
-  test('security.ejs compiles with twoFactor and twoFactorUrl locals', async () => {
-    const html = await render('security.ejs', baseLocals);
+  test('security.ejs shows native set-up action when 2FA is off', async () => {
+    const html = await render('security.ejs', { ...baseLocals, twoFactor: false, backupCodesLeft: 0, tfNotice: null });
     expect(html).toContain('Two-factor authentication');
-    expect(html).toContain('/security/whmcs');
+    expect(html).toContain('href="/security/2fa/setup"');
+    expect(html).not.toContain('/security/2fa/disable');
+    expect(html).not.toContain('action=twofactor');
     expect(html).toContain('/forgot-password');
+  });
+
+  test('security.ejs shows remove action and backup count when 2FA is on', async () => {
+    const html = await render('security.ejs', { ...baseLocals, twoFactor: true, backupCodesLeft: 7, tfNotice: 'on' });
+    expect(html).toContain('href="/security/2fa/disable"');
+    expect(html).not.toContain('href="/security/2fa/setup"');
+    expect(html).toContain('<b>7</b>');
+  });
+
+  test('2FA setup, backup, disable and login challenge views render', async () => {
+    const setup = await render('twofactor-setup.ejs', { ...baseLocals, error: null, qr: 'data:image/png;base64,AA', secret: 'JBSW Y3DP' });
+    expect(setup).toContain('action="/security/2fa/setup"');
+    expect(setup).toContain('data:image/png;base64,AA');
+    const backup = await render('twofactor-backup.ejs', { ...baseLocals, codes: ['abcd-efgh', 'jkmn-pqrs'] });
+    expect(backup).toContain('abcd-efgh');
+    expect(backup).toContain('/security?tf=on');
+    const disable = await render('twofactor-disable.ejs', { ...baseLocals, error: null });
+    expect(disable).toContain('action="/security/2fa/disable"');
+    const verify = await render('twofactor-verify.ejs', { ...baseLocals, error: 'bad' });
+    expect(verify).toContain('action="/login/2fa"');
+    expect(verify).toContain('bad');
   });
 
   test('login.ejs compiles with forgot link', async () => {

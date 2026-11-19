@@ -8,8 +8,9 @@
   </div>
 </header>
 
-<% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+<% if (typeof error !== 'undefined' && error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
 <% if (typeof done !== 'undefined' && done) { %><p class="sc-done" role="status"><%- icon('check') %><span><%= t('sec.done') %></span></p><% } %>
+<% if (typeof tfNotice !== 'undefined' && tfNotice) { %><p class="sc-done" role="status"><%- icon('check') %><span><%= t(tfNotice === 'off' ? 'sec.tfOffNotice' : 'sec.tfOnNotice') %></span></p><% } %>
 
 <div class="sc-grid">
   <form method="post" action="/security" class="sc-card sc-form" id="pwForm" novalidate>
@@ -48,11 +49,21 @@
     <button type="submit" class="auth-submit sc-save"><span><%= t('sec.save') %></span><%- icon('arrow') %></button>
   </form>
 
-  <section class="sc-card sc-2fa">
-    <h2><%- icon('shield') %><%= t('sec.twoFactor') %></h2>
-    <p><%= twoFactor ? t('sec.twoFactorEnabled') : t('sec.twoFactorDisabled') %></p>
-    <small class="sc-card-note"><%= t('sec.twoFactorNote') %></small>
-    <a class="btn" href="/security/whmcs"><%= t('sec.manageTwoFactor') %></a>
+  <section class="sc-card sc-2fa" aria-labelledby="tfTitle">
+    <div class="sc-2fa-top">
+      <span class="sc-2fa-ico" aria-hidden="true"><%- icon('shield') %></span>
+      <div>
+        <h2 id="tfTitle"><%= t('sec.twoFactor') %></h2>
+        <span class="sc-status <%= typeof twoFactor !== 'undefined' && twoFactor ? 'is-on' : 'is-off' %>"><%= typeof twoFactor !== 'undefined' && twoFactor ? t('sec.twoFactorEnabled') : t('sec.twoFactorDisabled') %></span>
+      </div>
+    </div>
+    <p class="sc-2fa-desc"><%= typeof twoFactor !== 'undefined' && twoFactor ? t('sec.twoFactorDescOn') : t('sec.twoFactorDesc') %></p>
+    <% if (typeof twoFactor !== 'undefined' && twoFactor) { %>
+      <small class="sc-card-note"><%= t('sec.backupLeft') %>: <b><%= typeof backupCodesLeft !== 'undefined' ? backupCodesLeft : 0 %></b></small>
+      <a class="sc-btn sc-btn-danger" href="/security/2fa/disable"><%= t('sec.tfRemove') %></a>
+    <% } else { %>
+      <a class="sc-btn" href="/security/2fa/setup"><%= t('sec.tfSetup') %> <%- icon('arrow') %></a>
+    <% } %>
   </section>
 
   <section class="sc-card sc-recovery">

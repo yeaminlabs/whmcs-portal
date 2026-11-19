@@ -4,7 +4,8 @@ const express = require('express');
 const whmcs = require('../lib/whmcs');
 const { isEmail, cleanStr } = require('../lib/validators');
 const avatars = require('../lib/avatars');
-const { nextParam, safeNext, signIn } = require('../lib/signin');
+const { nextParam, safeNext } = require('../lib/signin');
+const { completeSignIn } = require('../lib/twofactor-gate');
 const config = require('../config');
 const { consume } = require('../lib/portal-sso');
 const mailer = require('../lib/mailer');
@@ -48,7 +49,8 @@ const renderLogin = (res, status, error, next) => res.status(status).render('log
 
 router.get('/login', (req, res) => {
   if (req.session.clientId) return res.redirect(safeNext(req.query.next));
-  renderLogin(res, 200, null, nextParam(req.query.next));
+  const notice = req.query.error === '2fa' ? res.locals.t('tf.tooMany') : null;
+  renderLogin(res, 200, notice, nextParam(req.query.next));
 });
 
 // One-time signed handoff from the authenticated WHMCS portal.
@@ -65,13 +67,13 @@ router.get('/auth/sso', async (req, res) => {
   try {
     const data = await whmcs.call('GetClientsDetails', { clientid: Number(req.query.client_id) });
     if (data.result !== 'success' || !data.client || Number(data.client.id) !== Number(req.query.client_id)) throw new Error('SSO_LOOKUP_FAILED');
-    await signIn(req, {
+    const { challenge } = await completeSignIn(req, {
       clientId: Number(data.client.id),
       clientName: data.client.fullname || `${data.client.firstname || ''} ${data.client.lastname || ''}`.trim() || data.client.email,
       clientEmail: data.client.email,
       clientPicture: avatars.get(Number(data.client.id)),
-    }, 'sso');
-    return res.redirect(303, next);
+    }, 'sso', next);
+    return res.redirect(303, challenge ? '/login/2fa' : next);
   } catch (e) {
     return res.status(502).render('error', { title: 'Sign-in failed', message: 'Could not start your portal session.', back: '/login' });
   }
@@ -87,20 +89,19 @@ router.post('/login', async (req, res) => {
     const t = res.locals.t;
     const data = await whmcs.call('ValidateLogin', { email, password2: password });
     if (data.result !== 'success') return fail(401, data.message || 'Login failed.');
-    if (String(data.twoFactorEnabled) === 'true') return fail(403, t('authx.twoFactor'));
 
     // ValidateLogin returns the WHMCS *user* id; the portal works with the *client* the user owns.
     const owner = await ownedClientFor(data.userid, email);
     if (!owner) return fail(403, t('authx.notOwner'));
     try {
-      await signIn(req, {
+      const { challenge } = await completeSignIn(req, {
         clientId: owner.clientId,
         userId: Number(data.userid),
         clientName: owner.name || email,
         clientEmail: owner.email || email,
         clientPicture: avatars.get(owner.clientId),
-        twoFactor: String(data.twoFactorEnabled) === 'true',
-      });
+      }, 'password', next);
+      if (challenge) return res.redirect(303, '/login/2fa');
     } catch (err) {
       return renderError(res, 'Could not start session.');
     }

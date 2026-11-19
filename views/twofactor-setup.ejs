@@ -1,0 +1,36 @@
+<%- include('_head') %>
+<link rel="stylesheet" href="/css/security.css">
+<link rel="stylesheet" href="/css/twofactor.css">
+<header class="sc-head">
+  <span class="sc-badge" aria-hidden="true"><%- icon('shield') %></span>
+  <div>
+    <h1><%= t('tf.setupTitle') %></h1>
+    <p><%= t('tf.setupSub') %></p>
+  </div>
+</header>
+
+<% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+
+<div class="tf-grid">
+  <section class="sc-card tf-card">
+    <ol class="tf-steps">
+      <li><span class="tf-n">1</span><span><%= t('tf.step1') %></span></li>
+      <li><span class="tf-n">2</span><span><%= t('tf.step2') %></span></li>
+      <li><span class="tf-n">3</span><span><%= t('tf.step3') %></span></li>
+    </ol>
+    <div class="tf-qr"><img src="<%= qr %>" width="220" height="220" alt="QR code"></div>
+    <p class="tf-key-label"><%= t('tf.setupKey') %></p>
+    <code class="tf-key"><%= secret %></code>
+
+    <form method="post" action="/security/2fa/setup" class="tf-form" novalidate>
+      <label class="af-field"><span class="af-label"><%= t('tf.codeLabel') %></span>
+        <span class="af"><%- icon('key') %><input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,7}" maxlength="7" required autofocus></span>
+      </label>
+      <div class="tf-actions">
+        <button type="submit" class="sc-btn"><%= t('tf.confirm') %> <%- icon('arrow') %></button>
+        <a class="tf-cancel" href="/security"><%= t('tf.cancel') %></a>
+      </div>
+    </form>
+  </section>
+</div>
+<%- include('_foot') %>
