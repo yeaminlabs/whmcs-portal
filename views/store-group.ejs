@@ -1,4 +1,5 @@
 <%- include('_head') %>
+<link rel="stylesheet" href="/css/store-group-nav.css">
 <% const tr = (k, fb) => { const v = t(k); return v === k ? fb : v; }; %>
 <nav class="crumbs" aria-label="Breadcrumb"><a href="/store"><%= t('store.crumb') %></a><%- icon('chev') %><span><%= tr('group.' + group.slug, group.name) %></span></nav>
 <div class="pagehead">
@@ -26,8 +27,24 @@
 
 <%- usNetworks(group.slug, t('store.usNetworks')) %>
 
-<nav class="ui-tabs store-tabs" aria-label="<%= t('store.categories') %>">
-  <% groups.forEach(g => { %><a href="/store/<%= g.slug %>"<% if (g.slug === group.slug) { %> aria-current="page"<% } %>><%- brandMark(g.slug + ' ' + g.name) %><%= tr('group.' + g.slug, g.name) %></a><% }) %>
+<nav class="store-directory" aria-label="<%= t('store.categories') %>">
+  <% families.forEach(f => { const members = groups.filter(g => g.family === f.id); if (!members.length) return; %>
+  <section class="store-directory-family<%= group.family === f.id ? ' is-current' : '' %>">
+    <div class="store-directory-heading">
+      <span class="store-directory-icon" aria-hidden="true"><%- icon(({ hosting: 'server', reseller: 'users', vps: 'cpu', automation: 'activity', ai: 'bolt' })[f.id] || 'server') %></span>
+      <h2><%= tr('family.' + f.id, f.label) %></h2>
+      <span class="store-directory-count"><%= members.length %></span>
+    </div>
+    <div class="store-directory-links">
+      <% members.forEach(g => { %>
+      <a href="/store/<%= g.slug %>"<% if (g.slug === group.slug) { %> aria-current="page"<% } %>>
+        <span class="store-directory-link-name"><%- brandMark(g.slug + ' ' + g.name) %><%= tr('group.' + g.slug, g.name) %></span>
+        <span class="store-directory-link-detail"><%= tr('groupBlurb.' + g.slug, g.blurb) %></span>
+      </a>
+      <% }) %>
+    </div>
+  </section>
+  <% }) %>
 </nav>
 
 <div class="plan-grid">
