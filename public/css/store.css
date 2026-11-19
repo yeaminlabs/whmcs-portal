@@ -1,0 +1,76 @@
+/* Store landing (/store): hero with category jump list, then one section per product family.
+   One logo per card, always in the same slot above the name; titles carry no extra marks. */
+.st-hero{position:relative;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(16rem,1fr);gap:2rem;align-items:center;margin:.25rem 0 2rem;padding:2rem 2.25rem;border-radius:22px;color:#fff;overflow:hidden;isolation:isolate;background:radial-gradient(40rem 22rem at 100% 0%,rgba(190,48,69,.45),transparent 60%),radial-gradient(30rem 18rem at 0% 120%,rgba(66,115,107,.35),transparent 60%),linear-gradient(150deg,#30292E 0,#231E22 100%);box-shadow:0 30px 60px -40px rgba(48,41,46,.8);animation:stUp .45s cubic-bezier(.2,.8,.2,1) both}
+.st-hero::after{content:"";position:absolute;inset:0;z-index:-1;opacity:.07;background-image:linear-gradient(rgba(255,255,255,.9) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.9) 1px,transparent 1px);background-size:36px 36px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 70%);mask-image:linear-gradient(90deg,transparent,#000 70%)}
+.st-hero h1{margin:0;color:#fff;font-size:clamp(1.75rem,3vw,2.5rem);font-weight:800;letter-spacing:-.035em;line-height:1.1}
+.st-hero p{margin:.7rem 0 1.4rem;max-width:34rem;color:rgba(255,255,255,.78);font-size:1rem;line-height:1.6}
+.st-hero-btn{display:inline-flex;align-items:center;gap:.55rem;min-height:2.75rem;padding:0 1.1rem;border-radius:12px;background:#fff;color:#30292E;font-weight:700;font-size:.9375rem;box-shadow:0 10px 24px -14px rgba(0,0,0,.6);transition:transform .18s,box-shadow .18s}
+.st-hero-btn .ico{width:1.05rem;height:1.05rem;color:#BE3045}
+.st-hero-btn:hover{color:#30292E;transform:translateY(-1px);box-shadow:0 14px 28px -14px rgba(0,0,0,.7)}
+.st-hero-btn:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.st-jump{display:grid;gap:.5rem}
+.st-jump a{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:.75rem;padding:.7rem .85rem;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#fff;font-weight:600;font-size:.9375rem;backdrop-filter:blur(6px);transition:background .18s,border-color .18s,transform .18s}
+.st-jump a:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.28);color:#fff;transform:translateX(3px)}
+.st-jump a:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.st-jump-ico{display:grid;place-items:center;width:2rem;height:2rem;border-radius:10px;background:rgba(190,48,69,.3);color:#FFD2D9}
+.st-jump-ico .ico{width:1rem;height:1rem}
+.st-jump-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.st-jump-n{min-width:1.6rem;padding:.05rem .45rem;border-radius:999px;background:rgba(255,255,255,.14);font-size:.75rem;font-weight:700;text-align:center}
+.st-jump-chev{width:.9rem;height:.9rem;color:rgba(255,255,255,.6)}
+
+.st-sections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2rem 1.25rem}
+.st-family{grid-column:1/-1;scroll-margin-top:5rem}
+.st-family.is-solo{grid-column:auto}
+.st-fam-head{display:flex;align-items:center;gap:.65rem;margin:0 0 .9rem}
+.st-fam-head::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,#E1DAD4,transparent)}
+.st-fam-ico{display:grid;place-items:center;width:2rem;height:2rem;border-radius:10px;background:#FBEDEE;color:#BE3045}
+.st-fam-ico .ico{width:1rem;height:1rem}
+.st-fam-head h2{margin:0;color:#30292E;font-size:1.125rem;font-weight:800;letter-spacing:-.02em}
+.st-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(14.5rem,1fr));gap:1rem}
+.st-family.is-solo .st-grid{grid-template-columns:1fr}
+
+.st-card{position:relative;display:flex;flex-direction:column;gap:.9rem;height:100%;padding:1.25rem 1.25rem 1.1rem;background:#fff;border:1px solid #E1DAD4;border-radius:18px;color:#30292E;box-shadow:0 1px 2px rgba(48,41,46,.04);transition:transform .2s,box-shadow .2s,border-color .2s;animation:stUp .45s calc(.05s + var(--i) * .05s) cubic-bezier(.2,.8,.2,1) both}
+.st-card::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;border-radius:18px 18px 0 0;background:linear-gradient(90deg,#BE3045,#A1263A);opacity:0;transition:opacity .2s}
+.st-card:hover{color:#30292E;transform:translateY(-3px);border-color:#D9CFC8;box-shadow:0 22px 40px -28px rgba(48,41,46,.55)}
+.st-card:hover::before{opacity:1}
+.st-card:focus-visible{outline:2px solid #BE3045;outline-offset:3px}
+
+/* the single logo slot: fixed height, logo sized to fit, never larger than the name */
+.st-logo{display:flex;align-items:center;height:2.25rem}
+.st-logo img{display:block;height:100%;width:auto;max-width:9rem;object-fit:contain}
+.st-logo-flag img{height:1.5rem;border-radius:4px;box-shadow:0 0 0 1px rgba(48,41,46,.1)}
+.st-logo-bdix img{height:2.25rem}
+.st-logo-n8n img{height:1.5rem}
+.st-logo-wordmark img{height:1.6rem}
+.st-logo-none{width:2.25rem;justify-content:center;border-radius:10px;background:#FBEDEE;color:#BE3045}
+.st-logo-none .ico{width:1.1rem;height:1.1rem}
+
+.st-body{display:grid;gap:.35rem;flex:1}
+.st-name{font-size:1.0625rem;font-weight:800;letter-spacing:-.015em;line-height:1.3}
+.st-blurb{color:#685F65;font-size:.875rem;line-height:1.55}
+.st-foot{display:grid;gap:.75rem;padding-top:.85rem;border-top:1px dashed #E1DAD4}
+.st-price{display:flex;align-items:baseline;justify-content:space-between;gap:.5rem;flex-wrap:wrap;min-width:0}
+.st-from{color:#685F65;font-size:.8125rem;white-space:nowrap}
+.st-from b{color:#30292E;font-size:1.25rem;font-weight:800;letter-spacing:-.02em}
+.st-plans{color:#8A8087;font-size:.75rem}
+.st-cta{display:flex;align-items:center;justify-content:center;gap:.35rem;width:100%;padding:.6rem .8rem;border-radius:10px;background:#FBEDEE;color:#A1263A;font-size:.8125rem;font-weight:700;transition:background .18s,color .18s}
+.st-cta .ico{width:.9rem;height:.9rem;transition:transform .18s}
+.st-card:hover .st-cta{background:#BE3045;color:#fff}
+.st-card:hover .st-cta .ico{transform:translateX(3px)}
+
+/* two-card families split the row evenly instead of leaving half of it empty */
+.st-family.is-pair .st-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:620px){.st-family.is-pair .st-grid{grid-template-columns:1fr}}
+
+/* single-card families sit side by side as wider horizontal cards */
+.st-family.is-solo .st-card{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:1.1rem;row-gap:.85rem;align-items:start}
+.st-family.is-solo .st-logo{grid-row:1;grid-column:1/-1}
+.st-family.is-solo .st-body{grid-column:1/-1}
+.st-family.is-solo .st-foot{grid-column:1/-1}
+
+@keyframes stUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media(max-width:1100px){.st-hero{grid-template-columns:1fr;gap:1.5rem}.st-jump{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.st-sections{grid-template-columns:1fr}.st-family.is-solo{grid-column:1/-1}.st-hero{padding:1.5rem 1.25rem;border-radius:18px}.st-jump{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.st-hero,.st-card{animation:none}.st-card,.st-jump a,.st-hero-btn{transition:none}}
+.st-family.is-solo{display:flex;flex-direction:column}
+.st-family.is-solo .st-grid{flex:1}

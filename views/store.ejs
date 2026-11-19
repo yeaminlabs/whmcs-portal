@@ -1,29 +1,68 @@
 <%- include('_head') %>
-<% const tr = (k, fb) => { const v = t(k); return v === k ? fb : v; }; %>
-<div class="pagehead">
-  <div><h1><%= t('store.title') %></h1><p class="sub"><%= t('store.sub') %></p></div>
-  <a class="btn ghost" href="/order/domain"><%- icon('search') %><%= t('nav.registerDomain') %></a>
-</div>
+<link rel="stylesheet" href="/css/store.css">
+<%
+const tr = (k, fb) => { const v = t(k); return v === k ? fb : v; };
+const FAMILY_ICON = { hosting: 'globe', vps: 'server', automation: 'bolt', ai: 'cpu' };
+// Cheapest real monthly price in a group (skips free / zero-priced placeholder plans).
+const fromOf = (g) => {
+  let best = null;
+  g.products.forEach((p) => {
+    if (!p.from || !(Number(p.from.perMonth) > 0)) return;
+    if (!best || p.from.perMonth < best.perMonth) best = { perMonth: p.from.perMonth, prefix: p.pricing.prefix };
+  });
+  return best;
+};
+// Exactly one logo per card, always in the same slot above the name.
+const logoOf = (g) => {
+  const key = g.slug + ' ' + g.name;
+  if (/openclaw/i.test(key)) return { cls: 'wordmark', html: '<img src="/img/openclaw.png" alt="" width="468" height="96" decoding="async">' };
+  const tile = brandTile(key);
+  return tile.html ? { cls: tile.cls, html: tile.html } : null;
+};
+const sections = families.map((f) => ({ f, list: groups.filter((g) => g.family === f.id) })).filter((s) => s.list.length);
+%>
 
-<% families.forEach(f => { const list = groups.filter(g => g.family === f.id); if (!list.length) return; %>
-<section class="store-family reveal" aria-labelledby="fam-<%= f.id %>">
-  <h2 id="fam-<%= f.id %>"><%- brandMark(f.id === 'automation' ? 'n8n' : '') %><%= tr('family.' + f.id, f.label) %></h2>
-  <div class="group-grid">
-    <% list.forEach(g => { const cheapest = g.products.find(p => p.from); %>
-    <a class="group-card" href="/store/<%= g.slug %>">
-      <% const tile = brandTile(g.slug + ' ' + g.name); %><% if (tile.cls !== 'none') { %><span class="group-icon<%= tile.cls ? ' group-icon-' + tile.cls : '' %>"><%- tile.html || icon(f.id === 'vps' ? 'server' : f.id === 'automation' ? 'bolt' : f.id === 'ai' ? 'cpu' : 'globe') %></span><% } %>
-      <strong><%- bdixFlag(g.slug + ' ' + g.name) %><%- brandText(tr('group.' + g.slug, g.name)) %></strong>
-      <p><%= tr('groupBlurb.' + g.slug, g.blurb) %></p>
-      <span class="group-meta">
-        <span><%= t(g.products.length === 1 ? 'store.planOne' : 'store.planMany', { n: g.products.length }) %></span>
-        <% if (cheapest && cheapest.from) { %><span><%- t('store.from', { price: '<b>' + money(cheapest.from.perMonth, cheapest.pricing.prefix) + '</b>' }) %></span><% } %>
+<section class="st-hero" aria-labelledby="stTitle">
+  <div class="st-hero-copy">
+    <h1 id="stTitle"><%= t('store.title') %></h1>
+    <p><%= t('store.sub') %></p>
+    <a class="st-hero-btn" href="/order/domain"><%- icon('search') %><span><%= t('nav.registerDomain') %></span></a>
+  </div>
+  <nav class="st-jump" aria-label="<%= t('store.categories') %>">
+    <% sections.forEach(({ f, list }) => { %>
+    <a href="#fam-<%= f.id %>"><span class="st-jump-ico" aria-hidden="true"><%- icon(FAMILY_ICON[f.id] || 'globe') %></span><span class="st-jump-name"><%= tr('family.' + f.id, f.label) %></span><span class="st-jump-n"><%= list.length %></span><%- icon('chev', 'st-jump-chev') %></a>
+    <% }) %>
+  </nav>
+</section>
+
+<div class="st-sections">
+<% sections.forEach(({ f, list }) => { const solo = list.length === 1; %>
+<section class="st-family<%= solo ? ' is-solo' : list.length === 2 ? ' is-pair' : '' %>" id="fam-<%= f.id %>" aria-labelledby="fam-h-<%= f.id %>">
+  <header class="st-fam-head">
+    <span class="st-fam-ico" aria-hidden="true"><%- icon(FAMILY_ICON[f.id] || 'globe') %></span>
+    <h2 id="fam-h-<%= f.id %>"><%= tr('family.' + f.id, f.label) %></h2>
+  </header>
+  <div class="st-grid">
+    <% list.forEach((g, i) => { const from = fromOf(g); const logo = logoOf(g); %>
+    <a class="st-card" href="/store/<%= g.slug %>" style="--i:<%= i %>">
+      <span class="st-logo<%= logo ? ' st-logo-' + logo.cls : ' st-logo-none' %>" aria-hidden="true"><% if (logo) { %><%- logo.html %><% } else { %><%- icon(FAMILY_ICON[f.id] || 'globe') %><% } %></span>
+      <span class="st-body">
+        <strong class="st-name"><%= tr('group.' + g.slug, g.name) %></strong>
+        <span class="st-blurb"><%= tr('groupBlurb.' + g.slug, g.blurb) %></span>
       </span>
-      <span class="group-cta"><%= t('store.viewPlans') %> <%- icon('arrow') %></span>
+      <span class="st-foot">
+        <span class="st-price">
+          <% if (from) { %><span class="st-from"><%- t('store.from', { price: '<b>' + money(from.perMonth, from.prefix) + '</b>' }) %></span><% } %>
+          <span class="st-plans"><%= t(g.products.length === 1 ? 'store.planOne' : 'store.planMany', { n: g.products.length }) %></span>
+        </span>
+        <span class="st-cta"><%= t('store.viewPlans') %> <%- icon('arrow') %></span>
+      </span>
     </a>
     <% }) %>
   </div>
 </section>
 <% }) %>
+</div>
 
 <% if (!groups.length) { %>
 <div class="ui-empty"><h3><%= t('store.emptyTitle') %></h3><p><%= t('store.emptyText') %> <a href="/tickets/new"><%= t('foot.support') %></a></p></div>

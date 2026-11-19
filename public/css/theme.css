@@ -336,3 +336,8 @@ h1 .openclaw-logo{height:1.1em;margin:0 .18em 0 0;vertical-align:-.22em}
 .ct-main:hover{text-decoration:underline}
 .ct-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto;padding-top:12px}
 .ct-actions .btn .ico{width:15px;height:15px}
+
+/* Public top bar: between phone and full desktop the nav, login and create-account buttons
+   did not fit and pushed the page wider than the screen; tighten them in that range. */
+@media(max-width:1100px){.pub-nav a{padding-inline:.5rem}.pub-actions{gap:.4rem}.pub-actions .btn{padding-inline:.75rem}}
+@media(max-width:860px){.pub-nav{gap:0}.pub-nav a{padding-inline:.35rem;font-size:.875rem}.pub-actions .prefs-compact .pc-part b{display:none}}
