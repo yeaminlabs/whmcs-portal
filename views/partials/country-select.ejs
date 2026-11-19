@@ -1,0 +1,10 @@
+<%# Reusable country selector: 2-letter value, all ISO countries. %>
+<%# Params: name, id, value, label, required, countries (array of { code, name }). %>
+<%# Pull into any module (checkout, WHMCS bridge forms, etc.) by passing `countries`. %>
+<label for="<%- typeof id !== 'undefined' ? id : 'country' %>"><%- typeof label !== 'undefined' ? label : t('prof.country') %></label>
+<select name="<%- typeof name !== 'undefined' ? name : 'country' %>" id="<%- typeof id !== 'undefined' ? id : 'country' %>"<%- typeof required !== 'undefined' && required ? ' required' : '' %>>
+  <option value=""><%- t('common.optional') || '—' %></option>
+  <% (typeof countries !== 'undefined' && countries || []).forEach(({ code, name }) => { %>
+  <option value="<%- code %>"<%- String(value || '') === code ? ' selected' : '' %>><%- name %></option>
+  <% }) %>
+</select>

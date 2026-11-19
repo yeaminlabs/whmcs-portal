@@ -15,6 +15,7 @@ const { ownedInvoice, ownedService, ownedDomain, ownedQuote, ownedTicket } = req
 const { cached } = require('../lib/cache');
 const gtokens = require('../lib/google-tokens');
 const { getClient, invalidateClient } = require('../lib/client');
+const { countries } = require('../lib/countries');
 const kb = require('../lib/kb');
 const uptime = require('../lib/uptime');
 const { domainAvailability } = require('../lib/domain-availability');
@@ -490,7 +491,7 @@ router.get('/kb/:slug', (req, res) => {
 router.get('/profile', async (req, res) => {
   try {
     const data = await getClient(req);
-    res.render('profile', { title: 'Profile', customer: (data && data.client) || {}, updated: req.query.updated === '1', error: null });
+    res.render('profile', { title: 'Profile', customer: (data && data.client) || {}, authProvider: req.session.authProvider || 'password', countries, updated: req.query.updated === '1', error: null, verify: req.query.verify || null });
   } catch (e) {
     res.render('error', { title: 'Profile', message: e.message, back: '/' });
   }
@@ -504,17 +505,36 @@ router.post('/profile', async (req, res) => {
       lastname: cleanStr(req.body.lastname, 100),
       email: cleanStr(req.body.email, 190),
       phonenumber: cleanStr(req.body.phonenumber, 50),
+      companyname: cleanStr(req.body.companyname, 150),
       address1: cleanStr(req.body.address1, 200),
+      address2: cleanStr(req.body.address2, 200),
       city: cleanStr(req.body.city, 100),
+      state: cleanStr(req.body.state, 100),
       postcode: cleanStr(req.body.postcode, 30),
-      country: cleanStr(req.body.country, 2),
+      country: cleanStr(req.body.country, 2).toUpperCase(),
     };
     const data = await whmcs.call('UpdateClient', fields);
     invalidateClient(req.session.clientId);
     if (data.result !== 'success') throw new Error(data.message || 'Update failed');
     res.redirect('/profile?updated=1');
   } catch (e) {
-    res.render('profile', { title: 'Profile', customer: req.body, updated: false, error: e.message });
+    res.render('profile', { title: 'Profile', customer: req.body, authProvider: req.session.authProvider || 'password', updated: false, error: e.message });
+  }
+});
+
+router.post('/profile/verify-email', requireLogin, async (req, res) => {
+  const t = res.locals.t;
+  const clientEmail = String(req.session.clientEmail || '').toLowerCase();
+  if (!clientEmail || !isEmail(clientEmail)) return res.redirect('/profile?verify=err');
+  try {
+    const sent = await mailer.sendMail({
+      to: clientEmail,
+      subject: t('prof.verifySubject', { site: 'SNBD HOST' }),
+      text: t('prof.verifyBody', { email: clientEmail }),
+    });
+    res.redirect('/profile?' + (sent ? 'verify=sent' : 'verify=err'));
+  } catch (e) {
+    res.redirect('/profile?verify=err');
   }
 });
 

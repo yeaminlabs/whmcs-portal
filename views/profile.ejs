@@ -1,6 +1,8 @@
 <%- include('_head') %>
 <%
 const initials2 = String(customer.firstname || customer.fullname || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+const isGoogle = String(authProvider || '') === 'google';
+const verified = isGoogle;
 %>
 <div class="pagehead">
   <div>
@@ -11,14 +13,19 @@ const initials2 = String(customer.firstname || customer.fullname || '?').split(/
 </div>
 <% if (updated) { %><p class="alert ok" role="status"><%= t('common.saved') %></p><% } %>
 <% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+<% if (verify === 'sent') { %><p class="alert ok" role="status"><%= t('prof.verifySent') %></p><% } %>
+<% if (verify === 'err') { %><p class="alert err" role="alert"><%= t('prof.verifyFailed') %></p><% } %>
+
 <div class="prof-head narrow-card">
   <span class="avatar" style="--av:60px" aria-hidden="true"><%= initials2 %><% if (session.clientPicture) { %><img src="<%= session.clientPicture %>" alt="" width="60" height="60" referrerpolicy="no-referrer" onerror="this.remove()"><% } %></span>
   <div class="prof-head-info">
     <strong><%= customer.firstname %> <%= customer.lastname %></strong>
     <span><%= customer.email %></span>
     <% if (customer.phonenumber) { %><span style="color:var(--g500);font-size:13px"><%= customer.phonenumber %></span><% } %>
+    <% if (isGoogle) { %><span class="badge ok" style="font-size:12px"><%- icon('check') %><span><%= t('prof.emailVerified') %> (<%= t('prof.verifyViaGoogle') %>)</span></span><% } else { %><span class="badge warn" style="font-size:12px"><%- icon('mail') %><span><%= t('prof.emailUnverified') %></span></span><% } %>
   </div>
 </div>
+
 <form method="post" action="/profile" class="card narrow-card">
   <h2 style="margin-top:0"><%= t('prof.personalInfo') || 'Personal Information' %></h2>
   <div class="field-row">
@@ -27,14 +34,35 @@ const initials2 = String(customer.firstname || customer.fullname || '?').split(/
   </div>
   <label><%= t('prof.email') %><input type="email" name="email" value="<%= customer.email || '' %>" autocomplete="email"></label>
   <label><%= t('prof.phone') %><input name="phonenumber" value="<%= customer.phonenumber || '' %>" autocomplete="tel"></label>
+  <label><%= t('prof.company') %><input name="companyname" value="<%= customer.companyname || '' %>"></label>
   <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
   <h2 style="margin-top:0"><%= t('prof.addressInfo') || 'Address' %></h2>
-  <label><%= t('prof.address') %><input name="address1" value="<%= customer.address1 || '' %>" autocomplete="street-address"></label>
+  <label><%= t('prof.address') %><input name="address1" value="<%= customer.address1 || '' %>"></label>
+  <label><%= t('prof.address2') %><input name="address2" value="<%= customer.address2 || '' %>"></label>
   <div class="field-row">
-    <label><%= t('prof.city') %><input name="city" value="<%= customer.city || '' %>" autocomplete="address-level2"></label>
-    <label><%= t('prof.postcode') %><input name="postcode" value="<%= customer.postcode || '' %>" autocomplete="postal-code"></label>
+    <label><%= t('prof.city') %><input name="city" value="<%= customer.city || '' %>"></label>
+    <label><%= t('prof.state') %><input name="state" value="<%= customer.state || '' %>"></label>
   </div>
-  <label><%= t('prof.country') %><input name="country" value="<%= customer.country || '' %>" maxlength="2" autocomplete="country"><small class="hint">2-letter country code, e.g. BD, US, GB</small></label>
+  <div class="field-row">
+    <label><%= t('prof.postcode') %><input name="postcode" value="<%= customer.postcode || '' %>"></label>
+    <%- include('partials/country-select', { name: 'country', value: customer.country || '', required: true }) %>
+  </div>
   <button type="submit" class="btn red"><%= t('common.saveChanges') %></button>
 </form>
+
+<% if (!isGoogle) { %>
+<form method="post" action="/profile/verify-email" class="card narrow-card" style="margin-top:16px">
+  <h2 style="margin-top:0"><%= t('prof.verifyTitle') %></h2>
+  <p><%= t('prof.verifyNote') %></p>
+  <button type="submit" class="btn"><%= t('prof.verifyBtn') %></button>
+</form>
+<% } %>
+
 <%- include('_foot') %>
+
+<style>
+.prof-head .badge{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.prof-head .badge.ok{background:#e7f7ea;color:var(--g700);border:1px solid #b7e4c7}
+.prof-head .badge.warn{background:#fdecea;color:#b02a37;border:1px solid #f5c6c7}
+.prof-head .badge *[aria-hidden]{font-size:14px}
+</style>

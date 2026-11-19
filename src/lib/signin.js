@@ -22,7 +22,7 @@ function signIn(req, fields, method = 'password', isNew = false) {
   return new Promise((resolve, reject) => {
     req.session.regenerate((err) => (err ? reject(err) : resolve()));
   }).then(async () => {
-    Object.assign(req.session, fields);
+    Object.assign(req.session, fields, { authProvider: String(method || 'password').toLowerCase() });
     if (pendingOrder) req.session.pendingOrder = pendingOrder;
     await currency.accountCurrency(req).catch(() => null);
     tracking.queue(req, { event: isNew ? 'sign_up' : 'login', method });
