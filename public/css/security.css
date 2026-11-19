@@ -1,3 +1,4 @@
+@import url("/css/twofactor.css");
 /* Security page */
 .sc-head{display:flex;align-items:center;gap:1rem;margin:.25rem 0 1.25rem;animation:scUp .4s cubic-bezier(.2,.8,.2,1) both}
 .sc-badge{display:grid;place-items:center;flex:none;width:3.25rem;height:3.25rem;border-radius:16px;background:#FBEDEE;color:#BE3045;border:1px solid #F0D5D9}
@@ -66,3 +67,29 @@
 @keyframes scUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media(max-width:900px){.sc-grid{grid-template-columns:1fr}.sc-rules{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.sc-head,.sc-card{animation:none}}
+
+/* Keep account settings compact and readable at every viewport. */
+.sc-grid{grid-template-areas:"password factor" "password details" "recovery details";grid-template-rows:auto 1fr auto}
+.sc-form{grid-area:password}
+.sc-2fa{grid-area:factor;gap:1rem}
+.sc-recovery{grid-area:recovery}
+.sc-side{grid-area:details}
+.sc-card{border-radius:14px;box-shadow:none;animation:none;min-width:0}
+.sc-card::before{display:none}
+.sc-head{animation:none}
+.sc-2fa p.sc-2fa-desc{font-weight:400;line-height:1.65;color:#685F65}
+.sc-2fa-top>div,.sc-me>div{min-width:0}
+.sc-2fa h2{line-height:1.5;overflow-wrap:anywhere}
+.sc-btn{min-height:44px;box-sizing:border-box;justify-content:center;text-align:center;line-height:1.5;white-space:normal}
+.sc-btn:focus-visible,.tf-cancel:focus-visible,.sc-recovery a:focus-visible,.sc-help a:focus-visible{outline:3px solid #BE3045;outline-offset:4px}
+.sc-btn:hover{transform:none;box-shadow:none;background:#483D44}
+.sc-btn-danger:hover{background:#FDF2F4}
+.tf-card{gap:1.25rem}
+.tf-qr{background:#fff;border-style:solid}
+.tf-qr img{height:auto;aspect-ratio:1}
+.tf-form input{min-width:0;font-size:1rem;caret-color:#BE3045}
+.tf-key,.tf-codes code{user-select:all;overflow-wrap:anywhere}
+.tf-cancel{display:inline-flex;align-items:center;min-height:44px;text-underline-offset:4px}
+@media(max-width:900px){.sc-grid{grid-template-areas:"factor" "password" "recovery" "details";grid-template-rows:auto}}
+@media(max-width:520px){.sc-form,.sc-2fa,.tf-card{padding:1.1rem}.sc-head{align-items:flex-start}.sc-head h1{font-size:1.5rem}.tf-actions{align-items:stretch}.tf-actions .sc-btn{width:100%}.sc-2fa .sc-btn{justify-self:stretch}.sc-status{line-height:1.6}.tf-key{letter-spacing:.02em}}
+@media(prefers-reduced-motion:reduce){.sc-btn,.sc-recovery a .ico,.sc-help a .ico{transition:none}}
