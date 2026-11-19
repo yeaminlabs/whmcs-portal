@@ -23,6 +23,12 @@ describe('store categories', () => {
     const slugs = catalog.GROUPS.map((g) => g.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
   });
+  test('zero-priced products are never exposed by the catalog', () => {
+    const p = catalog.pricingFor({ paytype: 'free', pricing: { BDT: {} } }, 'BDT');
+    expect(p.cycles).toHaveLength(1);
+    expect(p.cycles[0].price).toBe(0);
+    expect(p.cycles.some((c) => c.price > 0 || c.setup > 0)).toBe(false);
+  });
   test('every category and family has a name and blurb in English and Bangla', () => {
     for (const g of catalog.GROUPS) {
       for (const dict of [en, bn]) {

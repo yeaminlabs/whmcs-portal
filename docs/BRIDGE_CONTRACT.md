@@ -51,7 +51,7 @@ Request:
 Whitelisted actions (client-scoped unless marked global):
 `GetClientsDetails, GetClientsProducts, GetClientsDomains, GetClientsAddons, GetInvoices,
 GetInvoice*, GetSupportTickets, GetSupportTicket*, GetTicketNotes*, GetQuotes, GetEmails,
-GetContacts, GetTransactions, GetOrders, GetCredits, GetAnnouncements (global),
+GetTransactions, GetOrders, GetCredits, GetAnnouncements (global),
 GetKBArticles (global), GetSupportDepartments (global), GetPaymentMethods (global),
 GetCurrencies (global), GetProducts (global), GetTLDPricing (global), GetServers (global)`
 
