@@ -114,7 +114,7 @@ describe('new views compile and render', () => {
     expect(html).toContain('/forgot-password');
     expect(html).toContain('Forgot password?');
     expect(html).toContain('class="authwrap authwrap-video"');
-    expect(html).toContain('youtube-nocookie.com/embed/pYqScYQZ-o8');
+    expect(html).toContain('youtube-nocookie.com/embed/InccedcHQ3A');
   });
 
   test('video background stays exclusive to the login screen', async () => {
