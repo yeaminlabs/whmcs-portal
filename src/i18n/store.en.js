@@ -41,4 +41,7 @@ module.exports = {
   'pub.placeOrder': 'Place order and pay',
   'pub.placeNote': 'We will create your invoice and take you to the payment screen next.',
   'pub.placing': 'Placing order…',
+  'store.stackKicker': 'A familiar hosting stack',
+  'store.stackTitle': 'Tools your site already knows',
+  'store.stackSub': 'Built on trusted tools for domains, security, backups and WordPress sites.',
 };

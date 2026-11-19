@@ -285,6 +285,21 @@ h1 .region-flag{height:.62em;margin-right:.55rem;vertical-align:.02em}
 .net-strip-logos img{display:block;height:26px;width:auto;max-width:118px;object-fit:contain}
 @media (max-width:560px){.net-strip{gap:10px 22px}.net-strip-logos{gap:12px 22px}.net-strip-logos img{height:22px;max-width:96px}}
 
+/* Shared hosting stack: a compact trust signal shown only on shared-hosting group pages. */
+.shared-stack{display:grid;grid-template-columns:minmax(12rem,.72fr) minmax(0,1.8fr);align-items:center;gap:1.5rem;margin:0 0 1.25rem;padding:1rem 1.15rem;border:1px solid #E9E1DB;border-radius:16px;background:linear-gradient(110deg,#fff 0,#FCF7F6 58%,#F7FBFA 100%)}
+.shared-stack-copy{min-width:0}
+.shared-stack-kicker{display:inline-flex;align-items:center;gap:.4rem;color:#BE3045;font-size:.68rem;font-weight:700;letter-spacing:.035em}
+.shared-stack-kicker .ico{width:.85rem;height:.85rem}
+.shared-stack-copy h2{margin:.28rem 0 .22rem;color:#30292E;font-size:1rem;font-weight:800;letter-spacing:-.02em}
+.shared-stack-copy p{max-width:27ch;margin:0;color:#685F65;font-size:.75rem;line-height:1.45}
+.shared-stack-logos{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;gap:.65rem}
+.shared-stack-logos span{display:grid;place-items:center;min-width:0;height:2.65rem;padding:.35rem .45rem;border-left:1px solid #E9E1DB}
+.shared-stack-logos img{display:block;width:auto;height:auto;max-width:100%;max-height:1.45rem;object-fit:contain}
+.shared-stack-logos span:nth-child(3) img{max-height:1.7rem}
+.shared-stack-logos span:nth-child(5) img{max-height:2rem}
+@media(max-width:800px){.shared-stack{grid-template-columns:1fr;gap:.85rem}.shared-stack-copy p{max-width:48ch}.shared-stack-logos span:first-child{border-left:0}}
+@media(max-width:560px){.shared-stack{padding:.9rem}.shared-stack-logos{grid-template-columns:repeat(3,minmax(0,1fr));gap:.45rem}.shared-stack-logos span{height:2.35rem;padding:.25rem .35rem}.shared-stack-logos span:nth-child(4){border-left:0}.shared-stack-logos img{max-height:1.15rem}.shared-stack-logos span:nth-child(3) img{max-height:1.3rem}.shared-stack-logos span:nth-child(5) img{max-height:1.5rem}}
+
 /* Region flag as the icon of a store category card (USA, Singapore, EU) */
 .group-icon.group-icon-flag{display:flex;align-items:center;width:auto;height:42px;padding:0;border:0;border-radius:0;background:none}
 .group-icon-flag .tile-flag{display:block;width:auto;height:34px;max-width:none;max-height:none;margin:0;border-radius:2px;box-shadow:none}

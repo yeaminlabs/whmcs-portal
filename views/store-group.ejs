@@ -7,6 +7,23 @@
   <% if (headLogo) { %><div class="pagehead-brand"><%- headLogo %></div><% } %>
 </div>
 
+<% if (/^(usa|bdix)-shared-hosting$/.test(group.slug)) { %>
+<section class="shared-stack" aria-labelledby="shared-stack-title">
+  <div class="shared-stack-copy">
+    <span class="shared-stack-kicker"><%- icon('server') %><%= t('store.stackKicker') %></span>
+    <h2 id="shared-stack-title"><%= t('store.stackTitle') %></h2>
+    <p><%= t('store.stackSub') %></p>
+  </div>
+  <div class="shared-stack-logos" role="list" aria-label="<%= t('store.stackTitle') %>">
+    <span role="listitem"><img src="/img/cpanel.png" alt="cPanel" width="256" height="57" decoding="async"></span>
+    <span role="listitem"><img src="/img/cloudlinux.png" alt="CloudLinux" width="292" height="74" decoding="async"></span>
+    <span role="listitem"><img src="/img/softaculous.png" alt="Softaculous" width="160" height="80" decoding="async"></span>
+    <span role="listitem"><img src="/img/jetbackup.png" alt="JetBackup" width="244" height="36" decoding="async"></span>
+    <span role="listitem"><img src="/img/wordpress.png" alt="WordPress" width="384" height="384" decoding="async"></span>
+  </div>
+</section>
+<% } %>
+
 <%- usNetworks(group.slug, t('store.usNetworks')) %>
 
 <nav class="ui-tabs store-tabs" aria-label="<%= t('store.categories') %>">
