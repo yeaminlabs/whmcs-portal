@@ -106,6 +106,12 @@ The coding agent owns the GitHub commit and push for its change. The deployer
 only executes the GitHub-first production script and verifies the service; it
 does not act as a code uploader.
 
+One command on the production server deploys whatever is on `main`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/yeaminlabs/whmcs-portal/main/scripts/deploy-from-github.sh | sudo bash
+```
+
 The portal runs as a systemd service behind nginx with a Let's Encrypt certificate:
 
 ```ini

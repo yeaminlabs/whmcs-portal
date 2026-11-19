@@ -11,11 +11,18 @@ fix must commit and push it to `main`. The deployer is an operator only; it
 must never upload an uncommitted local checkout or push on another agent's
 behalf.
 
-On the production server, run:
+On the production server, one command deploys the latest `main`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/yeaminlabs/whmcs-portal/main/scripts/deploy-from-github.sh | sudo bash
+```
+
+That bootstrap needs no local checkout, so it works even when production has no
+copy of the script yet. When a checkout is already present, this is equivalent:
 
 ```bash
 cd /opt/whmcs-portal-new
-bash scripts/deploy-from-github.sh
+sudo bash scripts/deploy-from-github.sh
 ```
 
 The command updates the Node portal and the WHMCS bridge addon, installs the
