@@ -27,6 +27,8 @@
 
 <%- usNetworks(group.slug, t('store.usNetworks')) %>
 
+<details class="store-directory-toggle">
+<summary><span class="store-directory-summary-icon" aria-hidden="true"><%- icon('layout') %></span><span class="store-directory-summary-text"><strong><%= t('store.categories') %></strong><small><%= tr('group.' + group.slug, group.name) %></small></span><%- icon('chev', 'store-directory-chevron') %></summary>
 <nav class="store-directory" aria-label="<%= t('store.categories') %>">
   <% families.forEach(f => { const members = groups.filter(g => g.family === f.id); if (!members.length) return; %>
   <section class="store-directory-family<%= group.family === f.id ? ' is-current' : '' %>">
@@ -46,6 +48,7 @@
   </section>
   <% }) %>
 </nav>
+</details>
 
 <div class="plan-grid">
   <% group.products.forEach((p, i) => {
