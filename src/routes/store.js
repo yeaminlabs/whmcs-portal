@@ -17,6 +17,7 @@ const currency = require('../lib/currency');
 const { invalidateClient } = require('../lib/client');
 const { applyPrefs } = require('../lib/prefs');
 const tracking = require('../lib/tracking');
+const { domainAvailability } = require('../lib/domain-availability');
 
 const router = express.Router();
 
@@ -111,7 +112,8 @@ router.post('/store/domain-check', async (req, res) => {
     ]);
     if (whois.result !== 'success') throw new Error(whois.message || 'Lookup failed');
     const price = tlds[tldOf(domain)] || null;
-    res.json({ ok: true, domain, available: whois.status === 'available', register: price && price.register, transfer: price && price.transfer });
+    const available = domainAvailability(whois);
+    res.json({ ok: true, domain, available, register: available === true && price ? price.register : null, transfer: available === true && price ? price.transfer : null });
   } catch (e) {
     res.status(502).json({ ok: false, error: res.locals.t('conf.checkFail') });
   }

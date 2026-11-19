@@ -431,6 +431,8 @@ module.exports = {
   'do.search': 'Search',
   'do.available': 'Available to register',
   'do.taken': 'Already registered',
+  'do.unverified': 'Could not verify availability',
+  'do.unverifiedHint': 'The registry did not return a definitive answer. Please try again shortly.',
   'do.takenHint': 'Try a different name or extension. If you own it, transfer it from the store when ordering hosting.',
   'do.year': 'year',
   'do.yearOne': '1 year',

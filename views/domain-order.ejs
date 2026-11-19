@@ -18,10 +18,10 @@
 <% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
 
 <% if (result) { %>
-<section class="panel do-result domain-result <%= result.available ? 'ok' : 'bad' %>" aria-live="polite">
+<section class="panel do-result domain-result <%= result.available === true ? 'ok' : result.available === false ? 'bad' : 'unknown' %>" aria-live="polite">
   <div class="do-result-head">
-    <span class="do-badge"><%- icon(result.available ? 'check' : 'alert') %></span>
-    <div><strong><%= result.domain %></strong><small><%= result.available ? t('do.available') : t('do.taken') %></small></div>
+    <span class="do-badge"><%- icon(result.available === true ? 'check' : 'alert') %></span>
+    <div><strong><%= result.domain %></strong><small><%= result.available === true ? t('do.available') : result.available === false ? t('do.taken') : t('do.unverified') %></small></div>
     <% if (result.available && result.price && result.price.register != null) { %><span class="do-price"><%= money(result.price.register, prefix) %><small>/<%= t('do.year') %></small></span><% } %>
   </div>
   <% if (result.available) { %>
@@ -39,8 +39,10 @@
     <% if (billCode !== displayCurrency.code) { %><p class="hint"><%= t('conf.taxNote', { code: billCode }) %></p><% } %>
     <button type="submit" class="btn red"><%= t('do.register', { domain: result.domain }) %> <%- icon('arrow') %></button>
   </form>
-  <% } else { %>
+  <% } else if (result.available === false) { %>
   <p class="pad-form hint"><%= t('do.takenHint') %></p>
+  <% } else { %>
+  <p class="pad-form hint"><%= t('do.unverifiedHint') %></p>
   <% } %>
 </section>
 <% } %>
