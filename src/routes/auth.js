@@ -7,6 +7,8 @@ const avatars = require('../lib/avatars');
 const { nextParam, safeNext, signIn } = require('../lib/signin');
 const config = require('../config');
 const { consume } = require('../lib/portal-sso');
+const mailer = require('../lib/mailer');
+const resetTokens = require('../lib/reset-tokens');
 
 const router = express.Router();
 
@@ -97,6 +99,7 @@ router.post('/login', async (req, res) => {
         clientName: owner.name || email,
         clientEmail: owner.email || email,
         clientPicture: avatars.get(owner.clientId),
+        twoFactor: String(data.twoFactorEnabled) === 'true',
       });
     } catch (err) {
       return renderError(res, 'Could not start session.');
@@ -112,6 +115,67 @@ router.post('/logout', (req, res) => {
 });
 router.get('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/login'));
+});
+
+// ---- Forget password / reset (token emailed via Mailgun, validated against WHMCS) ----
+router.get('/forgot-password', (req, res) =>
+  res.render('forgot-password', { title: 'Forgot password', error: null, sent: null })
+);
+
+router.post('/forgot-password', async (req, res) => {
+  const t = res.locals.t;
+  const email = cleanStr(req.body.email || '', 190).toLowerCase();
+  const fail = (error) => res.status(400).render('forgot-password', { title: 'Forgot password', error, sent: null });
+  if (!isEmail(email)) return fail(t('auth.enterEmail'));
+
+  // Never reveal whether an email is registered: always render "check your inbox".
+  let clientId = null;
+  try {
+    const data = await whmcs.call('GetClientsDetails', { email });
+    if (data.result === 'success' && data.client) {
+      clientId = Number(data.client.id || data.client.clientid || data.client.userid);
+    }
+  } catch (e) { /* treat as unregistered */ }
+
+  if (clientId) {
+    const token = resetTokens.create(email, clientId);
+    const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${token}`;
+    const text = t('pw.reset.body', { url: resetUrl, site: 'SNBD HOST' });
+    await mailer.sendMail({
+      to: email,
+      subject: t('pw.reset.subject', { site: 'SNBD HOST' }),
+      text,
+    }).catch((e) => console.warn('[mailer] reset mail failed:', e.message));
+  }
+  res.render('forgot-password', { title: 'Forgot password', error: null, sent: true });
+});
+
+router.get('/reset-password', (req, res) => {
+  const token = String(req.query.token || '');
+  const entry = token ? resetTokens.valid(token) : null;
+  if (!entry) {
+    return res.render('error', { title: 'Invalid link', message: res.locals.t('pw.reset.invalidLink'), back: '/login' });
+  }
+  res.render('reset-password', { title: 'Reset password', token, error: null, done: null });
+});
+
+router.post('/reset-password', async (req, res) => {
+  const t = res.locals.t;
+  const token = String(req.body.token || '');
+  const entry = resetTokens.valid(token);
+  if (!entry) {
+    return res.render('error', { title: 'Invalid link', message: t('pw.reset.invalidLink'), back: '/login' });
+  }
+  const fail = (error) => res.render('reset-password', { title: 'Reset password', token, error, done: null });
+  const newpw = String(req.body.newpw || '');
+  if (newpw.length < 8 || !/[a-z]/i.test(newpw) || !/[0-9]/.test(newpw)) return fail(t('sec.rule'));
+  if (newpw !== String(req.body.confirmpw || '')) return fail(t('err.pwMatch'));
+  try {
+    const data = await whmcs.call('UpdateClient', { clientid: entry.clientId, password2: newpw });
+    if (data.result !== 'success') return fail(data.message || t('err.pwFail'));
+    resetTokens.consume(token);
+    res.redirect(303, '/login?reset=1');
+  } catch (e) { fail(t('err.pwFail')); }
 });
 
 module.exports = router;

@@ -741,7 +741,24 @@ router.get('/emails', async (req, res) => {
   const list = data && data.emails ? (Array.isArray(data.emails.email) ? data.emails.email : [data.emails.email]) : [];
   res.render('emails', { title: 'Email History', emails: list });
 });
-router.get('/security', (req, res) => res.render('security', { title: 'Security', error: null, done: false }));
+router.get('/security', (req, res) => {
+  const whmcsBase = (config.whmcsStoreUrl || config.whmcsUrl || '').replace(/\/+$/, '');
+  const twoFactorUrl = whmcsBase ? whmcsBase + '/clientarea.php?action=twofactor' : '';
+  res.render('security', { title: 'Security', error: null, done: false, twoFactor: req.session.twoFactor === true, twoFactorUrl });
+});
+router.get('/security/whmcs', async (req, res) => {
+  try {
+    const data = await whmcs.call('CreateSsoToken', {
+      client_id: req.session.clientId,
+      destination: 'sso:custom_redirect',
+      sso_redirect_path: 'clientarea.php?action=security',
+    });
+    if (data.result !== 'success' || !data.redirect_url) throw new Error('SSO_FAILED');
+    return res.redirect(303, data.redirect_url);
+  } catch (e) {
+    return res.status(502).render('security', { title: 'Security', error: res.locals.t('sec.twoFactorError'), done: false, twoFactor: req.session.twoFactor === true, twoFactorUrl: '' });
+  }
+});
 router.post('/security', async (req, res) => {
   const fail = (error) => res.status(422).render('security', { title: 'Security', error, done: false });
   try {

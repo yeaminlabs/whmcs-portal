@@ -9,7 +9,7 @@
 </header>
 
 <% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
-<% if (done) { %><p class="sc-done" role="status"><%- icon('check') %><span><%= t('sec.done') %></span></p><% } %>
+<% if (typeof done !== 'undefined' && done) { %><p class="sc-done" role="status"><%- icon('check') %><span><%= t('sec.done') %></span></p><% } %>
 
 <div class="sc-grid">
   <form method="post" action="/security" class="sc-card sc-form" id="pwForm" novalidate>
@@ -47,6 +47,12 @@
 
     <button type="submit" class="auth-submit sc-save"><span><%= t('sec.save') %></span><%- icon('arrow') %></button>
   </form>
+
+  <section class="sc-card sc-2fa">
+    <h2><%- icon('shield') %><%= t('sec.twoFactor') %></h2>
+    <p><%= twoFactor ? t('sec.twoFactorEnabled') : t('sec.twoFactorDisabled') %></p>
+    <a class="btn" href="/security/whmcs"><%= t('sec.manageTwoFactor') %></a>
+  </section>
 
   <aside class="sc-side">
     <section class="sc-card sc-me">
