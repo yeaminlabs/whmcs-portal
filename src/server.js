@@ -208,7 +208,9 @@ app.listen(config.port, () => {
                   const text = isDown
                     ? `Your monitored URL is not responding.\n\nMonitor: ${monitor.name}\nURL: ${monitor.url}\nError: ${r.error || `HTTP ${r.code}`}\n\nWe will keep checking every ${monitor.interval_sec}s and notify you when it recovers.\n\n— SNBD HOST Uptime Monitor`
                     : `Your monitored URL has recovered.\n\nMonitor: ${monitor.name}\nURL: ${monitor.url}\nResponse time: ${r.ms}ms\n\n— SNBD HOST Uptime Monitor`;
-                  mailer.sendMail({ to: clientEmail, subject, text }).catch((e) => console.warn('[uptime alert]', e.message));
+                  mailer.sendMail({ to: clientEmail, subject, text }).then((sent) => {
+                    if (sent) uptime.markAlertSent(monitor.id);
+                  }).catch((e) => console.warn('[uptime alert]', e.message));
                 }
               }
             } catch (e) { /* ignore */ }

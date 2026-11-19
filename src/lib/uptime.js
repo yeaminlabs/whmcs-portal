@@ -27,6 +27,7 @@ function getDb() {
       last_ms INTEGER,
       last_code INTEGER,
       last_error TEXT,
+      last_alert_at INTEGER,
       created_at INTEGER NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_um_client ON uptime_monitors(client_id);
@@ -42,6 +43,8 @@ function getDb() {
     );
     CREATE INDEX IF NOT EXISTS idx_uc_monitor ON uptime_checks(monitor_id, checked_at);
   `);
+  // Keep existing installations compatible with the hourly reminder field.
+  try { db.exec('ALTER TABLE uptime_monitors ADD COLUMN last_alert_at INTEGER'); } catch (e) { /* already exists */ }
   return db;
 }
 
@@ -91,16 +94,24 @@ function recordCheck(monitorId, result) {
   d.prepare('DELETE FROM uptime_checks WHERE monitor_id = ? AND id NOT IN (SELECT id FROM uptime_checks WHERE monitor_id = ? ORDER BY checked_at DESC LIMIT 100)').run(Number(monitorId), Number(monitorId));
 }
 
-// Returns { flipped: bool, alert: bool, monitor } — alert on a transition or first confirmed down.
+// Returns { flipped: bool, alert: bool, monitor } — alert on a transition,
+// first confirmed down, or once per hour while the monitor stays down.
 function recordCheckDetectFlip(monitorId, result) {
   const d = getDb();
-  const before = d.prepare('SELECT last_status FROM uptime_monitors WHERE id = ?').get(Number(monitorId));
+  const before = d.prepare('SELECT last_status, last_alert_at FROM uptime_monitors WHERE id = ?').get(Number(monitorId));
   const prevStatus = before ? before.last_status : 'unknown';
+  const now = Date.now();
   recordCheck(monitorId, result);
   const flipped = prevStatus !== 'unknown' && prevStatus !== result.status;
-  const alert = flipped || (prevStatus === 'unknown' && result.status === 'down');
+  const firstDown = prevStatus === 'unknown' && result.status === 'down';
+  const hourlyDown = result.status === 'down' && (!before || !before.last_alert_at || (now - before.last_alert_at) >= 3600 * 1000);
+  const alert = flipped || firstDown || hourlyDown;
   const monitor = d.prepare('SELECT * FROM uptime_monitors WHERE id = ?').get(Number(monitorId));
   return { flipped, alert, monitor };
+}
+
+function markAlertSent(monitorId, at = Date.now()) {
+  getDb().prepare('UPDATE uptime_monitors SET last_alert_at = ? WHERE id = ?').run(Number(at), Number(monitorId));
 }
 
 function recentChecks(monitorId, limit) {
@@ -117,4 +128,4 @@ function uptimePercent(monitorId, hours) {
   return Math.round((up / rows.length) * 100);
 }
 
-module.exports = { init, listByClient, get, add, remove, dueMonitors, recordCheck, recordCheckDetectFlip, recentChecks, uptimePercent, DB_FILE };
+module.exports = { init, listByClient, get, add, remove, dueMonitors, recordCheck, recordCheckDetectFlip, markAlertSent, recentChecks, uptimePercent, DB_FILE };
