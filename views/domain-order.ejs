@@ -1,18 +1,24 @@
 <%- include('_head') %>
-<div class="pagehead"><div><h1><%= t('do.title') %></h1><p class="sub"><%= t('do.sub') %></p></div></div>
-<nav class="ui-tabs" aria-label="<%= t('store.categories') %>"><a href="/store"><%= t('do.tabServices') %></a><a href="/order/domain" aria-current="page"><%= t('do.tabDomains') %></a></nav>
+<link rel="stylesheet" href="/css/domain-order.css">
+<main class="domain-page">
+<nav class="ui-tabs domain-tabs" aria-label="<%= t('store.categories') %>"><a href="/store"><%= t('do.tabServices') %></a><a href="/order/domain" aria-current="page"><%= t('do.tabDomains') %></a></nav>
+<section class="domain-hero" aria-labelledby="domain-title">
+  <div class="domain-orbit domain-orbit-one" aria-hidden="true"></div><div class="domain-orbit domain-orbit-two" aria-hidden="true"></div>
+  <div class="domain-hero-content">
+    <h1 id="domain-title"><%= t('do.title') %></h1><p><%= t('do.sub') %></p>
+    <form method="post" action="/order/domain/check" class="do-search domain-search">
+      <label for="do-q" class="sr-only"><%= t('col.domain') %></label>
+      <span class="domain-search-icon" aria-hidden="true"><%- icon('search') %></span>
+      <input id="do-q" name="domain" value="<%= query %>" placeholder="mybusiness.com" autocomplete="off" autocapitalize="off" spellcheck="false" required>
+      <button type="submit" class="btn red"><%= t('do.search') %><%- icon('arrow') %></button>
+    </form>
+  </div>
+  <div class="domain-hero-art" aria-hidden="true"><span class="domain-art-ring"></span><span class="domain-art-core">.</span><span class="domain-art-dot"></span></div>
+</section>
 <% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
 
-<section class="panel">
-  <form method="post" action="/order/domain/check" class="do-search">
-    <label for="do-q" class="sr-only"><%= t('col.domain') %></label>
-    <input id="do-q" name="domain" value="<%= query %>" placeholder="mybusiness.com" autocomplete="off" autocapitalize="off" spellcheck="false" required>
-    <button type="submit" class="btn red"><%- icon('search') %><%= t('do.search') %></button>
-  </form>
-</section>
-
 <% if (result) { %>
-<section class="panel do-result <%= result.available ? 'ok' : 'bad' %>" aria-live="polite">
+<section class="panel do-result domain-result <%= result.available ? 'ok' : 'bad' %>" aria-live="polite">
   <div class="do-result-head">
     <span class="do-badge"><%- icon(result.available ? 'check' : 'alert') %></span>
     <div><strong><%= result.domain %></strong><small><%= result.available ? t('do.available') : t('do.taken') %></small></div>
@@ -40,12 +46,13 @@
 <% } %>
 
 <% if (popular.length) { %>
-<section class="panel">
-  <header><%= t('do.pricing') %></header>
+<section class="panel domain-pricing">
+  <header><h2><%= t('do.pricing') %></h2><span><%= popular.length %> TLDs</span></header>
   <div class="pad"><table>
     <thead><tr><th><%= t('do.extension') %></th><th class="num"><%= t('do.registerCol') %></th><th class="num"><%= t('do.transferCol') %></th></tr></thead>
-    <tbody><% popular.forEach(x => { %><tr><td>.<%= x.tld %></td><td class="num"><%= money(x.register, prefix) %></td><td class="num"><%= x.transfer != null ? money(x.transfer, prefix) : '—' %></td></tr><% }) %></tbody>
+    <tbody><% popular.forEach(x => { %><tr><th scope="row">.<%= x.tld %></th><td class="num"><%= money(x.register, prefix) %></td><td class="num"><%= x.transfer != null ? money(x.transfer, prefix) : '—' %></td></tr><% }) %></tbody>
   </table></div>
 </section>
 <% } %>
+</main>
 <%- include('_foot') %>
