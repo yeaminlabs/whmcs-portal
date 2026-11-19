@@ -42,6 +42,16 @@ const sections = families.map((f) => ({ f, list: groups.filter((g) => g.family =
     <span class="st-fam-ico" aria-hidden="true"><%- icon(FAMILY_ICON[f.id] || 'globe') %></span>
     <h2 id="fam-h-<%= f.id %>"><%= tr('family.' + f.id, f.label) %></h2>
   </header>
+  <% if (f.id === 'hosting') { %>
+  <div class="st-stack" role="group" aria-label="<%= lang === 'bn' ? 'শেয়ারড হোস্টিংয়ে যা থাকছে' : 'Included with shared hosting' %>">
+    <span class="st-stack-label"><%= lang === 'bn' ? 'যা থাকছে' : 'Included' %></span>
+    <img src="/img/stack/cpanel.png" alt="cPanel" width="126" height="28" loading="lazy" decoding="async">
+    <img src="/img/stack/cloudlinux.png" alt="CloudLinux OS" width="131" height="28" loading="lazy" decoding="async">
+    <img class="st-stack-sf" src="/img/stack/softaculous.png" alt="Softaculous" width="84" height="28" loading="lazy" decoding="async">
+    <img src="/img/stack/jetbackup.png" alt="JetBackup" width="190" height="28" loading="lazy" decoding="async">
+    <img class="st-stack-wp" src="/img/stack/wordpress.png" alt="WordPress" width="57" height="36" loading="lazy" decoding="async">
+  </div>
+  <% } %>
   <div class="st-grid">
     <% list.forEach((g, i) => { const from = fromOf(g); const logo = logoOf(g); %>
     <a class="st-card" href="/store/<%= g.slug %>" style="--i:<%= i %>">

@@ -74,3 +74,13 @@
 @media(prefers-reduced-motion:reduce){.st-hero,.st-card{animation:none}.st-card,.st-jump a,.st-hero-btn{transition:none}}
 .st-family.is-solo{display:flex;flex-direction:column}
 .st-family.is-solo .st-grid{flex:1}
+
+/* Shared hosting: small software brand strip under the section heading */
+.st-stack{display:flex;flex-wrap:wrap;align-items:center;gap:10px 26px;margin:-4px 0 16px;padding:10px 16px;border:1px solid #efe7ea;border-radius:12px;background:#fff}
+.st-stack-label{color:#8a7f86;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.st-stack img{display:block;height:22px;width:auto;max-width:140px;object-fit:contain;opacity:.92;transition:opacity .2s ease}
+.st-stack img.st-stack-wp{height:30px}
+.st-stack img.st-stack-sf{height:28px}
+.st-stack img:hover{opacity:1}
+@media (max-width:560px){.st-stack{gap:10px 18px;padding:10px 12px}.st-stack-label{flex:0 0 100%}.st-stack img{height:18px}.st-stack img.st-stack-wp{height:26px}.st-stack img.st-stack-sf{height:24px}}
+@media (prefers-reduced-motion:reduce){.st-stack img{transition:none}}
