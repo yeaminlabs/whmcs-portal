@@ -133,8 +133,29 @@ if [[ "$DRY_RUN" == false ]]; then
   log "Restarting $SERVICE_NAME"
   run systemctl restart "$SERVICE_NAME"
   run systemctl is-active --quiet "$SERVICE_NAME"
-  log "Checking $HEALTH_URL"
-  run curl --fail --silent --show-error --max-time 20 --output /dev/null "$HEALTH_URL"
+
+  # The app binds its port a few seconds after start and warms caches behind
+  # it, so nginx answers 502 during that window. Retry instead of failing the
+  # whole deploy on the first probe.
+  HEALTH_ATTEMPTS="${HEALTH_ATTEMPTS:-30}"
+  HEALTH_INTERVAL="${HEALTH_INTERVAL:-2}"
+  log "Checking $HEALTH_URL (up to $HEALTH_ATTEMPTS attempts, ${HEALTH_INTERVAL}s apart)"
+  HEALTHY=false
+  for ((attempt = 1; attempt <= HEALTH_ATTEMPTS; attempt++)); do
+    if systemctl is-active --quiet "$SERVICE_NAME" &&
+      curl --fail --silent --show-error --max-time 20 --output /dev/null "$HEALTH_URL"; then
+      HEALTHY=true
+      log "Healthy after $attempt attempt(s)"
+      break
+    fi
+    sleep "$HEALTH_INTERVAL"
+  done
+
+  if [[ "$HEALTHY" != true ]]; then
+    journalctl -u "$SERVICE_NAME" -n 40 --no-pager >&2 || true
+    die "health check failed after $HEALTH_ATTEMPTS attempts: $HEALTH_URL"
+  fi
+
   [[ "$(cat "$APP_DIR/REVISION")" == "$RELEASE_SHA" ]] || die "production revision marker does not match GitHub release"
 fi
 
