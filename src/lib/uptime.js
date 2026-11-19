@@ -91,6 +91,18 @@ function recordCheck(monitorId, result) {
   d.prepare('DELETE FROM uptime_checks WHERE monitor_id = ? AND id NOT IN (SELECT id FROM uptime_checks WHERE monitor_id = ? ORDER BY checked_at DESC LIMIT 100)').run(Number(monitorId), Number(monitorId));
 }
 
+// Returns { flipped: bool, alert: bool, monitor } — alert on a transition or first confirmed down.
+function recordCheckDetectFlip(monitorId, result) {
+  const d = getDb();
+  const before = d.prepare('SELECT last_status FROM uptime_monitors WHERE id = ?').get(Number(monitorId));
+  const prevStatus = before ? before.last_status : 'unknown';
+  recordCheck(monitorId, result);
+  const flipped = prevStatus !== 'unknown' && prevStatus !== result.status;
+  const alert = flipped || (prevStatus === 'unknown' && result.status === 'down');
+  const monitor = d.prepare('SELECT * FROM uptime_monitors WHERE id = ?').get(Number(monitorId));
+  return { flipped, alert, monitor };
+}
+
 function recentChecks(monitorId, limit) {
   const d = getDb();
   return d.prepare('SELECT * FROM uptime_checks WHERE monitor_id = ? ORDER BY checked_at DESC LIMIT ?').all(Number(monitorId), Number(limit) || 50);
@@ -105,4 +117,4 @@ function uptimePercent(monitorId, hours) {
   return Math.round((up / rows.length) * 100);
 }
 
-module.exports = { init, listByClient, get, add, remove, dueMonitors, recordCheck, recentChecks, uptimePercent, DB_FILE };
+module.exports = { init, listByClient, get, add, remove, dueMonitors, recordCheck, recordCheckDetectFlip, recentChecks, uptimePercent, DB_FILE };

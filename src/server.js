@@ -181,6 +181,8 @@ app.listen(config.port, () => {
   try {
     const uptime = require('./lib/uptime');
     const checker = require('./lib/uptime-checker');
+    const mailer = require('./lib/mailer');
+    const whmcsForUptime = require('./lib/whmcs');
     uptime.init();
     const tick = async () => {
       try {
@@ -193,7 +195,22 @@ app.listen(config.port, () => {
             if (!m) break;
             try {
               const r = await checker.probe(m.url, 10000);
-              uptime.recordCheck(m.id, r);
+              const { alert, monitor } = uptime.recordCheckDetectFlip(m.id, r);
+              if (alert && monitor) {
+                // look up client email from WHMCS for the alert
+                const clientData = await whmcsForUptime.call('GetClientsDetails', { clientid: monitor.client_id }).catch(() => null);
+                const clientEmail = clientData && clientData.client && clientData.client.email;
+                if (clientEmail) {
+                  const isDown = r.status === 'down';
+                  const subject = isDown
+                    ? `[SNBD HOST] Alert: ${monitor.name} is DOWN`
+                    : `[SNBD HOST] Recovered: ${monitor.name} is back UP`;
+                  const text = isDown
+                    ? `Your monitored URL is not responding.\n\nMonitor: ${monitor.name}\nURL: ${monitor.url}\nError: ${r.error || `HTTP ${r.code}`}\n\nWe will keep checking every ${monitor.interval_sec}s and notify you when it recovers.\n\n— SNBD HOST Uptime Monitor`
+                    : `Your monitored URL has recovered.\n\nMonitor: ${monitor.name}\nURL: ${monitor.url}\nResponse time: ${r.ms}ms\n\n— SNBD HOST Uptime Monitor`;
+                  mailer.sendMail({ to: clientEmail, subject, text }).catch((e) => console.warn('[uptime alert]', e.message));
+                }
+              }
             } catch (e) { /* ignore */ }
           }
         });
