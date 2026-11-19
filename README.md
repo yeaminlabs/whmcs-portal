@@ -97,6 +97,11 @@ See `whmcs-module/modules/addons/snbd_portal_bridge/README.md` and `docs/BRIDGE_
 
 ## Deployment
 
+Production is deployed only from GitHub. Coding agents must commit and push
+their completed work to `main`; the deployer only runs the checked-in
+`scripts/deploy-from-github.sh` script and never uploads local changes or
+pushes code. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+
 The portal runs as a systemd service behind nginx with a Let's Encrypt certificate:
 
 ```ini
