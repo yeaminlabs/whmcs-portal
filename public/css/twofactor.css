@@ -29,3 +29,18 @@
 .tf-codes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem;margin:0;padding:0;list-style:none}
 .tf-codes code{display:block;padding:.6rem .7rem;border-radius:10px;background:#F6F2EF;color:#30292E;font-size:1rem;letter-spacing:.08em;text-align:center}
 @media(max-width:520px){.tf-codes{grid-template-columns:1fr}}
+
+/* Inline no-refresh 2FA states */
+.tf-inline-state{display:grid;gap:1rem;margin-top:1rem;padding-top:1rem;border-top:1px solid #E1DAD4}
+.tf-loading,.tf-error{display:flex;align-items:center;gap:.55rem;color:#685F65;font-size:.875rem}
+.tf-error{color:#A1263A;font-weight:700;margin-top:.5rem}
+.tf-spinner{display:inline-block;width:1rem;height:1rem;border:2px solid #D9CFC8;border-top-color:#42736B;border-radius:50%;animation:tfSpin .75s linear infinite}
+@keyframes tfSpin{to{transform:rotate(360deg)}}
+.tf-hint{margin:.25rem 0 0;color:#685F65;font-size:.8125rem;line-height:1.4}
+.tf-cancel{color:#685F65;font-size:.9rem;font-weight:700;background:none;border:none;padding:0;cursor:pointer}
+.tf-cancel:hover{color:#30292E;text-decoration:underline}
+@media(max-width:520px){
+  .sc-grid{grid-template-columns:1fr}
+  .tf-inline-state{margin-top:.75rem;padding-top:.75rem}
+  .tf-qr img{width:160px;height:160px}
+}

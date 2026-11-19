@@ -54,15 +54,66 @@
       <span class="sc-2fa-ico" aria-hidden="true"><%- icon('shield') %></span>
       <div>
         <h2 id="tfTitle"><%= t('sec.twoFactor') %></h2>
-        <span class="sc-status <%= typeof twoFactor !== 'undefined' && twoFactor ? 'is-on' : 'is-off' %>"><%= typeof twoFactor !== 'undefined' && twoFactor ? t('sec.twoFactorEnabled') : t('sec.twoFactorDisabled') %></span>
+        <span class="sc-status <%= typeof twoFactor !== 'undefined' && twoFactor ? 'is-on' : 'is-off' %>" id="tfStatus" data-on="<%- t('sec.twoFactorEnabled') %>" data-off="<%- t('sec.twoFactorDisabled') %>"><%= typeof twoFactor !== 'undefined' && twoFactor ? t('sec.twoFactorEnabled') : t('sec.twoFactorDisabled') %></span>
       </div>
     </div>
-    <p class="sc-2fa-desc"><%= typeof twoFactor !== 'undefined' && twoFactor ? t('sec.twoFactorDescOn') : t('sec.twoFactorDesc') %></p>
+    <p class="sc-2fa-desc" id="tfDesc"><%= typeof twoFactor !== 'undefined' && twoFactor ? t('sec.twoFactorDescOn') : t('sec.twoFactorDesc') %></p>
+
+    <!-- No-refresh setup / backup / remove states, toggled by JS -->
+    <div id="tfSetupState" class="tf-inline-state" hidden>
+      <div class="tf-loading" id="tfSetupLoading" hidden>
+        <span class="tf-spinner" aria-hidden="true"></span><span><%= t('tf.loading') %></span>
+      </div>
+      <div id="tfSetupReady" hidden>
+        <div class="tf-qr"><img id="tfQrImg" width="220" height="220" alt="QR code"></div>
+        <p class="tf-key-label"><%= t('tf.setupKey') %></p>
+        <code class="tf-key" id="tfSetupKey"></code>
+        <p class="tf-hint"><%= t('tf.setupHint') %></p>
+        <form id="tfSetupForm" class="tf-form" novalidate>
+          <label class="af-field"><span class="af-label"><%= t('tf.codeLabel') %></span>
+            <span class="af"><%- icon('key') %><input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,7}" maxlength="7" required autofocus placeholder="123456"></span>
+            <p id="tfSetupError" class="tf-error" hidden></p>
+          </label>
+          <div class="tf-actions">
+            <button type="submit" class="sc-btn" id="tfSetupBtn"><%= t('tf.confirm') %> <%- icon('arrow') %></button>
+            <button type="button" class="tf-cancel" id="tfSetupCancel"><%= t('tf.cancel') %></button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="tfBackupState" class="tf-inline-state" hidden>
+      <h3><%= t('tf.backupTitle') %></h3>
+      <p><%= t('tf.backupSub') %></p>
+      <ul class="tf-codes" id="tfBackupCodes" aria-label="<%= t('tf.backupTitle') %>"></ul>
+      <div class="tf-actions">
+        <button type="button" class="sc-btn" id="tfBackupDone"><%= t('tf.backupDone') %> <%- icon('check') %></button>
+      </div>
+    </div>
+
+    <div id="tfRemoveState" class="tf-inline-state" hidden>
+      <div class="tf-loading" id="tfRemoveLoading" hidden>
+        <span class="tf-spinner" aria-hidden="true"></span><span><%= t('tf.removing') %></span>
+      </div>
+      <div id="tfRemoveReady" hidden>
+        <form id="tfRemoveForm" class="tf-form" novalidate>
+          <label class="af-field"><span class="af-label"><%= t('tf.removeCodeLabel') %></span>
+            <span class="af"><%- icon('key') %><input type="text" name="code" autocomplete="one-time-code" required maxlength="20" autofocus placeholder="123456"></span>
+            <p id="tfRemoveError" class="tf-error" hidden></p>
+          </label>
+          <div class="tf-actions">
+            <button type="submit" class="sc-btn sc-btn-danger" id="tfRemoveBtn"><%= t('tf.removeConfirm') %></button>
+            <button type="button" class="tf-cancel" id="tfRemoveCancel"><%= t('tf.cancel') %></button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <% if (typeof twoFactor !== 'undefined' && twoFactor) { %>
-      <small class="sc-card-note"><%= t('sec.backupLeft') %>: <b><%= typeof backupCodesLeft !== 'undefined' ? backupCodesLeft : 0 %></b></small>
-      <a class="sc-btn sc-btn-danger" href="/security/2fa/disable"><%= t('sec.tfRemove') %></a>
+      <small class="sc-card-note"><%= t('sec.backupLeft') %>: <b id="tfBackupCount"><%= typeof backupCodesLeft !== 'undefined' ? backupCodesLeft : 0 %></b></small>
+      <button type="button" class="sc-btn sc-btn-danger" id="tfRemoveOpen"><%= t('sec.tfRemove') %></button>
     <% } else { %>
-      <a class="sc-btn" href="/security/2fa/setup"><%= t('sec.tfSetup') %> <%- icon('arrow') %></a>
+      <button type="button" class="sc-btn" id="tfSetupOpen"><%= t('sec.tfSetup') %> <%- icon('arrow') %></button>
     <% } %>
   </section>
 
@@ -139,6 +190,97 @@
     });
   });
   update();
+})();
+</script>
+
+<script type="module">
+const $ = (id) => document.getElementById(id);
+const show = (el) => { if (el) el.hidden = false; };
+const hide = (el) => { if (el) el.hidden = true; };
+const setError = (id, msg) => {
+  const el = $(id);
+  if (!el) return;
+  if (msg) { el.textContent = msg; hide(el) === null; el.hidden = false; } else { el.hidden = true; }
+};
+const btnState = (btn, busy) => {
+  if (!btn) return;
+  btn.disabled = busy;
+  btn.setAttribute('aria-busy', String(busy));
+};
+const fetchJson = async (path, body) => {
+  const res = await fetch(path, {
+    method: body ? 'POST' : 'GET',
+    headers: body ? { 'Content-Type': 'application/json' } : {},
+    body: body ? JSON.stringify(body) : undefined,
+    credentials: 'same-origin',
+  });
+  const data = res.status === 204 ? {} : await res.json().catch(() => ({}));
+  return { ok: res.ok, status: res.status, data };
+};
+
+(() => {
+  const statusEl = $('tfStatus');
+  const descEl = $('tfDesc');
+
+  // Open setup flow
+  $('tfSetupOpen')?.addEventListener('click', async () => {
+    hide($('tfSetupOpen')); show($('tfSetupLoading')); hide($('tfSetupError'));
+    const { ok, data } = await fetchJson('/api/2fa/setup');
+    hide($('tfSetupLoading'));
+    if (!ok) { setError('tfSetupError', data.error || 'Setup failed.'); show($('tfSetupOpen')); return; }
+    $('tfQrImg').src = data.qr;
+    $('tfSetupKey').textContent = data.secret;
+    hide($('tfSetupLoading')); show($('tfSetupReady'));
+  });
+
+  $('tfSetupCancel')?.addEventListener('click', () => {
+    hide($('tfSetupReady')); hide($('tfSetupError')); show($('tfSetupOpen'));
+  });
+
+  $('tfSetupForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const code = e.target.elements.code.value.replace(/\s/g, '');
+    btnState($('tfSetupBtn'), true); setError('tfSetupError', '');
+    const { ok, data } = await fetchJson('/api/2fa/setup/confirm', { code });
+    btnState($('tfSetupBtn'), false);
+    if (!ok) { setError('tfSetupError', data.error || 'Setup failed.'); return; }
+    const list = $('tfBackupCodes'); list.innerHTML = '';
+    for (const c of (data.codes || [])) {
+      const li = document.createElement('li'); li.textContent = c; list.appendChild(li);
+    }
+    hide($('tfSetupReady')); show($('tfBackupState'));
+    statusEl.textContent = statusEl.dataset.on || '';
+    statusEl.className = 'sc-status is-on';
+    $('tfBackupCount').textContent = (data.codes || []).length;
+    hide($('tfSetupOpen')); show($('tfRemoveOpen'));
+  });
+
+  $('tfBackupDone')?.addEventListener('click', () => {
+    hide($('tfBackupState')); show($('tfRemoveOpen'));
+  });
+
+  // Open remove flow
+  $('tfRemoveOpen')?.addEventListener('click', () => {
+    hide($('tfRemoveOpen')); show($('tfRemoveReady')); hide($('tfRemoveError'));
+  });
+
+  $('tfRemoveCancel')?.addEventListener('click', () => {
+    hide($('tfRemoveReady')); hide($('tfRemoveError')); show($('tfRemoveOpen'));
+  });
+
+  $('tfRemoveForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const code = e.target.elements.code.value.replace(/\s/g, '');
+    btnState($('tfRemoveBtn'), true); setError('tfRemoveError', '');
+    const { ok } = await fetchJson('/api/2fa/remove', { code });
+    btnState($('tfRemoveBtn'), false);
+    if (!ok) { setError('tfRemoveError', 'Removal failed.'); return; }
+    hide($('tfRemoveReady')); show($('tfSetupOpen'));
+    statusEl.textContent = statusEl.dataset.off || '';
+    statusEl.className = 'sc-status is-off';
+    $('tfBackupCount').textContent = 0;
+    hide($('tfRemoveOpen'));
+  });
 })();
 </script>
 <%- include('_foot') %>

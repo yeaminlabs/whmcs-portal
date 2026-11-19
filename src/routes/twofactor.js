@@ -11,11 +11,17 @@ const totp = require('../lib/totp');
 const store = require('../lib/twofactor-store');
 
 const router = express.Router();
+router.use(express.json());
 const codeLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false });
 const SETUP_TTL_MS = 15 * 60 * 1000;
 const MAX_FAILS = 5;
 
 const cleanCode = (v) => cleanStr(String(v || ''), 20).trim();
+
+const tMsg = (res, key) => {
+  try { return res.locals && typeof res.locals.t === 'function' ? res.locals.t(key) : key; } catch (e) { return key; }
+};
+const jsonErr = (res, status, message) => res.status(status).json({ error: message });
 
 // ---- Login challenge (after password or Google sign-in) ----
 router.get('/login/2fa', (req, res) => {
@@ -112,6 +118,52 @@ router.post('/security/2fa/disable', requireLogin, codeLimiter, (req, res) => {
   }
   store.disable(clientId);
   res.redirect(303, '/security?tf=off');
+});
+
+// ---- No-refresh JSON API for the security 2FA card ----
+router.get('/api/2fa/status', requireLogin, (req, res) => {
+  const tf = store.status(req.session.clientId);
+  res.json({ enabled: tf.enabled, backupCodesLeft: tf.backupCodesLeft });
+});
+
+router.post('/api/2fa/setup', requireLogin, codeLimiter, async (req, res) => {
+  const clientId = req.session.clientId;
+  if (store.isEnabled(clientId)) return jsonErr(res, 409, 'Already enabled');
+  const secret = totp.generateSecret();
+  req.session.twofaSetup = { secret, at: Date.now() };
+  const account = req.session.clientEmail || String(clientId);
+  const uri = totp.otpauthUri({ secret, account, issuer: 'SNBD HOST' });
+  let qr;
+  try {
+    qr = await QRCode.toDataURL(uri, { margin: 1, width: 220 });
+  } catch (e) {
+    return jsonErr(res, 500, 'Could not generate setup code.');
+  }
+  res.json({ secret, qr });
+});
+
+router.post('/api/2fa/setup/confirm', requireLogin, codeLimiter, async (req, res) => {
+  const clientId = req.session.clientId;
+  const setup = req.session.twofaSetup;
+  if (!setup || Date.now() - setup.at > SETUP_TTL_MS) return jsonErr(res, 410, 'Setup session expired. Start again.');
+  if (store.isEnabled(clientId)) return jsonErr(res, 409, 'Already enabled');
+  const code = cleanCode(req.body.code);
+  if (totp.verify(setup.secret, code) < 0) return jsonErr(res, 422, tMsg(res, 'tf.invalidCode'));
+  const backupCodes = totp.generateBackupCodes();
+  store.enable(clientId, setup.secret, backupCodes);
+  store.acceptTotp(clientId, code);
+  delete req.session.twofaSetup;
+  res.json({ codes: backupCodes });
+});
+
+router.post('/api/2fa/remove', requireLogin, codeLimiter, (req, res) => {
+  const clientId = req.session.clientId;
+  if (!store.isEnabled(clientId)) return jsonErr(res, 409, 'Not enabled');
+  const code = cleanCode(req.body.code);
+  const ok = store.acceptTotp(clientId, code) || store.acceptBackup(clientId, code);
+  if (!ok) return jsonErr(res, 422, tMsg(res, 'tf.invalidCode'));
+  store.disable(clientId);
+  res.json({ ok: true });
 });
 
 module.exports = router;

@@ -82,7 +82,7 @@ describe('new views compile and render', () => {
   test('security.ejs shows native set-up action when 2FA is off', async () => {
     const html = await render('security.ejs', { ...baseLocals, twoFactor: false, backupCodesLeft: 0, tfNotice: null });
     expect(html).toContain('Two-factor authentication');
-    expect(html).toContain('href="/security/2fa/setup"');
+    expect(html).toContain('id="tfSetupOpen"');
     expect(html).not.toContain('/security/2fa/disable');
     expect(html).not.toContain('action=twofactor');
     expect(html).toContain('/forgot-password');
@@ -90,9 +90,9 @@ describe('new views compile and render', () => {
 
   test('security.ejs shows remove action and backup count when 2FA is on', async () => {
     const html = await render('security.ejs', { ...baseLocals, twoFactor: true, backupCodesLeft: 7, tfNotice: 'on' });
-    expect(html).toContain('href="/security/2fa/disable"');
-    expect(html).not.toContain('href="/security/2fa/setup"');
-    expect(html).toContain('<b>7</b>');
+    expect(html).toContain('id="tfRemoveOpen"');
+    expect(html).not.toContain('id="tfSetupOpen"');
+    expect(html).toContain('<b id="tfBackupCount">7</b>');
   });
 
   test('2FA setup, backup, disable and login challenge views render', async () => {
