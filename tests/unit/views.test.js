@@ -24,6 +24,9 @@ const t = (k, v) => {
     'sec.twoFactorDisabled': 'Not enabled',
     'sec.manageTwoFactor': 'Manage two-factor in WHMCS',
     'sec.twoFactorNote': 'Two-factor authentication is managed in your WHMCS client area.',
+    'sec.forgotTitle': 'Forgot your password?',
+    'sec.forgotSub': 'Send yourself a secure reset link through WHMCS.',
+    'sec.forgotCta': 'Reset password',
     'auth.showPassword': 'Show password',
     'auth.hidePassword': 'Hide password',
     'sec.save': 'Change password',
@@ -75,6 +78,7 @@ describe('new views compile and render', () => {
     const html = await render('security.ejs', baseLocals);
     expect(html).toContain('Two-factor authentication');
     expect(html).toContain('/security/whmcs');
+    expect(html).toContain('/forgot-password');
   });
 
   test('login.ejs compiles with forgot link', async () => {

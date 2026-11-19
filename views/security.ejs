@@ -51,7 +51,17 @@
   <section class="sc-card sc-2fa">
     <h2><%- icon('shield') %><%= t('sec.twoFactor') %></h2>
     <p><%= twoFactor ? t('sec.twoFactorEnabled') : t('sec.twoFactorDisabled') %></p>
+    <small class="sc-card-note"><%= t('sec.twoFactorNote') %></small>
     <a class="btn" href="/security/whmcs"><%= t('sec.manageTwoFactor') %></a>
+  </section>
+
+  <section class="sc-card sc-recovery">
+    <span class="sc-recovery-ico" aria-hidden="true"><%- icon('key') %></span>
+    <div>
+      <h2><%= t('sec.forgotTitle') %></h2>
+      <p><%= t('sec.forgotSub') %></p>
+      <a href="/forgot-password"><%= t('sec.forgotCta') %> <%- icon('arrow') %></a>
+    </div>
   </section>
 
   <aside class="sc-side">
