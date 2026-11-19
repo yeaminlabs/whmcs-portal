@@ -9,6 +9,12 @@ describe('store categories', () => {
     expect(g.family).toBe('ai');
     expect(catalog.FAMILIES.map((f) => f.id)).toContain('ai');
   });
+  test('both reseller hosting regions are listed in their own family', () => {
+    expect(catalog.GROUPS.filter((x) => x.family === 'reseller').map((x) => x.slug)).toEqual([
+      'usa-reseller-hosting', 'bdix-reseller-hosting',
+    ]);
+    expect(catalog.FAMILIES.map((f) => f.id)).toContain('reseller');
+  });
   test('every category belongs to a listed family, so none is silently hidden', () => {
     const families = catalog.FAMILIES.map((f) => f.id);
     for (const g of catalog.GROUPS) expect(families).toContain(g.family);

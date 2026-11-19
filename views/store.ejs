@@ -2,7 +2,7 @@
 <link rel="stylesheet" href="/css/store.css">
 <%
 const tr = (k, fb) => { const v = t(k); return v === k ? fb : v; };
-const FAMILY_ICON = { hosting: 'globe', vps: 'server', automation: 'bolt', ai: 'cpu' };
+const FAMILY_ICON = { hosting: 'globe', reseller: 'briefcase', vps: 'server', automation: 'bolt', ai: 'cpu' };
 // Cheapest real monthly price in a group (skips free / zero-priced placeholder plans).
 const fromOf = (g) => {
   let best = null;
@@ -36,22 +36,22 @@ const sections = families.map((f) => ({ f, list: groups.filter((g) => g.family =
 </section>
 
 <div class="st-sections">
-<% sections.forEach(({ f, list }) => { const solo = list.length === 1; %>
-<section class="st-family<%= solo ? ' is-solo' : list.length === 2 ? ' is-pair' : '' %>" id="fam-<%= f.id %>" aria-labelledby="fam-h-<%= f.id %>">
+<% sections.forEach(({ f, list }) => { %>
+<section class="st-family<%= list.length === 2 ? ' is-pair' : '' %>" id="fam-<%= f.id %>" aria-labelledby="fam-h-<%= f.id %>">
   <header class="st-fam-head">
     <span class="st-fam-ico" aria-hidden="true"><%- icon(FAMILY_ICON[f.id] || 'globe') %></span>
     <h2 id="fam-h-<%= f.id %>"><%= tr('family.' + f.id, f.label) %></h2>
+    <% if (f.id === 'hosting') { %>
+    <div class="st-stack" role="group" aria-label="<%= lang === 'bn' ? 'শেয়ারড হোস্টিংয়ে যা থাকছে' : 'Included with shared hosting' %>">
+      <span class="st-stack-label"><%= lang === 'bn' ? 'যা থাকছে' : 'Included' %></span>
+      <img src="/img/stack/cpanel.png" alt="cPanel" width="126" height="28" loading="lazy" decoding="async">
+      <img src="/img/stack/cloudlinux.png" alt="CloudLinux OS" width="131" height="28" loading="lazy" decoding="async">
+      <img class="st-stack-sf" src="/img/stack/softaculous.png" alt="Softaculous" width="84" height="28" loading="lazy" decoding="async">
+      <img src="/img/stack/jetbackup.png" alt="JetBackup" width="190" height="28" loading="lazy" decoding="async">
+      <img class="st-stack-wp" src="/img/stack/wordpress.png" alt="WordPress" width="57" height="36" loading="lazy" decoding="async">
+    </div>
+    <% } %>
   </header>
-  <% if (f.id === 'hosting') { %>
-  <div class="st-stack" role="group" aria-label="<%= lang === 'bn' ? 'শেয়ারড হোস্টিংয়ে যা থাকছে' : 'Included with shared hosting' %>">
-    <span class="st-stack-label"><%= lang === 'bn' ? 'যা থাকছে' : 'Included' %></span>
-    <img src="/img/stack/cpanel.png" alt="cPanel" width="126" height="28" loading="lazy" decoding="async">
-    <img src="/img/stack/cloudlinux.png" alt="CloudLinux OS" width="131" height="28" loading="lazy" decoding="async">
-    <img class="st-stack-sf" src="/img/stack/softaculous.png" alt="Softaculous" width="84" height="28" loading="lazy" decoding="async">
-    <img src="/img/stack/jetbackup.png" alt="JetBackup" width="190" height="28" loading="lazy" decoding="async">
-    <img class="st-stack-wp" src="/img/stack/wordpress.png" alt="WordPress" width="57" height="36" loading="lazy" decoding="async">
-  </div>
-  <% } %>
   <div class="st-grid">
     <% list.forEach((g, i) => { const from = fromOf(g); const logo = logoOf(g); %>
     <a class="st-card" href="/store/<%= g.slug %>" style="--i:<%= i %>">

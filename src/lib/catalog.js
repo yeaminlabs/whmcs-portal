@@ -24,6 +24,8 @@ const { cached } = require('./cache');
 const GROUPS = [
   { slug: 'usa-shared-hosting', name: 'USA Shared Hosting', family: 'hosting', blurb: 'NVMe hosting on US servers for global reach.' },
   { slug: 'bdix-shared-hosting', name: 'BDIX Shared Hosting', family: 'hosting', blurb: 'Lightning-fast local hosting for visitors in Bangladesh.' },
+  { slug: 'usa-reseller-hosting', name: 'USA Reseller Hosting', family: 'reseller', blurb: 'White-label USA hosting for agencies and growing hosting brands.' },
+  { slug: 'bdix-reseller-hosting', name: 'BDIX Reseller Hosting', family: 'reseller', blurb: 'Launch local hosting plans with fast BDIX connectivity and WHM.' },
   { slug: 'n8n', name: 'n8n Hosting', family: 'automation', blurb: 'Managed n8n instances, deployed instantly. No self-hosting.' },
   { slug: 'openclaw-hosting', name: 'OpenClaw Hosting', family: 'ai', blurb: 'Your own OpenClaw AI agent instance, deployed instantly on dedicated, isolated resources.' },
   { slug: 'bdix-vps', name: 'BDIX VPS', family: 'vps', blurb: 'Ultra-low-latency servers in Bangladesh with full root access.' },
@@ -34,6 +36,7 @@ const GROUPS = [
 
 const FAMILIES = [
   { id: 'hosting', label: 'Shared hosting' },
+  { id: 'reseller', label: 'Reseller hosting' },
   { id: 'vps', label: 'VPS servers' },
   { id: 'automation', label: 'n8n automation' },
   { id: 'ai', label: 'AI agent hosting' },

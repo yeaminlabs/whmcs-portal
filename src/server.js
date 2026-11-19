@@ -162,6 +162,7 @@ app.use('/api/react', require('./routes/react-api'));
 app.use('/', require('./routes/downloads'));
 app.use('/', require('./routes/affiliates'));
 app.use('/', require('./routes/portal'));
+app.use('/', require('./routes/uptime'));
 app.use('/google', require('./routes/google'));
 
 app.use((req, res) => {
@@ -177,6 +178,31 @@ app.use((err, req, res, next) => {
 app.listen(config.port, () => {
   console.log(`WHMCS portal listening on http://localhost:${config.port} (mock=${config.useMock})`);
   warmup().catch((e) => console.warn('[warmup]', e.message));
+  try {
+    const uptime = require('./lib/uptime');
+    const checker = require('./lib/uptime-checker');
+    uptime.init();
+    const tick = async () => {
+      try {
+        const due = uptime.dueMonitors(Date.now());
+        // limit concurrency to 5
+        const queue = due.slice();
+        const workers = Array.from({ length: Math.min(5, queue.length) }, async () => {
+          while (queue.length) {
+            const m = queue.shift();
+            if (!m) break;
+            try {
+              const r = await checker.probe(m.url, 10000);
+              uptime.recordCheck(m.id, r);
+            } catch (e) { /* ignore */ }
+          }
+        });
+        await Promise.all(workers);
+      } catch (e) { console.warn('[uptime]', e.message); }
+    };
+    tick();
+    setInterval(tick, 60 * 1000);
+  } catch (e) { console.warn('[uptime init]', e.message); }
 });
 
 process.on('unhandledRejection', (err) => {

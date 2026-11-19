@@ -16,6 +16,7 @@ const { cached } = require('../lib/cache');
 const gtokens = require('../lib/google-tokens');
 const { getClient, invalidateClient } = require('../lib/client');
 const kb = require('../lib/kb');
+const uptime = require('../lib/uptime');
 
 const router = express.Router();
 const GOOGLE_CLIENT_ID = config.googleClientId;
@@ -262,6 +263,10 @@ router.get(['/', '/dashboard'], async (req, res) => {
       ticketsUnavailable: !ticketsAllowed || Boolean(tickets && tickets.blocked),
       gtools: gtokens.tools(cid),
       n8nPlan,
+      uptimeMonitors: uptime.listByClient(cid).map((m) => ({
+        ...m,
+        uptime24: uptime.uptimePercent(m.id, 24),
+      })),
     });
   } catch (e) {
     res.render('error', { title: 'Dashboard', message: 'Could not load dashboard data.', back: '/login' });

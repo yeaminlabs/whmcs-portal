@@ -232,38 +232,25 @@ const GX = lang === 'bn' ? {
     </div>
   </section>
 
-  <section class="dx-card dx-notif" id="ticketsSection" aria-labelledby="notifTitle">
+  <section class="dx-card dx-uptime" id="uptimeSection" aria-labelledby="uptimeTitle">
     <header class="dx-card-head">
-      <h2 id="notifTitle" tabindex="-1"><%= t('dash.notifTitle') %></h2>
+      <h2 id="uptimeTitle" tabindex="-1"><%= t('dash.uptimeTitle') %></h2>
+      <a class="dx-link" href="/uptime"><%= t('dash.uptimeManage') %> <%- icon('arrow') %></a>
     </header>
     <div class="dx-notif-list">
-      <% if (numDue > 0) { %>
-        <a class="dx-notif-item" href="/invoices">
-          <span class="dx-notif-ico <%= isOverdue ? 'bad' : 'due' %>"><%- icon('receipt') %></span>
-          <span class="dx-notif-copy"><strong><%= t('dash.amountDue') %> · <%= money(dueBalance) %></strong><small><%= t(numDue === 1 ? 'dash.unpaidOne' : 'dash.unpaidMany', { n: numDue }) %></small></span>
-          <time><%= unpaid && (unpaid.duedate || unpaid.date) ? fmtDate(unpaid.duedate || unpaid.date) : '' %></time>
-        </a>
-      <% } %>
-      <% if (overdueServices > 0) { %>
-        <a class="dx-notif-item" href="/services">
-          <span class="dx-notif-ico warn"><%- icon('alert') %></span>
-          <span class="dx-notif-copy"><strong><%= t(overdueServices === 1 ? 'dash.overdueOne' : 'dash.overdueMany', { n: overdueServices }) %></strong><small><%= t('dash.overdueHint') %></small></span>
-        </a>
-      <% } %>
-      <% tickets.forEach(tk => { %>
-        <a class="dx-notif-item" href="/tickets/<%= tk.id %>">
-          <span class="dx-notif-ico"><%- icon('life') %></span>
-          <span class="dx-notif-copy"><strong><%= tk.subject %></strong><small>#<%= tk.tid || tk.id %> · <%= st(tk.status) %></small></span>
-          <time><%= fmtDate(tk.lastreply || tk.date) %></time>
-        </a>
-      <% }) %>
-      <% if (ticketsUnavailable) { %>
-        <p class="svc-muted dx-notif-empty"><%= t('tix.unavailable') %> <a href="/contact"><%= t('nav.contact') %></a></p>
-      <% } else if (!numDue && !overdueServices && !tickets.length) { %>
-        <div class="dx-empty-art"><svg viewBox="0 0 120 90" aria-hidden="true" fill="none" stroke-linejoin="round"><path d="M60 14c-14 0-22 10-22 24v14l-8 12h60l-8-12V38c0-14-8-24-22-24z"/><path d="M52 70a8 8 0 0016 0" class="r"/><circle cx="86" cy="22" r="4" class="rf"/><path d="M20 30l8 4M96 52l8 4" class="r"/></svg><p class="svc-muted dx-notif-empty"><%= t('dash.notifEmpty') %></p></div>
+      <% if (!uptimeMonitors || !uptimeMonitors.length) { %>
+        <p class="svc-muted dx-notif-empty"><%= t('dash.uptimeEmpty') %> <a href="/uptime"><%= t('dash.uptimeAdd') %></a></p>
+      <% } else { %>
+        <% uptimeMonitors.forEach(m => { const statusText = m.last_status === 'up' ? t('dash.uptimeUp') : m.last_status === 'down' ? t('dash.uptimeDown') : t('dash.uptimeUnknown'); const statusClass = m.last_status === 'up' ? 'ok' : m.last_status === 'down' ? 'bad' : ''; const up24 = m.uptime24 === null ? '—' : m.uptime24 + '%'; %>
+          <a class="dx-notif-item" href="/uptime">
+            <span class="dx-notif-ico <%= statusClass %>"><%- icon(m.last_status === 'up' ? 'check' : 'alert') %></span>
+            <span class="dx-notif-copy"><strong><%= m.name %></strong><small><%= m.url %></small></span>
+            <time><%= m.last_checked ? new Date(m.last_checked).toLocaleDateString() : '' %></time>
+            <span class="dx-notif-meta"><%= up24 %></span>
+          </a>
+        <% }) %>
       <% } %>
     </div>
-    <a class="dx-viewall" href="/tickets"><%= t('common.viewAll') %></a>
   </section>
 </div>
 
