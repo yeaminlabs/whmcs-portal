@@ -14,11 +14,15 @@ behalf.
 On the production server, one command deploys the latest `main`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yeaminlabs/whmcs-portal/main/scripts/deploy-from-github.sh | sudo bash
+curl -fsSL -H 'Accept: application/vnd.github.raw' \
+  'https://api.github.com/repos/yeaminlabs/whmcs-portal/contents/scripts/deploy-from-github.sh?ref=main' \
+  | sudo bash
 ```
 
-That bootstrap needs no local checkout, so it works even when production has no
-copy of the script yet. When a checkout is already present, this is equivalent:
+The GitHub API is used instead of `raw.githubusercontent.com`, which can serve a
+cached copy of the script for several minutes after a push. The bootstrap needs
+no local checkout, so it works even when production has no copy of the script
+yet. When a checkout is already present, this is equivalent:
 
 ```bash
 cd /opt/whmcs-portal-new

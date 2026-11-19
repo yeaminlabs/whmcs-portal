@@ -109,7 +109,9 @@ does not act as a code uploader.
 One command on the production server deploys whatever is on `main`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yeaminlabs/whmcs-portal/main/scripts/deploy-from-github.sh | sudo bash
+curl -fsSL -H 'Accept: application/vnd.github.raw' \
+  'https://api.github.com/repos/yeaminlabs/whmcs-portal/contents/scripts/deploy-from-github.sh?ref=main' \
+  | sudo bash
 ```
 
 The portal runs as a systemd service behind nginx with a Let's Encrypt certificate:
