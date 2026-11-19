@@ -993,15 +993,38 @@ a{color:#BE3045}a:hover{color:#A1263A}
   .gx-pulse{display:none}
   .gx-btn,.gx-btn-end{transition:none}
 }
-/* tighter vertical rhythm */
-.gx{padding-top:.5rem;margin-bottom:1.5rem}
-.gx-art{height:6rem;margin-bottom:.35rem}
-.gx-hub{width:4.5rem;height:4.5rem}.gx-hub img{width:3.1rem;height:3.1rem}
-.gx-node{width:2.9rem;height:2.9rem}
-.gx-eyebrow{margin-bottom:.55rem}
-.gx-title{font-size:clamp(1.5rem,2.8vw,2.1rem)}
-.gx-body{margin-top:.55rem;font-size:.9375rem}
-.gx-points{margin-top:.8rem;gap:.4rem .5rem}
-.gx-points li{padding:.28rem .7rem;font-size:.78rem}
-.gx-actions{margin-top:1.05rem}
-.gx-safe{margin-top:.75rem}
+/* compact centered rhythm: the invitation is a focal moment, not a second hero */
+.gx{width:min(100%,42rem);padding:.35rem .75rem 0;margin:.25rem auto 1.1rem}
+.gx::before{top:-.5rem;width:min(38rem,100%);height:11rem}
+.gx-art{width:min(18rem,100%);height:4.9rem;margin-bottom:.15rem}
+.gx-hub{width:3.8rem;height:3.8rem}.gx-hub img{width:2.7rem;height:2.7rem;border-radius:13px}
+.gx-node{width:2.55rem;height:2.55rem;border-radius:13px}
+.gx-node img{width:1.3rem;height:1.3rem}
+.gx-eyebrow{margin-bottom:.4rem;padding:.24rem .65rem;font-size:.7rem}
+.gx-title{font-size:clamp(1.35rem,2.5vw,1.9rem);line-height:1.16}
+.gx-body{max-width:34rem;margin-top:.45rem;font-size:.875rem;line-height:1.5}
+.gx-points{max-width:38rem;margin-top:.65rem;gap:.35rem .4rem}
+.gx-points li{padding:.24rem .6rem;font-size:.73rem}
+.gx-actions{margin-top:.8rem;gap:.55rem}
+.gx-btn{min-height:2.8rem;padding:.35rem .55rem .35rem .42rem;border-radius:13px}
+.gx-btn-ico{width:2rem;height:2rem;border-radius:9px}
+.gx-btn-copy strong{font-size:.8rem}.gx-btn-copy small{font-size:.69rem}
+.gx-btn-end{width:1.5rem;height:1.5rem}
+.gx-safe{margin-top:.55rem;font-size:.75rem}
+
+@media(max-width:560px){
+  .gx{padding-top:.5rem}
+  .gx-art{height:4.25rem;width:min(16rem,100%)}
+  .gx-node{width:2.35rem;height:2.35rem}
+  .gx-hub{width:3.45rem;height:3.45rem}.gx-hub img{width:2.4rem;height:2.4rem}
+}
+
+/* Fit the invitation into the dashboard grid: same width as the cards around it (the grid strips auto
+   margins, which left it stuck off-centre), content centred inside, and a soft borderless band so it
+   reads as part of the dashboard rather than floating on the page. */
+.dx>.gx{justify-self:stretch;width:auto;max-width:none;margin:0!important;padding:1.6rem 1.25rem 1.4rem;border-radius:20px;background:radial-gradient(60% 120% at 50% 0%,rgba(190,48,69,.08),transparent 70%),linear-gradient(180deg,#FFFFFF 0%,rgba(255,255,255,.55) 100%);box-shadow:inset 0 0 0 1px rgba(225,218,212,.55)}
+.dx>.gx::before{display:none}
+.dx>.gx>*{max-width:40rem;margin-left:auto;margin-right:auto}
+.dx>.gx .gx-points{max-width:44rem}
+.dx>.gx .gx-title{max-width:none}
+@media(max-width:560px){.dx>.gx{padding:1.1rem .9rem 1rem;border-radius:16px}}
