@@ -444,8 +444,14 @@ final class Ops
             } catch (\Throwable $e) {
                 throw BridgeError::module(Sanitize::message($e->getMessage(), 'Single sign-on failed.'));
             }
-            if (is_array($r) && !empty($r['success']) && is_string($r['redirectTo'] ?? null) && $r['redirectTo'] !== '') {
-                return ['url' => $r['redirectTo']];
+            // WHMCS's cPanel module uses redirectTo, while a few older/custom
+            // module builds return redirect_url. Accept both response shapes,
+            // but never pass a non-URL value through to the portal.
+            if (is_array($r) && !empty($r['success'])) {
+                $url = $r['redirectTo'] ?? ($r['redirect_url'] ?? null);
+                if (is_string($url) && preg_match('#^https?://[^\s]+$#i', $url)) {
+                    return ['url' => $url];
+                }
             }
             throw BridgeError::module(Sanitize::message(is_array($r) ? ($r['errorMsg'] ?? null) : $r, 'Single sign-on failed.'));
         }

@@ -4,6 +4,7 @@
 const s = service;
 const ip = s.dedicatedip || (s.server && s.server.ip) || '';
 const host = s.server && (s.server.hostname || s.server.name);
+const ssoApps = new Set((Array.isArray(sso) ? sso : []).map(x => String(x.app || '')));
 const TILES = [
   { app: 'Email_Accounts', icon: 'mail' },
   { app: 'FileManager_Home', icon: 'folder' },
@@ -30,17 +31,17 @@ const meter = (label, ic, used, limit) => {
   <div>
     <section class="panel">
       <header><span><%= t('svcx.host.signOn') %></span><small class="svc-head-note"><%- icon('external') %><%= t('svcx.newTab') %></small></header>
-      <form method="post" action="/services/<%= s.id %>/sso" target="_blank" class="svc-body">
+      <% if (ssoApps.size) { %><form method="post" action="/services/<%= s.id %>/sso" target="_blank" class="svc-body">
         <div class="svc-row">
-          <button type="submit" name="app" value="" class="btn red"<% if (!active) { %> disabled<% } %>><%- icon('external') %><%= t('svcx.host.cpanel') %></button>
-          <button type="submit" name="app" value="Email_Webmail" class="btn ghost"<% if (!active) { %> disabled<% } %>><%- icon('mail') %><%= t('svcx.host.webmail') %></button>
+          <% if (ssoApps.has('')) { %><button type="submit" name="app" value="" class="btn red"<% if (!active) { %> disabled<% } %>><%- icon('external') %><%= t('svcx.host.cpanel') %></button><% } %>
+          <% if (ssoApps.has('Email_Webmail')) { %><button type="submit" name="app" value="Email_Webmail" class="btn ghost"<% if (!active) { %> disabled<% } %>><%- icon('mail') %><%= t('svcx.host.webmail') %></button><% } %>
         </div>
         <% if (!active) { %><p class="hint"><%= t('svcx.whenActive') %></p><% } %>
         <p class="svc-label"><%= t('svcx.host.shortcuts') %></p>
         <div class="svc-tiles">
-          <% TILES.forEach(x => { %><button type="submit" name="app" value="<%= x.app %>" class="svc-tile"<% if (!active) { %> disabled<% } %>><%- icon(x.icon) %><span><%= t('svcx.app.' + x.app) %></span></button><% }) %>
+          <% TILES.filter(x => ssoApps.has(x.app)).forEach(x => { %><button type="submit" name="app" value="<%= x.app %>" class="svc-tile"<% if (!active) { %> disabled<% } %>><%- icon(x.icon) %><span><%= t('svcx.app.' + x.app) %></span></button><% }) %>
         </div>
-      </form>
+      </form><% } else { %><p class="hint svc-body"><%= t('svcx.err.sso') %></p><% } %>
     </section>
 
     <section class="panel">

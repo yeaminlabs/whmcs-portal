@@ -7,6 +7,7 @@ function required(name, fallback = '') {
 const config = {
   port: parseInt(process.env.PORT || '3000', 10),
   sessionSecret: process.env.SESSION_SECRET || 'dev-only-change-me',
+  ssoSharedSecret: process.env.SSO_SHARED_SECRET || '',
   whmcsUrl: (process.env.WHMCS_URL || '').replace(/\/+$/, ''),
   // Public WHMCS address for reading store pages; leave empty to use the one in WHMCS's product URLs.
   whmcsStoreUrl: (process.env.WHMCS_STORE_URL || '').replace(/\/+$/, ''),

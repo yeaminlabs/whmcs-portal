@@ -5,6 +5,8 @@ const whmcs = require('../lib/whmcs');
 const { isEmail, cleanStr } = require('../lib/validators');
 const avatars = require('../lib/avatars');
 const { nextParam, safeNext, signIn } = require('../lib/signin');
+const config = require('../config');
+const { consume } = require('../lib/portal-sso');
 
 const router = express.Router();
 
@@ -45,6 +47,32 @@ const renderLogin = (res, status, error, next) => res.status(status).render('log
 router.get('/login', (req, res) => {
   if (req.session.clientId) return res.redirect(safeNext(req.query.next));
   renderLogin(res, 200, null, nextParam(req.query.next));
+});
+
+// One-time signed handoff from the authenticated WHMCS portal.
+router.get('/auth/sso', async (req, res) => {
+  const next = nextParam(req.query.next) || '/';
+  if (!consume({
+    clientId: req.query.client_id,
+    expires: req.query.expires,
+    nonce: req.query.nonce,
+    next,
+    signature: req.query.signature,
+    secret: config.ssoSharedSecret,
+  })) return res.status(401).render('error', { title: 'Sign-in failed', message: 'This sign-in link is invalid or expired.', back: '/login' });
+  try {
+    const data = await whmcs.call('GetClientsDetails', { clientid: Number(req.query.client_id) });
+    if (data.result !== 'success' || !data.client || Number(data.client.id) !== Number(req.query.client_id)) throw new Error('SSO_LOOKUP_FAILED');
+    await signIn(req, {
+      clientId: Number(data.client.id),
+      clientName: data.client.fullname || `${data.client.firstname || ''} ${data.client.lastname || ''}`.trim() || data.client.email,
+      clientEmail: data.client.email,
+      clientPicture: avatars.get(Number(data.client.id)),
+    }, 'sso');
+    return res.redirect(303, next);
+  } catch (e) {
+    return res.status(502).render('error', { title: 'Sign-in failed', message: 'Could not start your portal session.', back: '/login' });
+  }
 });
 
 router.post('/login', async (req, res) => {

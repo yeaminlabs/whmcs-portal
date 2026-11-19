@@ -51,6 +51,7 @@ const notFound = (res, back) => res.status(404).render('error', { title: 'Not fo
 const serviceId = (req) => (/^\d{1,10}$/.test(req.params.id) ? Number(req.params.id) : 0);
 const wantsJson = (req) => String(req.get('accept') || '').includes('application/json');
 const httpUrl = (u) => (typeof u === 'string' && /^https?:\/\/[^\s]+$/i.test(u) ? u : null);
+const httpsUrl = (u) => (typeof u === 'string' && /^https:\/\/[^\s]+$/i.test(u) ? u : null);
 
 const ERROR_STATUS = { bad_request: 400, not_allowed: 403, not_found: 404, not_active: 409, confirm_required: 428 };
 
@@ -93,7 +94,7 @@ async function renderDashboard(req, res, view) {
   const confirmAction = actions.find((a) => a.fn === req.query.confirm) || null;
   res.render(`service/${kind}`, {
     title: service.name || 'Service', view, kind, service, panel: view.panel || {}, actions,
-    active: service.status === 'Active', upgrades, ordered: null, error: null, flash: res.locals.flash,
+    sso: Array.isArray(view.sso) ? view.sso : [], active: service.status === 'Active', upgrades, ordered: null, error: null, flash: res.locals.flash,
     result, confirmAction, k: kinds,
   });
 }
@@ -167,18 +168,40 @@ router.post('/services/:id/sso', requireLogin, async (req, res, next) => {
     req.session.flash = { type: 'err', text: t(key) };
     return res.redirect(303, `/services/${id}`);
   };
-  if (!useBridge()) return fail('svcx.unavailable');
   if (!kinds.CPANEL_APPS.includes(app)) return fail('svcx.err.bad_request');
-  try {
-    const out = await bridge('service.sso', { clientId: req.session.clientId, serviceId: id, app });
-    const url = httpUrl(out && out.url);
-    if (!url) return fail('svcx.err.sso');
-    return res.redirect(303, url);
-  } catch (e) {
-    if (e.code === 'not_found') return notFound(res, '/services');
-    console.warn(`[services] sso ${id} failed: ${e.code || e.message}`);
-    return fail(e.code === 'not_active' ? 'svcx.err.not_active' : 'svcx.err.sso');
+
+  const whmcsSsoFallback = async () => {
+    const path = `clientarea.php?action=productdetails&id=${id}&dosinglesignon=1${app ? `&app=${encodeURIComponent(app)}` : ''}`;
+    if (useBridge()) {
+      const out = await bridge('whmcs.sso', { clientId: req.session.clientId, path }).catch(() => null);
+      return httpsUrl(out && out.url);
+    }
+    if (!(await ownedService(req.session.clientId, id).catch(() => false))) return null;
+    const data = await whmcs.call('CreateSsoToken', { client_id: req.session.clientId, destination: 'sso:custom_redirect', sso_redirect_path: path }).catch(() => null);
+    return data && data.result === 'success' ? httpsUrl(data.redirect_url) : null;
+  };
+
+  if (useBridge()) {
+    try {
+      const out = await bridge('service.sso', { clientId: req.session.clientId, serviceId: id, app });
+      const url = httpsUrl(out && out.url);
+      if (url) return res.redirect(303, url);
+    } catch (e) {
+      if (e.code === 'not_found') return notFound(res, '/services');
+      if (e.code === 'not_active') return fail('svcx.err.not_active');
+      console.warn(`[services] direct sso ${id} failed (${e.code || e.message}), trying whmcs fallback`);
+    }
   }
+
+  // Fallback to WHMCS native SSO to login to cPanel
+  try {
+    const fallbackUrl = await whmcsSsoFallback();
+    if (fallbackUrl) return res.redirect(303, fallbackUrl);
+  } catch (e) {
+    console.warn(`[services] whmcs sso fallback ${id} failed: ${e.message}`);
+  }
+
+  return fail(useBridge() ? 'svcx.err.sso' : 'svcx.unavailable');
 });
 
 router.post('/services/:id/manage', requireLogin, async (req, res, next) => {

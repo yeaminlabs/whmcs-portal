@@ -557,6 +557,21 @@ test('service.sso: cPanel apps allowlist and other modules rejected', function (
     check(!str_contains($log, 'cpsess1'), 'sso url not logged');
 });
 
+test('service.sso accepts legacy cPanel redirect_url responses and rejects invalid URLs', function () {
+    $w = new World();
+    $w->addService(['id' => 345, 'servertype' => 'cpanel'], new FakeHandle('cpanel', [
+        'ServiceSingleSignOn' => static fn (array $p) => ['success' => true, 'redirect_url' => 'https://usa2:2083/cpsess2/?goto_app=' . $p['app']],
+    ]));
+    [, $p] = $w->send(['op' => 'service.sso', 'clientId' => 12, 'serviceId' => 345, 'app' => '']);
+    same('https://usa2:2083/cpsess2/?goto_app=', $p['data']['url'], 'legacy redirect_url');
+
+    $w->addService(['id' => 346, 'servertype' => 'cpanel'], new FakeHandle('cpanel', [
+        'ServiceSingleSignOn' => static fn (array $p) => ['success' => true, 'redirectTo' => 'javascript:alert(1)'],
+    ]));
+    [, $p] = $w->send(['op' => 'service.sso', 'clientId' => 12, 'serviceId' => 346, 'app' => '']);
+    same('module_error', errorCode($p), 'invalid redirect rejected');
+});
+
 test('whmcs.sso validates the path and uses CreateSsoToken', function () {
     $w = new World();
     $w->api->responses['CreateSsoToken'] = ['result' => 'success', 'redirect_url' => 'https://portal.snbdhost.com/oauth/singlesignon.php?access_token=x'];
