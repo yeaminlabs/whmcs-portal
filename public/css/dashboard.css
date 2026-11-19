@@ -897,3 +897,111 @@ a{color:#BE3045}a:hover{color:#A1263A}
 .dx-perf-head{align-items:center}
 .dx-perf-head .dx-perf-logo{display:grid;place-items:center;width:3rem;height:3rem;margin:0;border-radius:14px;background:#FFFFFF;border:1px solid #E1DAD4;box-shadow:0 6px 14px -10px rgba(48,41,46,.5)}
 .dx-perf-head .dx-perf-logo img{display:block;width:2rem;height:2rem;object-fit:contain}
+
+/* ==========================================================================
+   Google connection invitation ("Signal bridge"): no card, centred on the page.
+   Search Console and Analytics feed into the SNBD mark along two animated wires.
+   ========================================================================== */
+.gx{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;margin:.5rem auto 1.75rem;padding:1.25rem 1rem .25rem;max-width:46rem;isolation:isolate}
+.gx::before{content:"";position:absolute;z-index:-1;left:50%;top:-1rem;width:min(44rem,100%);height:15rem;transform:translateX(-50%);background:radial-gradient(closest-side,rgba(190,48,69,.10),rgba(66,115,107,.05) 55%,transparent 100%);pointer-events:none}
+.gx[hidden]{display:none!important}
+
+.gx-art{position:relative;display:flex;align-items:center;justify-content:space-between;width:min(22.5rem,100%);height:7.5rem;margin-bottom:.5rem;animation:gxIn .7s cubic-bezier(.2,.8,.2,1) both}
+.gx-wires{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.gx-wires path{fill:none;stroke:#E1DAD4;stroke-width:1.6;stroke-dasharray:4 6;stroke-linecap:round;animation:gxDash 1.2s linear infinite}
+.gx-pulse{fill:#BE3045;filter:drop-shadow(0 0 4px rgba(190,48,69,.55))}
+.gx-pulse-b{fill:#42736B;filter:drop-shadow(0 0 4px rgba(66,115,107,.55))}
+.gx-node{position:relative;z-index:1;display:grid;place-items:center;width:3.25rem;height:3.25rem;border-radius:16px;background:#fff;border:1px solid #E1DAD4;box-shadow:0 10px 24px -16px rgba(48,41,46,.55);animation:gxFloat 5s ease-in-out infinite}
+.gx-node-r{animation-delay:-2.5s}
+.gx-node img{width:1.6rem;height:1.6rem;object-fit:contain}
+.gx-hub{position:relative;z-index:1;display:grid;place-items:center;width:5rem;height:5rem;animation:gxPop .6s .15s cubic-bezier(.2,1.3,.4,1) both}
+.gx-hub img{position:relative;z-index:1;width:3.5rem;height:3.5rem;border-radius:16px;box-shadow:0 14px 28px -12px rgba(161,38,58,.7)}
+.gx-ring{position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(190,48,69,.35);animation:gxRing 2.6s ease-out infinite}
+.gx-ring-2{animation-delay:1.3s}
+
+.gx-eyebrow{display:inline-flex;align-items:center;gap:.45rem;margin:0 0 .7rem;padding:.3rem .8rem;border-radius:999px;background:#fff;border:1px solid #E1DAD4;color:#685F65;font-size:.75rem;font-weight:700;letter-spacing:.04em;animation:gxUp .5s .1s both}
+.gx-eyebrow img{width:.9rem;height:.9rem}
+.gx-title{margin:0;color:#30292E;font-size:clamp(1.6rem,3.2vw,2.35rem);font-weight:800;letter-spacing:-.035em;line-height:1.12;animation:gxUp .5s .18s both}
+.gx-hl{position:relative;white-space:nowrap;color:#BE3045}
+.gx-hl::after{content:"";position:absolute;left:0;right:0;bottom:-.08em;height:.16em;border-radius:999px;background:linear-gradient(90deg,#BE3045,#42736B);transform-origin:left;animation:gxLine .7s .55s cubic-bezier(.2,.8,.2,1) both}
+.gx-body{max-width:36rem;margin:.75rem 0 0;color:#685F65;font-size:1rem;line-height:1.6;animation:gxUp .5s .26s both}
+
+.gx-points{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem .6rem;margin:1rem 0 0;padding:0;animation:gxUp .5s .34s both}
+.gx-points li{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .75rem;border-radius:999px;background:rgba(255,255,255,.7);border:1px solid #E1DAD4;color:#30292E;font-size:.8125rem;font-weight:600}
+.gx-points .ico{width:.95rem;height:.95rem;color:#BE3045}
+.gx-points li:nth-child(3) .ico{color:#42736B}
+
+.gx-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:.75rem;margin-top:1.35rem;animation:gxUp .5s .42s both}
+.gx-btn{display:inline-flex;align-items:center;gap:.7rem;min-height:3.25rem;padding:.45rem .65rem .45rem .5rem;border-radius:16px;background:#fff;border:1px solid #E1DAD4;color:#30292E;text-align:left;text-decoration:none;box-shadow:0 1px 2px rgba(48,41,46,.05);transition:transform .2s,box-shadow .2s,border-color .2s,background .2s}
+.gx-btn:hover{color:#30292E;transform:translateY(-2px);border-color:#BE3045;box-shadow:0 16px 28px -18px rgba(161,38,58,.7)}
+.gx-btn:focus-visible{outline:2px solid #BE3045;outline-offset:3px}
+.gx-btn-ico{display:grid;place-items:center;flex:none;width:2.25rem;height:2.25rem;border-radius:11px;background:#F8F6F2}
+.gx-btn-ico img{width:1.25rem;height:1.25rem;object-fit:contain}
+.gx-btn-copy{display:grid;gap:.05rem}
+.gx-btn-copy strong{font-size:.875rem;font-weight:700;white-space:nowrap}
+.gx-btn-copy small{color:#BE3045;font-size:.75rem;font-weight:700}
+.gx-btn-end{display:grid;place-items:center;width:1.75rem;height:1.75rem;margin-left:.25rem;border-radius:50%;background:#FBEDEE;color:#BE3045;transition:background .2s,color .2s,transform .2s}
+.gx-btn-end .ico{width:.95rem;height:.95rem}
+.gx-btn .gx-tick{display:none}
+.gx-btn:hover .gx-btn-end{background:#BE3045;color:#fff;transform:translateX(2px)}
+
+/* primary: the one the dashboard needs */
+.gx-btn-primary{background:linear-gradient(135deg,#BE3045,#A1263A);border-color:transparent;color:#fff;box-shadow:0 16px 30px -18px rgba(161,38,58,.95)}
+.gx-btn-primary:hover{color:#fff;border-color:transparent;box-shadow:0 20px 34px -18px rgba(161,38,58,1)}
+.gx-btn-primary .gx-btn-ico{background:#fff}
+.gx-btn-primary .gx-btn-copy small{color:#FFE3E7}
+.gx-btn-primary .gx-btn-end{background:rgba(255,255,255,.18);color:#fff}
+.gx-btn-primary:hover .gx-btn-end{background:#fff;color:#A1263A}
+.gx-btn-primary{position:relative;overflow:hidden}
+.gx-btn-primary::before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.28) 50%,transparent 70%);transform:translateX(-120%);animation:gxShine 1.1s .9s cubic-bezier(.4,0,.2,1) both;pointer-events:none}
+
+/* connected: calm, green, not a call to action */
+.gx-btn.is-connected{background:#F3FAF6;border-color:#BFE0CF;color:#30292E;box-shadow:none}
+.gx-btn.is-connected .gx-btn-ico{background:#fff}
+.gx-btn.is-connected .gx-btn-copy small{color:#26704E}
+.gx-btn.is-connected .gx-btn-end{background:#26704E;color:#fff}
+.gx-btn.is-connected .gx-arrow{display:none}
+.gx-btn.is-connected .gx-tick{display:block}
+.gx-btn.is-connected::before{display:none}
+.gx-btn.is-connected:hover{border-color:#26704E;box-shadow:0 12px 24px -18px rgba(38,112,78,.7)}
+
+.gx-safe{display:inline-flex;align-items:center;gap:.4rem;margin:1rem 0 0;color:#685F65;font-size:.8125rem;animation:gxUp .5s .5s both}
+.gx-safe .ico{width:.9rem;height:.9rem;color:#42736B}
+
+@keyframes gxIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+@keyframes gxPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+@keyframes gxUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes gxLine{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes gxShine{to{transform:translateX(120%)}}
+@keyframes gxDash{to{stroke-dashoffset:-20}}
+@keyframes gxRing{0%{transform:scale(.75);opacity:.9}100%{transform:scale(1.45);opacity:0}}
+@keyframes gxFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+@media(max-width:560px){
+  .gx{padding-top:.75rem}
+  .gx-art{height:6rem;width:min(18rem,100%)}
+  .gx-node{width:2.75rem;height:2.75rem}
+  .gx-hub{width:4.25rem;height:4.25rem}.gx-hub img{width:3rem;height:3rem}
+  .gx-actions{flex-direction:column;align-items:stretch;width:100%}
+  .gx-btn{width:100%}
+  .gx-btn-end{margin-left:auto}
+  .gx-safe{align-items:flex-start;text-align:left}
+}
+@media(prefers-reduced-motion:reduce){
+  .gx-art,.gx-hub,.gx-eyebrow,.gx-title,.gx-body,.gx-points,.gx-actions,.gx-safe,.gx-hl::after,.gx-btn-primary::before,.gx-node,.gx-ring,.gx-wires path{animation:none!important}
+  .gx-btn-primary::before{display:none}
+  .gx-pulse{display:none}
+  .gx-btn,.gx-btn-end{transition:none}
+}
+/* tighter vertical rhythm */
+.gx{padding-top:.5rem;margin-bottom:1.5rem}
+.gx-art{height:6rem;margin-bottom:.35rem}
+.gx-hub{width:4.5rem;height:4.5rem}.gx-hub img{width:3.1rem;height:3.1rem}
+.gx-node{width:2.9rem;height:2.9rem}
+.gx-eyebrow{margin-bottom:.55rem}
+.gx-title{font-size:clamp(1.5rem,2.8vw,2.1rem)}
+.gx-body{margin-top:.55rem;font-size:.9375rem}
+.gx-points{margin-top:.8rem;gap:.4rem .5rem}
+.gx-points li{padding:.28rem .7rem;font-size:.78rem}
+.gx-actions{margin-top:1.05rem}
+.gx-safe{margin-top:.75rem}

@@ -53,33 +53,59 @@ const serviceAction = (service) => {
   </div>
 </section>
 
-<!-- Google connection prompt: shown until Search Console is connected or the account hides this surface. -->
-<section class="google-connect-prompt" id="googleConnectPrompt" aria-labelledby="googleConnectTitle"<%= googleConnected.searchconsole ? ' hidden' : '' %>>
-  <div class="google-connect-visual" aria-hidden="true">
-    <div class="google-connect-brand">
-      <img src="/img/snbd-logo.png" alt="" width="136" height="34" decoding="async">
-      <span class="google-connect-plus">+</span>
-      <span class="google-connect-mark"><img src="/img/google-g.png" alt="" width="22" height="22" decoding="async"></span>
-    </div>
-    <span class="google-connect-orbit google-connect-orbit-one"></span>
-    <span class="google-connect-orbit google-connect-orbit-two"></span>
+<!-- Google connection invitation: shown until Search Console is connected. No card: it sits on the page and blends in. -->
+<%
+const GX = lang === 'bn' ? {
+  eyebrow: 'সার্চ ইনসাইট · শুধু পড়ার অনুমতি',
+  title1: 'দেখুন মানুষ কীভাবে আপনাকে', title2: 'Google-এ খুঁজে পায়',
+  body: 'Search Console আর Analytics একবার সংযুক্ত করুন। আপনার ক্লিক, কীওয়ার্ড আর ভিজিটর এখানেই দেখা যাবে, আলাদা ট্যাবে যেতে হবে না।',
+  p1: 'ক্লিক, ইমপ্রেশন, CTR ও গড় পজিশন', p2: 'শীর্ষ কীওয়ার্ড, ডিভাইস ও দেশ', p3: 'Analytics থেকে অডিয়েন্স ইনসাইট',
+  safe: 'শুধু পড়ার অনুমতি। অ্যাকাউন্ট → Google Tools থেকে যেকোনো সময় সংযোগ বিচ্ছিন্ন করুন।'
+} : {
+  eyebrow: 'Search insights · read-only',
+  title1: 'See how people find you', title2: 'on Google',
+  body: 'Connect Search Console and Analytics once. Your clicks, keywords and visitors show up right here, no more tab-hopping.',
+  p1: 'Clicks, impressions, CTR and average position', p2: 'Top keywords, devices and countries', p3: 'Audience insights from Analytics',
+  safe: 'Read-only access. Disconnect any time from Account → Google Tools.'
+};
+%>
+<section class="gx" id="googleConnectPrompt" aria-labelledby="googleConnectTitle"<%= googleConnected.searchconsole ? ' hidden' : '' %>>
+  <div class="gx-art" aria-hidden="true">
+    <svg class="gx-wires" viewBox="0 0 360 120" preserveAspectRatio="none">
+      <path id="gxWireL" d="M40 60 C 110 60, 120 60, 180 60"/>
+      <path id="gxWireR" d="M320 60 C 250 60, 240 60, 180 60"/>
+      <circle class="gx-pulse" r="3.2"><animateMotion dur="2.4s" repeatCount="indefinite"><mpath href="#gxWireL"/></animateMotion></circle>
+      <circle class="gx-pulse gx-pulse-b" r="3.2"><animateMotion dur="2.4s" begin="1.2s" repeatCount="indefinite"><mpath href="#gxWireR"/></animateMotion></circle>
+    </svg>
+    <span class="gx-node gx-node-l"><img src="/img/google-search-console.png" alt="" width="28" height="28" decoding="async"></span>
+    <span class="gx-hub"><span class="gx-ring"></span><span class="gx-ring gx-ring-2"></span><img src="/img/snbd-mark.png" alt="" width="56" height="56" decoding="async"></span>
+    <span class="gx-node gx-node-r"><img src="/img/google-analytics.png" alt="" width="24" height="28" decoding="async"></span>
   </div>
-  <div class="google-connect-copy">
-    <h2 id="googleConnectTitle"><%= t('google.connectPromptTitle') %></h2>
-    <p><%= t('google.connectPromptBody') %></p>
-    <div class="google-connect-tools" aria-label="<%= t('google.connectPromptTools') %>">
-      <a class="google-tool-action" data-google-tool="searchconsole" href="<%= googleConnected.searchconsole ? '/google/tools' : '/google/connect/searchconsole' %>">
-        <span class="google-tool-icon"><img src="/img/google-search-console.png" alt="" width="24" height="24" decoding="async"></span>
-        <span class="google-tool-copy"><strong><%= t('gt.searchconsole') %></strong><small data-google-tool-state><%= googleConnected.searchconsole ? t('google.connected') : t('google.connect') %></small></span>
-        <%- icon('arrow', 'google-tool-arrow') %>
-      </a>
-      <a class="google-tool-action" data-google-tool="analytics" href="<%= googleConnected.analytics ? '/google/tools' : '/google/connect/analytics' %>">
-        <span class="google-tool-icon"><img src="/img/google-analytics.png" alt="" width="20" height="24" decoding="async"></span>
-        <span class="google-tool-copy"><strong><%= t('gt.analytics') %></strong><small data-google-tool-state><%= googleConnected.analytics ? t('google.connected') : t('google.connect') %></small></span>
-        <%- icon('arrow', 'google-tool-arrow') %>
-      </a>
-    </div>
+
+  <p class="gx-eyebrow"><img src="/img/google-g.png" alt="" width="14" height="14" decoding="async"><%= GX.eyebrow %></p>
+  <h2 id="googleConnectTitle" class="gx-title"><%= GX.title1 %> <span class="gx-hl"><%= GX.title2 %></span></h2>
+  <p class="gx-body"><%= GX.body %></p>
+
+  <ul class="gx-points">
+    <li><%- icon('activity') %><span><%= GX.p1 %></span></li>
+    <li><%- icon('search') %><span><%= GX.p2 %></span></li>
+    <li><%- icon('globe') %><span><%= GX.p3 %></span></li>
+  </ul>
+
+  <div class="gx-actions" aria-label="<%= t('google.connectPromptTools') %>">
+    <a class="gx-btn gx-btn-primary<%= googleConnected.searchconsole ? ' is-connected' : '' %>" data-google-tool="searchconsole" href="<%= googleConnected.searchconsole ? '/google/tools' : '/google/connect/searchconsole' %>">
+      <span class="gx-btn-ico"><img src="/img/google-search-console.png" alt="" width="20" height="20" decoding="async"></span>
+      <span class="gx-btn-copy"><strong><%= t('gt.searchconsole') %></strong><small data-google-tool-state><%= googleConnected.searchconsole ? t('google.connected') : t('google.connect') %></small></span>
+      <span class="gx-btn-end" aria-hidden="true"><%- icon('arrow', 'gx-arrow') %><%- icon('check', 'gx-tick') %></span>
+    </a>
+    <a class="gx-btn<%= googleConnected.analytics ? ' is-connected' : '' %>" data-google-tool="analytics" href="<%= googleConnected.analytics ? '/google/tools' : '/google/connect/analytics' %>">
+      <span class="gx-btn-ico"><img src="/img/google-analytics.png" alt="" width="17" height="20" decoding="async"></span>
+      <span class="gx-btn-copy"><strong><%= t('gt.analytics') %></strong><small data-google-tool-state><%= googleConnected.analytics ? t('google.connected') : t('google.connect') %></small></span>
+      <span class="gx-btn-end" aria-hidden="true"><%- icon('arrow', 'gx-arrow') %><%- icon('check', 'gx-tick') %></span>
+    </a>
   </div>
+
+  <p class="gx-safe"><%- icon('lock') %><span><%= GX.safe %></span></p>
   <p class="sr-only" id="googleConnectStatus" role="status" aria-live="polite"></p>
 </section>
 
