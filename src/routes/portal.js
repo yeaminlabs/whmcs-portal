@@ -18,6 +18,7 @@ const { getClient, invalidateClient } = require('../lib/client');
 const kb = require('../lib/kb');
 const uptime = require('../lib/uptime');
 const { domainAvailability } = require('../lib/domain-availability');
+const mailer = require('../lib/mailer');
 
 const router = express.Router();
 const GOOGLE_CLIENT_ID = config.googleClientId;
@@ -764,7 +765,16 @@ router.get('/status.json', async (req, res) => {
 const contactInfo = require('../content/contact');
 router.get('/contact', (req, res) => res.render('contact', { title: 'Contact', error: null, done: false, info: contactInfo }));
 router.post('/contact', async (req, res) => {
-  await whmcs.call('SendContact', { name: cleanStr(req.body.name, 100), email: cleanStr(req.body.email, 190), message: cleanStr(req.body.message, 2000) }).catch(() => null);
+  const name = cleanStr(req.body.name, 100);
+  const email = cleanStr(req.body.email, 190);
+  const message = cleanStr(req.body.message, 2000);
+  await whmcs.call('SendContact', { name, email, message }).catch(() => null);
+  await mailer.sendMail({
+    to: contactInfo.email.address,
+    replyTo: email,
+    subject: `Website contact from ${name || 'visitor'}`,
+    text: `Name: ${name || '—'}\nEmail: ${email || '—'}\n\n${message}`,
+  }).catch((e) => console.warn('[mailer] contact message failed:', e.message));
   res.render('contact', { title: 'Contact', error: null, done: true, info: contactInfo });
 });
 // Affiliates live in routes/affiliates.js

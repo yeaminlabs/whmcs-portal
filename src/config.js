@@ -34,6 +34,12 @@ const config = {
     apiKey: process.env.UPTIMEROBOT_API_KEY || '',
     baseUrl: 'https://api.uptimerobot.com/v3',
   },
+  mailgun: {
+    apiKey: process.env.MAILGUN_API_KEY || '',
+    domain: process.env.MAILGUN_DOMAIN || 'snbdhost.com',
+    from: process.env.MAILGUN_FROM || 'SNBD HOST <postmaster@snbdhost.com>',
+    baseUrl: (process.env.MAILGUN_API_BASE_URL || 'https://api.mailgun.net/v3').replace(/\/+$/, ''),
+  },
 };
 
 config.bridge = {
@@ -43,6 +49,7 @@ config.bridge = {
 
 config.stripe.enabled = Boolean(config.stripe.secretKey && config.stripe.publishableKey);
 config.uptimerobot.enabled = Boolean(config.uptimerobot.apiKey);
+config.mailgun.enabled = Boolean(config.mailgun.apiKey && config.mailgun.domain && config.mailgun.from);
 config.bkash.enabled = Boolean(config.bkash.appKey && config.bkash.appSecret && config.bkash.username && config.bkash.password);
 config.useMock = config.mockMode || !config.whmcsUrl || !config.whmcsIdentifier || !config.whmcsSecret;
 config.bridge.enabled = Boolean(config.bridge.secret) && !config.useMock;
