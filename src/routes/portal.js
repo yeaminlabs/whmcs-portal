@@ -17,6 +17,7 @@ const gtokens = require('../lib/google-tokens');
 const { getClient, invalidateClient } = require('../lib/client');
 const kb = require('../lib/kb');
 const uptime = require('../lib/uptime');
+const { domainAvailability } = require('../lib/domain-availability');
 
 const router = express.Router();
 const GOOGLE_CLIENT_ID = config.googleClientId;
@@ -433,7 +434,8 @@ router.post('/order/domain/check', async (req, res) => {
     if (whois.result !== 'success') return renderDomainOrder(req, res, { query, error: t('conf.checkFail') }, 502);
     const tlds = await catalog.getTldPrices(res.locals.displayCurrency.id);
     const tld = query.split('.').slice(1).join('.');
-    await renderDomainOrder(req, res, { query, result: { domain: query, available: whois.status === 'available', price: tlds[tld] || null } });
+    const available = domainAvailability(whois);
+    await renderDomainOrder(req, res, { query, result: { domain: query, available, price: available === true ? (tlds[tld] || null) : null } });
   } catch (e) { res.render('error', { title: 'Order Domain', message: e.message, back: '/order/domain' }); }
 });
 
@@ -447,7 +449,9 @@ router.post('/order/domain', async (req, res) => {
     const paymentmethod = cleanStr(req.body.paymentmethod, 60);
     if (!methods.some((m) => m.module === paymentmethod)) return renderDomainOrder(req, res, { query: domain, error: t('err.choosePayment') }, 422);
     const whois = await whmcs.call('DomainWhois', { domain });
-    if (whois.result !== 'success' || whois.status !== 'available') return renderDomainOrder(req, res, { query: domain, error: t('conf.taken', { domain }) }, 422);
+    if (whois.result !== 'success') return renderDomainOrder(req, res, { query: domain, error: t('conf.checkFail') }, 502);
+    const available = domainAvailability(whois);
+    if (available !== true) return renderDomainOrder(req, res, { query: domain, error: available === false ? t('conf.taken', { domain }) : t('do.unverified') }, 422);
     const data = await whmcs.call('AddOrder', {
       clientid: req.session.clientId, paymentmethod,
       'domain[0]': domain, 'domaintype[0]': 'register', 'regperiod[0]': regperiod,
@@ -610,7 +614,7 @@ router.post('/domains/:id/renew', async (req, res) => {
   } catch (e) { res.render('error', { title: 'Renew', message: e.message, back: '/domains' }); }
 });
 
-// Quotes, pay, funds, emails, contacts, security
+// Quotes, pay, funds, emails, security
 router.get('/quotes', async (req, res) => {
   const data = await whmcs.call('GetQuotes', { userid: req.session.clientId }).catch(() => null);
   const list = data && data.quotes ? (Array.isArray(data.quotes.quote) ? data.quotes.quote : [data.quotes.quote]) : [];
@@ -715,11 +719,6 @@ router.get('/emails', async (req, res) => {
   const data = await whmcs.call('GetEmails', { clientid: req.session.clientId }).catch(() => null);
   const list = data && data.emails ? (Array.isArray(data.emails.email) ? data.emails.email : [data.emails.email]) : [];
   res.render('emails', { title: 'Email History', emails: list });
-});
-router.get('/contacts', async (req, res) => {
-  const data = await whmcs.call('GetContacts', { clientid: req.session.clientId }).catch(() => null);
-  const list = data && data.contacts ? (Array.isArray(data.contacts.contact) ? data.contacts.contact : [data.contacts.contact]) : [];
-  res.render('contacts', { title: 'Contacts', contacts: list });
 });
 router.get('/security', (req, res) => res.render('security', { title: 'Security', error: null, done: false }));
 router.post('/security', async (req, res) => {

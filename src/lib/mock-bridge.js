@@ -220,7 +220,7 @@ async function whmcsSso({ clientId, path }) {
 }
 
 const GLOBAL = new Set(['GetAnnouncements', 'GetKBArticles', 'GetSupportDepartments', 'GetPaymentMethods', 'GetCurrencies', 'GetProducts', 'GetTLDPricing', 'GetServers']);
-const SCOPED = new Set(['GetClientsDetails', 'GetClientsProducts', 'GetClientsDomains', 'GetClientsAddons', 'GetInvoices', 'GetInvoice', 'GetSupportTickets', 'GetSupportTicket', 'GetTicketNotes', 'GetQuotes', 'GetEmails', 'GetContacts', 'GetTransactions', 'GetOrders', 'GetCredits']);
+const SCOPED = new Set(['GetClientsDetails', 'GetClientsProducts', 'GetClientsDomains', 'GetClientsAddons', 'GetInvoices', 'GetInvoice', 'GetSupportTickets', 'GetSupportTicket', 'GetTicketNotes', 'GetQuotes', 'GetEmails', 'GetTransactions', 'GetOrders', 'GetCredits']);
 
 async function batch({ clientId, calls }) {
   if (!clientId || !Array.isArray(calls) || calls.length > 12) throw bridgeError('bad_request', 'Invalid batch');

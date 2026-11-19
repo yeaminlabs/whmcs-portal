@@ -34,6 +34,37 @@ const products = [
   { pid: 90, gid: 18, type: 'server', module: 'ArkHostHetznerVPS', paytype: 'recurring', name: 'USA VPS 2G', slug: 'usa-vps-2g', product_url: `${STORE}/usa-vps/usa-vps-2g`,
     description: '<strong>Instant Deploy USA VPS Hosting</strong><br />\n2 Core AMD EPYC™ CPU<br />\n2GB Dedicated RAM<br />\n40GB NVMe Storage<br />\n1 Dedicated IPv4 Address<br />\n<em>Ideal for lightweight automation and US-based proxy needs.</em>',
     pricing: BDT('3657.00', '43907.00', '131717.00') },
+  // Demo-only plans so every production store group also shows locally (prices = production "from" values).
+  { pid: 60, gid: 2, type: 'hostingaccount', module: 'cpanel', paytype: 'recurring', name: 'BDIX-01 Starter', slug: 'bdix-starter', product_url: `${STORE}/bdix-shared-hosting/bdix-starter`,
+    description: '<strong>1 GB NVMe SSD Storage</strong><br />\r\n<strong>Unmetered BDIX Bandwidth</strong><br />\r\n<strong>512 MB CloudLinux RAM</strong><br />\r\n<strong>LiteSpeed</strong> + LSCache Enabled<br />\r\n<strong>Free SSL</strong> (Let’s Encrypt)',
+    pricing: BDT('97.00', '397.00', '1197.00') },
+  { pid: 61, gid: 2, type: 'hostingaccount', module: 'cpanel', paytype: 'recurring', name: 'BDIX-02 Basic', slug: 'bdix-basic', product_url: `${STORE}/bdix-shared-hosting/bdix-basic`,
+    description: '<strong>5 GB NVMe SSD Storage</strong><br />\r\n<strong>Unmetered BDIX Bandwidth</strong><br />\r\n<strong>1 GB CloudLinux RAM</strong><br />\r\n<strong>Addon Domains</strong> 2 (Up to 3 Websites)<br />\r\n<strong>Free SSL</strong> (Let’s Encrypt)',
+    pricing: BDT('187.00', '1497.00', '4197.00') },
+  { pid: 62, gid: 3, type: 'reselleraccount', module: 'cpanel', paytype: 'recurring', name: 'USA Reseller Starter', slug: 'usa-reseller-starter', product_url: `${STORE}/usa-reseller-hosting/usa-reseller-starter`,
+    description: '<strong>20 GB NVMe SSD Storage</strong><br />\r\n<strong>Unlimited Bandwidth</strong><br />\r\n<strong>10 cPanel Accounts</strong><br />\r\n<strong>WHM + White-label Tools</strong><br />\r\n<strong>Free SSL</strong>',
+    pricing: BDT('500.00', '5000.00', '15000.00') },
+  { pid: 63, gid: 3, type: 'reselleraccount', module: 'cpanel', paytype: 'recurring', name: 'USA Reseller Pro', slug: 'usa-reseller-pro', product_url: `${STORE}/usa-reseller-hosting/usa-reseller-pro`,
+    description: '<strong>60 GB NVMe SSD Storage</strong><br />\r\n<strong>Unlimited Bandwidth</strong><br />\r\n<strong>30 cPanel Accounts</strong><br />\r\n<strong>WHM + White-label Tools</strong><br />\r\n<strong>Free SSL</strong>',
+    pricing: BDT('1200.00', '12000.00', '36000.00') },
+  { pid: 64, gid: 4, type: 'reselleraccount', module: 'cpanel', paytype: 'recurring', name: 'BDIX Reseller Starter', slug: 'bdix-reseller-starter', product_url: `${STORE}/bdix-reseller-hosting/bdix-reseller-starter`,
+    description: '<strong>20 GB NVMe SSD Storage</strong><br />\r\n<strong>Unmetered BDIX Bandwidth</strong><br />\r\n<strong>10 cPanel Accounts</strong><br />\r\n<strong>WHM + White-label Tools</strong><br />\r\n<strong>Free SSL</strong>',
+    pricing: BDT('500.00', '5000.00', '15000.00') },
+  { pid: 65, gid: 4, type: 'reselleraccount', module: 'cpanel', paytype: 'recurring', name: 'BDIX Reseller Pro', slug: 'bdix-reseller-pro', product_url: `${STORE}/bdix-reseller-hosting/bdix-reseller-pro`,
+    description: '<strong>60 GB NVMe SSD Storage</strong><br />\r\n<strong>Unmetered BDIX Bandwidth</strong><br />\r\n<strong>30 cPanel Accounts</strong><br />\r\n<strong>WHM + White-label Tools</strong><br />\r\n<strong>Free SSL</strong>',
+    pricing: BDT('1500.00', '15000.00', '45000.00') },
+  { pid: 70, gid: 20, type: 'other', module: 'snbd_openclaw', paytype: 'recurring', name: 'OpenClaw Starter', slug: 'openclaw-starter', product_url: `${STORE}/openclaw-hosting/openclaw-starter`,
+    description: '<strong>Instant Deploy OpenClaw Agent</strong><br /> 1 Core CPU<br /> 2 GB RAM<br /> 20 GB NVMe Storage<br /> Isolated instance',
+    pricing: BDT('397.00', '4757.00', '14277.00') },
+  { pid: 71, gid: 20, type: 'other', module: 'snbd_openclaw', paytype: 'recurring', name: 'OpenClaw Pro', slug: 'openclaw-pro', product_url: `${STORE}/openclaw-hosting/openclaw-pro`,
+    description: '<strong>Instant Deploy OpenClaw Agent</strong><br /> 2 Core CPU<br /> 4 GB RAM<br /> 40 GB NVMe Storage<br /> Isolated instance',
+    pricing: BDT('797.00', '9557.00', '28677.00') },
+  { pid: 80, gid: 19, type: 'server', module: 'ArkHostHetznerVPS', paytype: 'recurring', name: 'SG VPS 2G', slug: 'sg-vps-2g', product_url: `${STORE}/sg-vps/sg-vps-2g`,
+    description: '<strong>Instant Deploy Singapore VPS</strong><br />\n2 Core CPU<br />\n2GB RAM<br />\n40GB NVMe Storage<br />\n1 Dedicated IPv4 Address',
+    pricing: BDT('3217.00', '38597.00', '115797.00') },
+  { pid: 85, gid: 21, type: 'server', module: 'ArkHostHetznerVPS', paytype: 'recurring', name: 'EU VPS 2G', slug: 'eu-vps-2g', product_url: `${STORE}/eu-vps/eu-vps-2g`,
+    description: '<strong>Instant Deploy EU VPS</strong><br />\n2 Core AMD EPYC™ CPU<br />\n2GB RAM<br />\n40GB NVMe Storage<br />\n1 Dedicated IPv4 Address',
+    pricing: BDT('1197.00', '14357.00', '43077.00') },
 ];
 
 const handlers = {
@@ -184,9 +215,6 @@ const handlers = {
   async CloseTicket() { return ok({}); },
   async GetEmails() {
     return ok({ totalresults: 1, emails: { email: [{ id: 1, subject: 'Invoice Created', date: '2026-11-01' }] } });
-  },
-  async GetContacts() {
-    return ok({ totalresults: 1, contacts: { contact: [{ id: 1, firstname: 'Billing', lastname: 'Contact', email: 'billing@example.com' }] } });
   },
   async UpdatePassword() { return ok({}); },
   async GetPaymentMethodsFull() {

@@ -98,7 +98,7 @@ final class Catalog
     /** Batch actions scoped to the caller: clientid and userid are forced to clientId. */
     public const BATCH_CLIENT = [
         'GetClientsDetails', 'GetClientsProducts', 'GetClientsDomains', 'GetClientsAddons',
-        'GetInvoices', 'GetSupportTickets', 'GetQuotes', 'GetEmails', 'GetContacts',
+        'GetInvoices', 'GetSupportTickets', 'GetQuotes', 'GetEmails',
         'GetTransactions', 'GetOrders', 'GetCredits',
     ];
 

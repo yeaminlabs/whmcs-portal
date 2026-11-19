@@ -89,7 +89,7 @@ The API role used by the portal needs at least:
 - **Store and orders**: `GetProducts`, `GetTLDPricing`, `DomainWhois`, `AddOrder`.
 - **Support**: `GetSupportTickets`, `GetSupportTicket`, `GetSupportDepartments`, `OpenTicket`, `AddTicketReply`, `UpdateTicket`.
 - **Service and domain management**: `UpgradeProduct`, `AddCancelRequest`, `DomainUpdateNameservers`, `DomainGetNameservers`, `DomainGetLockingStatus`, `DomainUpdateLockingStatus`, `RenewDomain`.
-- **Content**: `GetQuotes`, `AcceptQuote`, `GetEmails`, `GetContacts`, `GetAnnouncements`, `GetKBArticles`, `GetDownloads`, `GetServers`, `SendContact`, `GetAffiliates`.
+- **Content**: `GetQuotes`, `AcceptQuote`, `GetEmails`, `GetAnnouncements`, `GetKBArticles`, `GetDownloads`, `GetServers`, `SendContact`, `GetAffiliates`.
 
 ## WHMCS bridge addon
 

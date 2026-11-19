@@ -127,6 +127,9 @@ function decorate(p, currencyCode) {
   const path = storePath(p.product_url);
   const pricing = pricingFor(p, currencyCode);
   const from = pricing.cycles.find((c) => c.id === 'monthly') || pricing.cycles[0] || null;
+  // The first billable cycle is what the store shows as “from”; never expose a
+  // product whose visible starting price is zero, even if a later cycle costs money.
+  const paid = Boolean(from && (from.price > 0 || from.setup > 0));
   return {
     pid: Number(p.pid),
     gid: Number(p.gid),
@@ -140,6 +143,7 @@ function decorate(p, currencyCode) {
     ...parseDescription(p.description),
     pricing,
     from,
+    paid,
   };
 }
 
@@ -261,7 +265,7 @@ async function getGroup(slug, currencyCode) {
   const [all, visible] = await Promise.all([loadProducts(), visibleSlugs(slug)]);
   const products = all
     .map((p) => decorate(p, currencyCode))
-    .filter((p) => p.group === slug && (!visible || visible.has(p.slug)) && p.pricing.cycles.length)
+    .filter((p) => p.group === slug && (!visible || visible.has(p.slug)) && p.pricing.cycles.length && p.paid)
     .sort((a, b) => (a.from ? a.from.perMonth : 0) - (b.from ? b.from.perMonth : 0));
   return { ...groupMeta(slug), products };
 }
