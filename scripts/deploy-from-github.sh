@@ -12,6 +12,7 @@ SERVICE_NAME="${SERVICE_NAME:-whmcs-portal.service}"
 HEALTH_URL="${HEALTH_URL:-https://app.snbdhost.com/login}"
 MODULE_DIR="${MODULE_DIR:-/home/snbdhost-portal/htdocs/portal.snbdhost.com/modules/addons/snbd_portal_bridge}"
 BACKUP_DIR="${BACKUP_DIR:-/var/backups/whmcs-portal}"
+LOCK_FILE="${LOCK_FILE:-/var/lock/whmcs-portal-deploy.lock}"
 DRY_RUN=false
 
 usage() {
@@ -19,7 +20,7 @@ usage() {
 Usage: scripts/deploy-from-github.sh [--dry-run]
 
 Environment overrides:
-  APP_DIR, REPO_URL, BRANCH, SERVICE_NAME, HEALTH_URL, MODULE_DIR, BACKUP_DIR
+  APP_DIR, REPO_URL, BRANCH, SERVICE_NAME, HEALTH_URL, MODULE_DIR, BACKUP_DIR, LOCK_FILE
 
 The production .env, data/, and node_modules/ are preserved. The release is
 always cloned from GitHub; no local production checkout is trusted as source.
@@ -50,6 +51,11 @@ for command in git rsync npm curl; do
   command -v "$command" >/dev/null 2>&1 || die "required command not found: $command"
 done
 
+if [[ "$DRY_RUN" == false ]] && command -v flock >/dev/null 2>&1; then
+  exec 9>"$LOCK_FILE"
+  flock -n 9 || die "another deployment is already running (lock: $LOCK_FILE)"
+fi
+
 if [[ "$APP_DIR" == "/" || "$APP_DIR" == "" || "$MODULE_DIR" == "/" || "$MODULE_DIR" == "" ]]; then
   die "refusing unsafe empty or root deployment path"
 fi
@@ -59,13 +65,23 @@ cleanup() { rm -rf "$TMP_DIR"; }
 trap cleanup EXIT
 
 RELEASE_DIR="$TMP_DIR/release"
+if [[ "$DRY_RUN" == false ]]; then
+  REMOTE_SHA="$(git ls-remote --exit-code "$REPO_URL" "refs/heads/$BRANCH" | awk 'NR == 1 { print $1 }')"
+  [[ "$REMOTE_SHA" =~ ^[0-9a-f]{40}$ ]] || die "could not resolve GitHub $BRANCH commit"
+  log "Latest GitHub $BRANCH: $REMOTE_SHA"
+else
+  REMOTE_SHA='dry-run'
+fi
+
 log "Cloning $REPO_URL ($BRANCH)"
 run git clone --depth 1 --branch "$BRANCH" --single-branch "$REPO_URL" "$RELEASE_DIR"
 
 if "$DRY_RUN"; then
   COMMIT='dry-run'
 else
-  COMMIT="$(git -C "$RELEASE_DIR" rev-parse --short HEAD)"
+  RELEASE_SHA="$(git -C "$RELEASE_DIR" rev-parse HEAD)"
+  [[ "$RELEASE_SHA" == "$REMOTE_SHA" ]] || die "cloned release does not match GitHub $BRANCH"
+  COMMIT="${RELEASE_SHA:0:12}"
 fi
 log "Release: $COMMIT"
 
@@ -90,12 +106,17 @@ run rsync -a --delete \
   --exclude='.env' \
   --exclude='data/' \
   --exclude='node_modules/' \
+  --exclude='REVISION' \
   --exclude='.deploy-backups/' \
   "$RELEASE_DIR/" "$APP_DIR/"
 
 log "Installing locked dependencies and building the client"
 run npm --prefix "$APP_DIR" ci
 run npm --prefix "$APP_DIR" run build
+
+if [[ "$DRY_RUN" == false ]]; then
+  printf '%s\n' "$RELEASE_SHA" > "$APP_DIR/REVISION"
+fi
 
 if [[ -d "$RELEASE_DIR/whmcs-module/modules/addons/snbd_portal_bridge" ]]; then
   log "Syncing WHMCS bridge addon"
@@ -114,6 +135,7 @@ if [[ "$DRY_RUN" == false ]]; then
   run systemctl is-active --quiet "$SERVICE_NAME"
   log "Checking $HEALTH_URL"
   run curl --fail --silent --show-error --max-time 20 --output /dev/null "$HEALTH_URL"
+  [[ "$(cat "$APP_DIR/REVISION")" == "$RELEASE_SHA" ]] || die "production revision marker does not match GitHub release"
 fi
 
 log "Deployment complete: $COMMIT"

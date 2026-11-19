@@ -102,6 +102,10 @@ their completed work to `main`; the deployer only runs the checked-in
 `scripts/deploy-from-github.sh` script and never uploads local changes or
 pushes code. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
+The coding agent owns the GitHub commit and push for its change. The deployer
+only executes the GitHub-first production script and verifies the service; it
+does not act as a code uploader.
+
 The portal runs as a systemd service behind nginx with a Let's Encrypt certificate:
 
 ```ini
