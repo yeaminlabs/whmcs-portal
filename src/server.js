@@ -163,6 +163,7 @@ app.use('/', require('./routes/downloads'));
 app.use('/', require('./routes/affiliates'));
 app.use('/', require('./routes/portal'));
 app.use('/', require('./routes/uptime'));
+app.use('/', require('./routes/dns-lookup'));
 app.use('/google', require('./routes/google'));
 
 app.use((req, res) => {

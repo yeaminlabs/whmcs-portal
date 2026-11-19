@@ -26,6 +26,7 @@ const NAV = [
     { href: '/profile', icon: 'user', text: t('nav.profile'), on: ti === 'Profile' },
     { href: '/security', icon: 'shield', text: t('nav.security'), on: ti === 'Security' },
     { href: '/google/tools', icon: 'plug', text: t('nav.googleTools'), on: ti === 'Connected Google Tools' },
+    { href: '/dns-lookup', icon: 'globe', text: t('nav.dnsLookup'), on: ti === 'DNS lookup' },
     { href: '/emails', icon: 'history', text: t('nav.emails'), on: ti === 'Email History' },
     { href: '/affiliates', icon: 'star', text: t('nav.affiliates'), on: ti === 'Affiliates' },
     { href: '/uptime', icon: 'activity', text: t('nav.uptime'), on: ti === 'Uptime' },
@@ -48,6 +49,7 @@ const isPublic = !(session && session.clientId) && typeof publicPage !== 'undefi
 <link rel="stylesheet" href="/css/app.css">
 <link rel="stylesheet" href="/css/theme.css">
 <% if (ti === 'Contact') { %><link rel="stylesheet" href="/css/contact.css"><% } %>
+<% if (ti === 'DNS lookup') { %><link rel="stylesheet" href="/css/dns-lookup.css"><% } %>
 <% if (ti === 'Dashboard') { %><link rel="stylesheet" href="/css/dashboard.css"><% } %>
 <% if (typeof kbPage !== 'undefined' && kbPage) { %><link rel="stylesheet" href="/css/kb.css"><% } %>
 <% if (typeof kitsPage !== 'undefined' && kitsPage) { %><link rel="stylesheet" href="/css/kits.css"><% } %>

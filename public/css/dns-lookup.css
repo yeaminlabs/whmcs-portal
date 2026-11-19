@@ -1,0 +1,31 @@
+.dns-page{max-width:1050px;margin:0 auto;padding:10px 0 64px}
+.dns-head{margin:0 0 25px}
+.dns-head h1{margin:0;color:#30292e;font-size:clamp(30px,3vw,42px);letter-spacing:-.03em;line-height:1.15}
+.dns-search{padding:30px;border:1px solid #e5dedb;border-radius:18px;background:#fff;box-shadow:0 15px 34px -29px rgba(48,41,46,.5)}
+.dns-form{display:grid;grid-template-columns:minmax(0,1fr) 150px auto;align-items:end;gap:12px}
+.dns-form label{display:grid;gap:8px;min-width:0}
+.dns-form .af-label{font-size:13px;font-weight:700;color:#53494f}
+.dns-form .af-input{width:100%;height:52px;border:1px solid #cfc7c5;border-radius:10px;background:#fff;color:#30292e;font-size:16px}
+.dns-form .af-input::placeholder{color:#736c73;opacity:1}
+.dns-form .af-input:focus-visible{outline:3px solid #edb0bb;outline-offset:2px;border-color:#ba354b}
+.dns-submit{height:52px;min-height:52px;display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:0 23px;border-radius:10px;background:#be3045;color:#fff;font-weight:700;white-space:nowrap}
+.dns-submit:hover{background:#a6283b;color:#fff}
+.dns-submit:focus-visible{outline:3px solid #edb0bb;outline-offset:2px}
+.dns-submit .ico{width:17px;height:17px}
+.dns-result{margin-top:20px;padding:0;border:1px solid #e5dedb;border-radius:18px;background:#fff;overflow:hidden}
+.dns-result-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:25px 30px;border-bottom:1px solid #eee8e6}
+.dns-result-head h2{margin:0;color:#30292e;font-size:25px;letter-spacing:-.02em;overflow-wrap:anywhere}
+.dns-result-head p{margin:6px 0 0;color:#645b62;font-size:13px;font-variant-numeric:tabular-nums}
+.dns-status{display:inline-flex;align-items:center;flex:none;padding:7px 12px;border-radius:999px;font-size:12px;font-weight:750;white-space:nowrap}
+.dns-status.consistent{background:#e3f4e9;color:#176137}
+.dns-status.mixed{background:#fff0d3;color:#755006}
+.dns-status.no-record{background:#f2eeee;color:#554b50}
+.dns-answer-list{list-style:none;margin:0;padding:4px 30px 10px}
+.dns-answer-list li{display:flex;align-items:start;gap:12px;padding:16px 0;border-bottom:1px solid #f0eae8}
+.dns-answer-list li:last-child{border-bottom:0}
+.dns-answer-check{display:grid;place-items:center;flex:none;width:23px;height:23px;border-radius:50%;background:#e3f4e9;color:#176137}
+.dns-answer-check .ico{width:15px;height:15px}
+.dns-answer-list code{color:#30292e;font:600 15px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere}
+.dns-empty{margin:0;padding:24px 30px;color:#645b62}
+@media(max-width:750px){.dns-form{grid-template-columns:minmax(0,1fr) 125px}.dns-submit{grid-column:1/-1}.dns-search{padding:22px}.dns-result-head{padding:21px;align-items:start}.dns-answer-list{padding:3px 21px 8px}}
+@media(max-width:520px){.dns-form{grid-template-columns:1fr}.dns-submit{grid-column:1}.dns-result-head{display:grid;gap:11px}.dns-status{justify-self:start}}

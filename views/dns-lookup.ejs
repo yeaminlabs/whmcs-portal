@@ -1,0 +1,28 @@
+<%- include('_head') %>
+<main class="dns-page">
+  <header class="dns-head"><h1><%= t('dns.title') %></h1></header>
+
+  <section class="dns-search card" aria-label="<%= t('dns.title') %>">
+    <form method="get" action="/dns-lookup" class="dns-form">
+      <label class="dns-domain-field"><span class="af-label"><%= t('dns.domain') %></span><input class="af-input" name="domain" value="<%= domain %>" placeholder="example.com" required autocomplete="off" spellcheck="false"></label>
+      <label class="dns-type-field"><span class="af-label"><%= t('dns.type') %></span><select class="af-input" name="type"><% types.forEach((item) => { %><option value="<%= item %>"<%= type === item ? ' selected' : '' %>><%= item %></option><% }) %></select></label>
+      <button class="btn dns-submit" type="submit"><%- icon('search') %><%= t('dns.lookup') %></button>
+    </form>
+  </section>
+
+  <% if (error) { %><div class="alert err" role="alert"><%= error %></div><% } %>
+  <% if (result) { const answers = [...new Set(result.results.flatMap(row => row.answers))]; const unavailable = result.results.some(row => row.status === 'timeout' || row.status === 'unavailable'); %>
+  <section class="dns-result card" aria-live="polite" aria-labelledby="dns-result-title">
+    <header class="dns-result-head">
+      <div><h2 id="dns-result-title"><%= result.domain %></h2><p><%= result.type %> <span aria-hidden="true">·</span> <%= t('dns.checked') %> <%= new Date(result.checkedAt).toLocaleString() %></p></div>
+      <span class="dns-status <%= result.propagation %>"><%= answers.length === 0 && unavailable ? t('dns.status.unavailable') : t('dns.' + result.propagation) %></span>
+    </header>
+    <% if (answers.length) { %>
+      <ul class="dns-answer-list"><% answers.forEach(answer => { %><li><span class="dns-answer-check" aria-hidden="true"><%- icon('check') %></span><code><%= answer %></code></li><% }) %></ul>
+    <% } else { %>
+      <p class="dns-empty"><%= answers.length === 0 && unavailable ? t('dns.status.unavailable') : t('dns.no-record') %></p>
+    <% } %>
+  </section>
+  <% } %>
+</main>
+<%- include('_foot') %>
