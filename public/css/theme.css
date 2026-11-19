@@ -169,6 +169,16 @@ body.nav-collapsed .snav-link:focus-visible,body.nav-collapsed .snav-toggle:focu
    ========================================================================== */
 .authwrap{display:grid;place-items:stretch;align-items:stretch;justify-items:stretch;grid-template-columns:minmax(0,58fr) minmax(0,42fr);height:100vh;height:100dvh;min-height:0;padding:0;background:#FBFAF8;overflow:hidden;position:static}
 .authwrap::before{display:none}
+.authwrap-video{position:relative;isolation:isolate;background:#241e22 url(/img/auth-team-hero.webp) 50%/cover no-repeat}
+.auth-video,.auth-video-shade{position:absolute;inset:0;pointer-events:none}
+.auth-video{z-index:-2;overflow:hidden;background:#241e22 url(/img/auth-team-hero.webp) 50%/cover no-repeat}
+.auth-video iframe{position:absolute;top:50%;left:50%;width:max(100vw,177.778vh);height:max(100vh,56.25vw);border:0;transform:translate(-50%,-50%) scale(1.02)}
+.auth-video-shade{z-index:-1;background:linear-gradient(90deg,rgba(21,16,20,.7) 0%,rgba(31,22,28,.48) 53%,rgba(24,18,22,.34) 100%),linear-gradient(180deg,rgba(0,0,0,.24),transparent 34%,rgba(0,0,0,.34))}
+.authwrap-video .auth-side{z-index:1;background:transparent}
+.authwrap-video .auth-side::after{opacity:.11}
+.authwrap-video .auth-pane{z-index:1;margin:clamp(.75rem,2vw,1.5rem);margin-left:0;border:1px solid rgba(255,255,255,.46);border-radius:24px;background:rgba(251,250,248,.9);box-shadow:0 30px 80px -32px rgba(0,0,0,.68);-webkit-backdrop-filter:blur(18px) saturate(1.08);backdrop-filter:blur(18px) saturate(1.08)}
+.authwrap-video .auth-prefs{position:relative;z-index:2}
+.authwrap-video .auth-foot{color:#685F65}
 .auth-side{position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:1.5rem;min-height:0;padding:clamp(1.25rem,3.2vh,2.25rem) clamp(1.5rem,3.4vw,3rem);color:#fff;overflow:hidden;isolation:isolate;background:radial-gradient(60rem 28rem at 0% 110%,rgba(190,48,69,.34),transparent 62%),linear-gradient(165deg,rgba(48,41,46,.92) 0,rgba(35,30,34,.97) 100%),url(/img/auth-team-hero.webp) 35% 40%/cover no-repeat,#30292E}
 .auth-side::after{content:"";position:absolute;inset:auto 0 0 0;height:55%;z-index:-1;pointer-events:none;opacity:.18;background:repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 2.2rem,transparent 2.2rem 3.2rem);-webkit-mask-image:linear-gradient(0deg,#000,transparent);mask-image:linear-gradient(0deg,#000,transparent);clip-path:polygon(0 70%,8% 62%,16% 74%,24% 48%,32% 58%,40% 36%,48% 52%,56% 30%,64% 44%,72% 22%,80% 40%,88% 18%,100% 34%,100% 100%,0 100%)}
 .as-brand{display:inline-flex;align-items:center;gap:.7rem;width:max-content;color:#fff;font-weight:800;font-size:1.0625rem;letter-spacing:.02em;text-decoration:none}
@@ -225,6 +235,9 @@ body.nav-collapsed .snav-link:focus-visible,body.nav-collapsed .snav-toggle:focu
 @media(max-height:700px){.as-copy h2{font-size:clamp(1.75rem,3vw,2.5rem)}.as-cards{display:none}.authwrap .auth-sub{margin-bottom:.9rem}.af,.af input{min-height:2.6rem;height:2.5rem}.authwrap .auth-card{gap:.65rem}}
 @media(max-width:900px){
   .authwrap{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
+  .authwrap-video{display:block;overflow:hidden auto;padding:1rem}
+  .authwrap-video .auth-side{min-height:auto;padding:.25rem .25rem 1rem}
+  .authwrap-video .auth-pane{min-height:calc(100dvh - 5.25rem);margin:0;border-radius:20px;background:rgba(251,250,248,.92)}
   .auth-side{flex-direction:row;align-items:center;justify-content:flex-start;padding:.85rem 1.25rem}
   .auth-side .as-copy,.auth-side .as-cards{display:none}
   .auth-side::after{display:none}
@@ -234,7 +247,7 @@ body.nav-collapsed .snav-link:focus-visible,body.nav-collapsed .snav-toggle:focu
   .authwrap .auth-card .field-row{grid-template-columns:1fr 1fr}
 }
 @media(max-width:480px){.authwrap .auth-card .field-row{grid-template-columns:1fr}}
-@media(prefers-reduced-motion:reduce){.authwrap .auth-card{animation:none}}
+@media(prefers-reduced-motion:reduce){.authwrap .auth-card{animation:none}.authwrap-video .auth-video{display:none}.authwrap-video{background:#241e22 url(/img/auth-team-hero.webp) 50%/cover no-repeat}}
 
 /* Payment method logos (bKash, Stripe) sit on a white tile */
 .gw-logo,.gw input:checked + span .gw-mark.gw-logo{background:none;border:0;border-radius:0;padding:0}

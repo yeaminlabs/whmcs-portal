@@ -249,7 +249,18 @@ const nextQ = encodeURIComponent(cp);
 <main id="main" class="pubmain" tabindex="-1">
 <% if (flash) { %><p class="alert <%= flash.type === 'ok' ? 'ok' : flash.type === 'err' ? 'err' : '' %> flash" role="status"><%= flash.text || t(flash.key, flash.vars) %></p><% } %>
 <% } else { %>
-<div class="authwrap">
+<div class="authwrap<%= ti === 'Log in' ? ' authwrap-video' : '' %>">
+  <% if (ti === 'Log in') { %>
+  <div class="auth-video" aria-hidden="true">
+    <iframe
+      src="https://www.youtube-nocookie.com/embed/pYqScYQZ-o8?autoplay=1&amp;mute=1&amp;controls=0&amp;loop=1&amp;playlist=pYqScYQZ-o8&amp;playsinline=1&amp;rel=0&amp;disablekb=1&amp;iv_load_policy=3&amp;modestbranding=1"
+      title=""
+      tabindex="-1"
+      allow="autoplay; encrypted-media; picture-in-picture"
+      referrerpolicy="strict-origin-when-cross-origin"></iframe>
+  </div>
+  <div class="auth-video-shade" aria-hidden="true"></div>
+  <% } %>
   <aside class="auth-side" aria-label="SNBD HOST">
     <a class="as-brand" href="/" aria-label="<%= t('brand.home') %>"><img src="/img/snbd-mark.png" alt="" width="40" height="40"><span>SNBD HOST</span></a>
     <div class="as-copy">
