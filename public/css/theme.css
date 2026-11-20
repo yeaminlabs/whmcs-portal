@@ -249,12 +249,6 @@ body.nav-collapsed .snav-link:focus-visible,body.nav-collapsed .snav-toggle:focu
 @media(max-width:480px){.authwrap .auth-card .field-row{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.authwrap .auth-card{animation:none}.authwrap-video .auth-video{display:none}.authwrap-video{background:#241e22 url(/img/auth-team-hero.webp) 50%/cover no-repeat}}
 
-/* Login: centered 1:1 card over the animated video background */
-.authwrap-video{grid-template-columns:1fr;place-items:center;padding:1rem}
-.authwrap-video .auth{position:relative;z-index:2;width:100%;max-width:420px;margin:0 auto;padding:0;background:transparent;box-shadow:none}
-.authwrap-video .auth-prefs{display:none}
-.auth-video iframe{transform:translate(-50%,-50%) scale(0.86)}
-
 /* Payment method logos (bKash, Stripe) sit on a white tile */
 .gw-logo,.gw input:checked + span .gw-mark.gw-logo{background:none;border:0;border-radius:0;padding:0}
 .gw-logo img{padding:0}
