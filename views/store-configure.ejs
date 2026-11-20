@@ -25,7 +25,8 @@ const js = (v) => JSON.stringify(v).replace(/</g, '\\\\u003c');
           <div class="plan-brand"><%- brandMark(product.name) %></div>
           <div class="plan-info">
             <b class="plan-name"><%- brandText(product.name) %></b>
-            <p class="plan-desc"><%= t(product.kind === 'hosting' ? 'conf.subHosting' : product.kind === 'server' ? 'conf.subServer' : 'conf.subOther') %></p>
+            <% const planDesc = product.tagline || product.lead || ''; %>
+            <% if (planDesc) { %><p class="plan-desc"><%= planDesc %></p><% } %>
           </div>
         </div>
         <div class="plan-period">
@@ -43,15 +44,15 @@ const js = (v) => JSON.stringify(v).replace(/</g, '\\\\u003c');
         <% if (selected.setup) { %>
         <div class="plan-setup"><small><%= t('conf.setup') %>: <%= money(selected.setup, prefix) %></small></div>
         <% } %>
+        <% if (product.features && product.features.length) { %>
         <div class="plan-features">
           <ul class="feature-list">
-            <% if (product.kind === 'hosting') { %>
-            <li><span class="check">✓</span><%= t('conf.featureDomain') %></li>
-            <li><span class="check">✓</span><%= t('conf.featureEmail') %></li>
-            <% } %>
-            <li><span class="check">✓</span><%= t('conf.featureSupport') %></li>
+            <% product.features.forEach(f => { %>
+            <li><span class="check">✓</span><span class="feat-text"><b><%= f.main %></b><% if (f.note) { %> <%= f.note %><% } %></span></li>
+            <% }) %>
           </ul>
         </div>
+        <% } %>
       </section>
 
       <!-- Domain section (hosting only) -->

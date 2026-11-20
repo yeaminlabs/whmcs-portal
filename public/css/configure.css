@@ -196,3 +196,5 @@
 .cart .choice.cycle > span{border:0;padding:0;background:none;box-shadow:none;border-radius:0;display:block}
 .cart .panel{box-shadow:none;border:0}
 @media(max-width:860px){.cart-sidebar{position:static}}
+/* Feature text comes from the WHMCS product description: no extra highlight boxes around it. */
+.cart .feature-list li .feat-text,.cart .feature-list li .feat-text b{background:none!important;border:0!important;padding:0!important;box-shadow:none!important;border-radius:0!important;color:inherit}
