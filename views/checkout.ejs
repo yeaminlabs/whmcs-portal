@@ -23,6 +23,7 @@ const pmName = String(o.paymentmethod.name || o.paymentmethod.module).split('|')
         <% if (o.hostname) { %><div><dt><%= t('pub.hostname') %></dt><dd class="co-wrap"><%= o.hostname %></dd></div><% } %>
         <div><dt><%= t('pub.payment') %></dt><dd class="co-wrap"><span class="pm-inline"><%- payLogo(o.paymentmethod.module) || payLogo(pmName) %><%= pmName %></span></dd></div>
       </dl>
+      <% if (order.promocode) { %><p class="sum-note"><%= t('checkout.promoApplied', { code: order.promocode }) %></p><% } %>
       <div class="sum-total"><span><%= t('pub.total') %></span><strong><%= money(o.total, o.prefix) %></strong></div>
       <% if (billedNote) { %><p class="sum-bill"><%= billedNote %></p><% } %>
       <p class="sum-note"><%= t('pub.totalNote') %></p>

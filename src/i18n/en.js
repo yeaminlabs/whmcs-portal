@@ -730,6 +730,7 @@ module.exports = {
   'err.pwCurrent': 'Your current password is incorrect.',
   'err.pwFail': 'Could not change your password right now. Try again in a moment.',
   'err.orderFailed': 'The order could not be placed.',
+  'err.promoInvalid': 'That promo code is invalid or does not apply to this order.',
 
   'ns.sub': 'Live status of SNBD HOST servers, websites and services.',
   'ns.head.operational': 'All systems operational',

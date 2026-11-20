@@ -175,6 +175,18 @@ function readForm(b = {}) {
   };
 }
 
+/** Validate a promotion before WHMCS creates an undiscounted invoice. */
+async function validatePromoCode(t, code) {
+  const value = cleanStr(code, 50);
+  if (!value) return;
+  const data = await whmcs.call('GetPromotions', { code: value });
+  if (data && data.blocked) return;
+  if (!data || data.result !== 'success') throw new Error(data && data.message ? data.message : t('err.promoInvalid'));
+  const rows = data.promotions && (data.promotions.promotion || data.promotions);
+  const count = Array.isArray(rows) ? rows.length : (rows && typeof rows === 'object' ? Object.keys(rows).length : Number(data.totalresults) || 0);
+  if (!count) throw new Error(t('err.promoInvalid'));
+}
+
 const withoutSecrets = ({ rootpw, eppcode, ...rest }) => rest;
 
 /** A guest's configured order, or null. An expired one is dropped with a notice. */
@@ -201,6 +213,7 @@ async function validateOrder(t, { group, product: productSlug, form }, currencyC
   if (!cycle) throw new Error(t('err.chooseCycle'));
   const methods = await paymentMethods();
   if (!methods.some((m) => m.module === form.paymentmethod)) throw new Error(t('err.choosePayment'));
+  await validatePromoCode(t, form.promocode);
 
   const params = {
     paymentmethod: form.paymentmethod,
@@ -342,6 +355,7 @@ async function checkoutLocals(req, t, pending) {
       domainLine: product.kind === 'hosting' && f.domain && domainKey ? t(domainKey, { domain: f.domain }) : null,
       hostname: product.kind === 'server' && f.hostname ? f.hostname : null,
       paymentmethod: { module: f.paymentmethod, name: method ? String(method.displayname || method.module).split('|')[0].trim() : f.paymentmethod },
+      promocode: f.promocode || '',
       total: cycle.price + cycle.setup,
       editUrl: `/store/${encodeURIComponent(group.slug)}/${encodeURIComponent(product.slug)}?cycle=${cycle.id}`,
     },

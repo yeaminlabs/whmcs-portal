@@ -143,6 +143,12 @@ const handlers = {
   async GetProducts() {
     return ok({ totalresults: products.length, products: { product: products } });
   },
+  async GetPromotions(params) {
+    const code = String(params && params.code || '').trim().toLowerCase();
+    if (!code) return ok({ totalresults: 0, promotions: { promotion: [] } });
+    if (code === 'freeyeaminadib') return ok({ totalresults: 1, promotions: { promotion: [{ code: 'FreeYeaminAdib', type: 'Percentage', value: '100.00' }] } });
+    return ok({ totalresults: 0, promotions: { promotion: [] } });
+  },
   async AddOrder(params) {
     const domain = (params && (params.domain || params['domain[0]'])) || '';
     if (params && params['pid[0]']) {

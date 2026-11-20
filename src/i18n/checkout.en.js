@@ -9,6 +9,7 @@ module.exports = {
   'checkout.domainTransfer': 'Transfer {domain}',
   'checkout.domainOwn': 'Use {domain} (a domain you already own)',
   'checkout.billedIn': 'Invoice will be in {code}',
+  'checkout.promoApplied': 'Promo code {code} will be applied to the invoice.',
   'checkout.regInvalid': 'Enter your first and last name, a valid email and a password of at least 8 characters.',
   'checkout.regFailed': 'We could not create your account. Please try again.',
 };

@@ -9,6 +9,7 @@ module.exports = {
   'checkout.domainTransfer': '{domain} ট্রান্সফার',
   'checkout.domainOwn': '{domain} ব্যবহার (আপনার নিজের ডোমেইন)',
   'checkout.billedIn': 'ইনভয়েস হবে {code}-তে',
+  'checkout.promoApplied': 'প্রোমো কোড {code} ইনভয়েসে প্রয়োগ হবে।',
   'checkout.regInvalid': 'নামের প্রথম ও শেষ অংশ, সঠিক ইমেইল এবং কমপক্ষে ৮ অক্ষরের পাসওয়ার্ড দিন।',
   'checkout.regFailed': 'আপনার অ্যাকাউন্ট তৈরি করা যায়নি। আবার চেষ্টা করুন।',
 };
