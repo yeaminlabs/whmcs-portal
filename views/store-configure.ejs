@@ -81,19 +81,21 @@ let step = 0;
     <% step++; %>
     <section class="panel step" aria-labelledby="s-pay">
       <header><span id="s-pay"><span class="step-n"><%= step %></span><%= t('conf.payment') %></span></header>
+      <div class="pay-list" role="radiogroup" aria-label="<%= t('conf.payment') %>">
+        <% methods.forEach(m => { %>
+        <% const mName = String(m.displayname || m.module).split('|')[0].trim(); const mDesc = String(m.displayname).includes('|') ? String(m.displayname).split('|').slice(1).join(' ').trim() : ''; const mLogo = payLogo(m.module) || payLogo(mName); %>
+        <label class="pay-row"><input type="radio" name="paymentmethod" value="<%= m.module %>" <%= m.module === pm ? 'checked' : '' %>><span class="gw-mark<%= mLogo ? ' gw-logo' : '' %>"><% if (mLogo) { %><%- mLogo %><% } else { %><%- icon('wallet') %><% } %></span><span class="pay-info"><b><%= mName %></b><% if (mDesc) { %><small><%= mDesc %></small><% } %></span><span class="pay-check" aria-hidden="true"></span></label>
+        <% }) %>
+      </div>
+    </section>
+
+    <% step++; %>
+    <section class="panel step" aria-labelledby="s-promo">
+      <header><span id="s-promo"><span class="step-n"><%= step %></span><%- icon('bolt') %><%= t('conf.promo') %></span><small><%= t('common.optional') %></small></header>
       <div class="step-body">
-        <div class="pay-list" role="radiogroup" aria-label="<%= t('conf.payment') %>">
-          <% methods.forEach(m => { %>
-          <% const mName = String(m.displayname || m.module).split('|')[0].trim(); const mDesc = String(m.displayname).includes('|') ? String(m.displayname).split('|').slice(1).join(' ').trim() : ''; const mLogo = payLogo(m.module) || payLogo(mName); %>
-          <label class="choice pay gw"><input type="radio" name="paymentmethod" value="<%= m.module %>" <%= m.module === pm ? 'checked' : '' %>><span><span class="gw-mark<%= mLogo ? ' gw-logo' : '' %>"><% if (mLogo) { %><%- mLogo %><% } else { %><%- icon('wallet') %><% } %></span><b><%= mName %></b><% if (mDesc) { %><small><%= mDesc %></small><% } %></span></label>
-          <% }) %>
-        </div>
-        <div class="promo" id="promo-box">
-          <label class="promo-label" id="promo-label"><%- icon('bolt') %><%= t('conf.promo') %> <span class="opt"><%= t('common.optional') %></span></label>
-          <div class="promo-row">
-            <input name="promocode" id="promo-input" value="<%= form.promocode || '' %>" autocomplete="off" aria-labelledby="promo-label" placeholder="<%= t('conf.promoPlaceholder') %>">
-            <button type="button" class="promo-apply"><span><%= t('conf.applyPromo') %></span></button>
-          </div>
+        <div class="promo-row">
+          <input name="promocode" id="promo-input" value="<%= form.promocode || '' %>" autocomplete="off" placeholder="<%= t('conf.promoPlaceholder') %>" aria-label="<%= t('conf.promo') %>">
+          <button type="button" class="promo-apply"><span><%= t('conf.applyPromo') %></span></button>
         </div>
         <div id="promo-feedback" class="promo-feedback" role="status" hidden></div>
       </div>
