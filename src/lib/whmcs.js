@@ -29,6 +29,12 @@ const MOCK = require('./mock');
 const httpAgent = new http.Agent({ keepAlive: true, maxSockets: 16, family: 4 });
 const httpsAgent = new https.Agent({ keepAlive: true, maxSockets: 16, family: 4 });
 const TIMEOUT_MS = 15000;
+// Order creation can legitimately take longer than a read (WHMCS may create
+// the invoice, provision a module, and run gateway hooks). Never retry it: a
+// timeout does not prove that WHMCS did not create the order, and retrying can
+// create a duplicate order.
+const MUTATION_TIMEOUT_MS = 30000;
+const NON_RETRYABLE_ACTIONS = new Set(['AddOrder']);
 const MAX_ATTEMPTS = 2;
 const RETRY_DELAY_MS = 300;
 const BLOCK_MS = 10 * 60 * 1000;
@@ -146,7 +152,9 @@ class WhmcsClient {
 
     if (!bypassBlocked && isBlocked(action)) return blockedResult();
 
-    const attempts = Math.min(Math.max(1, Number(retries) || 1), MAX_ATTEMPTS);
+    const attempts = NON_RETRYABLE_ACTIONS.has(action)
+      ? 1
+      : Math.min(Math.max(1, Number(retries) || 1), MAX_ATTEMPTS);
     const body = new URLSearchParams({
       identifier: config.whmcsIdentifier,
       secret: config.whmcsSecret,
@@ -161,7 +169,7 @@ class WhmcsClient {
         try {
           const res = await axios.post(`${config.whmcsUrl}/includes/api.php`, body, {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            timeout: TIMEOUT_MS,
+            timeout: NON_RETRYABLE_ACTIONS.has(action) ? MUTATION_TIMEOUT_MS : TIMEOUT_MS,
             httpAgent,
             httpsAgent,
           });
