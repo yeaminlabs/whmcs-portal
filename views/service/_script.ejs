@@ -88,7 +88,7 @@
     box.append(el('strong', null, res.message || L.failed));
     if (res.detail) box.append(' ', el('span', null, res.detail));
     const d = res.data || {};
-    if (res.ok && !d.url && !d.file && !d.password && !d.logs) {
+    if (res.ok && !d.url && !d.file && !d.password && !d.logs && !d.disk && !d.env && !d.token) {
       const a = el('a', 'svc-refresh', L.refresh);
       a.href = location.pathname;
       box.append(' ', a);
@@ -133,6 +133,21 @@
         out.append(pre);
       }
     }
+    if (d.disk) {
+      const disk = el('pre', 'svc-logs');
+      disk.textContent = JSON.stringify(d.disk, null, 2);
+      out.append(disk);
+    }
+    if (d.env) {
+      const env = el('pre', 'svc-logs');
+      env.textContent = JSON.stringify(d.env, null, 2);
+      out.append(env);
+    }
+    if (d.token) {
+      const token = el('pre', 'svc-logs');
+      token.textContent = JSON.stringify({ token: d.token, ttl: d.ttl, endpoint: d.endpoint, wsUrl: d.wsUrl }, null, 2);
+      out.append(token);
+    }
   }
 
   async function run(form, confirmed) {
@@ -153,6 +168,7 @@
     try {
       const body = new URLSearchParams(new FormData(form));
       if (confirmed) body.set('confirm', '1');
+      if (form.dataset.args) body.set('args', form.dataset.args);
       const r = await fetch(form.action, { method: 'POST', headers: { Accept: 'application/json' }, body, credentials: 'same-origin' });
       if (r.status === 429) res = { ok: false, message: L.tooMany };
       else res = await r.json().catch(() => ({ ok: false, message: L.failed }));
