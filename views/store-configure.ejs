@@ -94,6 +94,7 @@ let step = 0;
             <span class="promo-icon" aria-hidden="true"><%- icon('bolt') %></span>
             <input name="promocode" id="promo-input" value="<%= form.promocode || '' %>" autocomplete="off" aria-labelledby="promo-label" placeholder="<%= t('conf.promoPlaceholder') %>">
             <button type="button" class="promo-apply"><span><%= t('conf.applyPromo') %></span></button>
+            <span class="promo-spinner" aria-hidden="true"></span>
           </div>
         </div>
         <div id="promo-feedback" class="promo-feedback" role="status" hidden></div>

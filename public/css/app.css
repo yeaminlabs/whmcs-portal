@@ -288,10 +288,47 @@ dialog.ui-dialog::backdrop{background:rgba(16,24,40,.6);backdrop-filter:blur(4px
 .cycle .save{justify-self:start;margin-top:6px;font-style:normal;font-size:11px;font-weight:700;color:var(--ok);background:var(--ok-bg);border:1px solid var(--ok-line);border-radius:99px;padding:1px 7px}
 .pay-list{display:grid;gap:8px}
 .promo{margin:16px 0 0;max-width:280px}
-.promo .btn-sm{margin-left:8px;font-size:13px;padding:6px 10px}
 .promo-feedback{margin:8px 0 0;font-size:13px;min-height:1px}
 .promo-feedback.ok{color:var(--ok)}
 .promo-feedback.bad{color:var(--bad)}
+
+/* --- Promo box (store configure) --- */
+.promo-box{margin:14px 0 0;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#fff;display:flex;align-items:center;gap:10px}
+.promo-label{font-size:14px;color:var(--ink);font-weight:500}
+.promo-field{display:flex;gap:8px;flex:1}
+.promo-icon{width:20px;height:20px;flex-shrink:0;color:var(--g400);margin-top:2px}
+.promo-field input[type="text"],.promo-field input[name="promocode"]{flex:1;padding:10px 12px;border:1px solid var(--g300);border-radius:10px;font-size:14px;color:var(--ink);background:#fff}
+.promo-field input:focus{border-color:var(--red);outline:none;box-shadow:0 0 0 2px rgba(220,20,60,0.1)}
+.promo-apply{padding:10px 16px;border:1px solid var(--g300);border-radius:10px;background:#fff;color:var(--ink);font-size:14px;font-weight:500;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s}
+.promo-apply:hover{border-color:var(--g400)}
+.promo-apply:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.promo-apply.is-busy{opacity:.7;cursor:wait}
+.promo-spinner{width:16px;height:16px;border:2px solid var(--g300);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0;display:none}
+.promo-apply.is-busy ~ .promo-spinner{display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* --- Loading state on summary during coupon check --- */
+.summary-card.is-loading{position:relative;pointer-events:none;opacity:.7}
+.summary-card.is-loading::after{content:"";position:absolute;inset:0;border-radius:12px;background:rgba(255,255,255,.6);z-index:1}
+
+/* --- Pricing shimmer during coupon apply --- */
+.sum-shimmer{height:8px;border-radius:4px;background:linear-gradient(90deg,#f2f2f2 25%,#e6e6e6 50%,#f2f2f2 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;margin:10px 0 6px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* --- Promo discount row --- */
+.sum-promo{color:var(--ok);font-weight:600}
+.sum-promo dt{color:var(--ok);font-size:13px}
+
+/* --- Price bump on total change --- */
+.bump{animation:bump .3s ease}
+@keyframes bump{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+
+/* --- Checkout processing overlay --- */
+.place-overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);backdrop-filter:blur(4px)}
+.place-card{background:#fff;border-radius:16px;padding:32px 40px;display:flex;flex-direction:column;align-items:center;gap:14px;box-shadow:0 20px 40px rgba(0,0,0,.15)}
+.place-ring{width:32px;height:32px;border:3px solid var(--line);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite}
+.place-card b{font-size:16px;color:var(--ink)}
+.place-card small{font-size:13px;color:var(--g500)}
 .checkout-side{position:sticky;top:84px}
 .summary-card{margin:0}
 .sum-body{padding:18px 20px 20px}
