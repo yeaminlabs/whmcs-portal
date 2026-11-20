@@ -280,6 +280,13 @@ module.exports = {
   'conf.pointNs': 'Point {domain} to our nameservers after your order is set up.',
   'conf.checkFail': 'Could not check that domain right now. Try again in a moment.',
   'conf.placing': 'Placing order…',
+  "conf.promoPlaceholder": "e.g. SUMMER25",
+  "conf.promoRow": "Promo {code}",
+  "conf.promoApplied": "Code {code} applied. The discount shows in your total and is confirmed at checkout.",
+  "conf.promoAtCheckout": "Applied at checkout",
+  "conf.placeStep1": "Checking your details…",
+  "conf.placeStep2": "Creating your order…",
+  "conf.placeStep3": "Preparing secure payment…",
 
   'done.title': 'Order placed',
   'done.sub': 'Thanks! Order #{order} for {product} is in. Pay invoice #{invoice} to start setup.',

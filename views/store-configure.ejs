@@ -1,4 +1,5 @@
 <%- include('_head') %>
+<link rel="stylesheet" href="/css/configure.css">
 <%
 const tr = (k, fb) => { const v = t(k); return v === k ? fb : v; };
 const cycles = product.pricing.cycles;
@@ -87,8 +88,15 @@ let step = 0;
           <label class="choice pay gw"><input type="radio" name="paymentmethod" value="<%= m.module %>" <%= m.module === pm ? 'checked' : '' %>><span><span class="gw-mark<%= mLogo ? ' gw-logo' : '' %>"><% if (mLogo) { %><%- mLogo %><% } else { %><%- icon('wallet') %><% } %></span><b><%= mName %></b><% if (mDesc) { %><small><%= mDesc %></small><% } %></span></label>
           <% }) %>
         </div>
-        <label class="promo"><%= t('conf.promo') %> <span class="opt"><%= t('common.optional') %></span><input name="promocode" value="<%= form.promocode || '' %>" autocomplete="off"><button type="button" class="btn btn-sm promo-apply"><%= t('conf.applyPromo') %></button></label>
-<div id="promo-feedback" class="promo-feedback" hidden></div>
+        <div class="promo" id="promo-box">
+          <span class="promo-label" id="promo-label"><%= t('conf.promo') %> <span class="opt"><%= t('common.optional') %></span></span>
+          <div class="promo-field">
+            <span class="promo-icon" aria-hidden="true"><%- icon('bolt') %></span>
+            <input name="promocode" id="promo-input" value="<%= form.promocode || '' %>" autocomplete="off" aria-labelledby="promo-label" placeholder="<%= t('conf.promoPlaceholder') %>">
+            <button type="button" class="promo-apply"><span><%= t('conf.applyPromo') %></span></button>
+          </div>
+        </div>
+        <div id="promo-feedback" class="promo-feedback" role="status" hidden></div>
       </div>
     </section>
   </div>
@@ -96,19 +104,30 @@ let step = 0;
   <aside class="checkout-side">
     <div class="panel summary-card">
       <header><%= t('conf.summary') %></header>
-      <div class="sum-body">
+      <div class="sum-body" id="sum-body">
         <div class="sum-product"><b><%- brandMark(product.name) %><%= product.name %></b><small><%= gname %></small></div>
+        <div class="sum-pricing" id="sum-pricing">
+        <div class="sum-shimmer" aria-hidden="true"></div>
         <dl>
           <div><dt id="sum-cycle"><%= st(selected.label) %></dt><dd id="sum-price"><%= money(selected.price, prefix) %></dd></div>
           <div id="sum-setup-row"<% if (!selected.setup) { %> hidden<% } %>><dt><%= t('conf.setup') %></dt><dd id="sum-setup"><%= money(selected.setup, prefix) %></dd></div>
           <% if (product.kind === 'hosting') { %><div id="sum-domain-row" hidden><dt id="sum-domain-label"><%= t('col.domain') %></dt><dd id="sum-domain">—</dd></div><% } %>
+          <div id="sum-promo-row" class="sum-promo" hidden><dt id="sum-promo-label"></dt><dd id="sum-promo"></dd></div>
         </dl>
         <div class="sum-total"><span><%= t('conf.dueToday') %></span><strong id="sum-total"><%= money(selected.price + selected.setup, prefix) %></strong></div>
+        </div>
         <% if (billing) { %>
         <p class="sum-bill" id="sum-bill-row"><%= t('conf.billedAs', { code: billing.code }) %> <b id="sum-bill"></b></p>
         <% } %>
         <p class="sum-note"><%= t('conf.taxNote', { code: billing ? billing.code : product.pricing.code }) %></p>
         <button type="submit" class="btn red sum-cta"><%= t(session && session.clientId ? 'conf.complete' : 'pub.continueCheckout') %> <%- icon('arrow') %></button>
+        <div class="place-overlay" id="place-overlay" role="status" aria-live="polite" hidden>
+          <div class="place-card">
+            <span class="place-ring" aria-hidden="true"></span>
+            <b><%= t('conf.placing') %></b>
+            <small id="place-step"><%= t('conf.placeStep1') %></small>
+          </div>
+        </div>
         <p class="sum-secure"><%- icon('lock') %><%= t('conf.secure') %></p>
       </div>
     </div>
@@ -122,7 +141,20 @@ let step = 0;
     checking: t('conf.checking'), available: t('conf.available'), firstYear: t('conf.firstYear'),
     taken: t('conf.taken'), notRegistered: t('conf.notRegistered'), canTransfer: t('conf.canTransfer'),
     pointNs: t('conf.pointNs'), checkFail: t('conf.checkFail'), placing: t('conf.placing'),
+    promoRow: t('conf.promoRow'), promoApplied: t('conf.promoApplied'), promoAtCheckout: t('conf.promoAtCheckout'),
   }) %>;
+  let promo = null;
+  // Preview of the coupon's effect on today's total. WHMCS applies the real amount at checkout.
+  function promoDiscount(subtotal, setup) {
+    if (!promo || promo.unverified) return { amount: 0, label: I18N.promoAtCheckout };
+    const pct = promo.type.toLowerCase().includes('percent');
+    const fixed = promo.type.toLowerCase().includes('fixed');
+    const free = promo.type.toLowerCase().includes('free') || promo.type.toLowerCase().includes('setup');
+    if (pct) { const amount = Math.min(subtotal, subtotal * promo.value / 100); return { amount, label: '−' + fmt(amount) }; }
+    if (fixed) { const amount = Math.min(subtotal, promo.value); return { amount, label: '−' + fmt(amount) }; }
+    if (free) { const amount = Math.min(subtotal, setup); return { amount, label: '−' + fmt(amount) }; }
+    return { amount: 0, label: I18N.promoAtCheckout };
+  }
   const fill = (s, v) => s.replace(/\{(\w+)\}/g, (m, k) => (v[k] == null ? m : v[k]));
   const form = document.getElementById('checkout');
   const prefix = <%- js(prefix) %>;
@@ -162,7 +194,20 @@ let step = 0;
       $('sum-domain-label').textContent = fill(opt === 'transfer' ? I18N.xfer : I18N.reg, { domain: d });
       $('sum-domain').textContent = fee == null ? I18N.atCheckout : fmt(fee);
     }
-    $('sum-total').textContent = fmt(price + setup + (fee || 0));
+    const subtotal = price + setup + (fee || 0);
+    const discount = promoDiscount(subtotal, setup);
+    const total = Math.max(0, subtotal - discount.amount);
+    const totalEl = $('sum-total');
+    if (totalEl.textContent !== fmt(total)) {
+      totalEl.textContent = fmt(total);
+      totalEl.classList.remove('bump'); void totalEl.offsetWidth; totalEl.classList.add('bump');
+    }
+    const promoRow = $('sum-promo-row');
+    promoRow.hidden = !promo;
+    if (promo) {
+      $('sum-promo-label').textContent = fill(I18N.promoRow, { code: promo.code });
+      $('sum-promo').textContent = discount.label;
+    }
     if (billing) {
       const b = billing.cycles[c.value] || { price: 0, setup: 0 };
       const bfee = domainFee(billing.tlds) || 0;
@@ -208,57 +253,63 @@ let step = 0;
       }
     });
   }
+  // The order is only created here, when the checkout button submits the form.
+  const placeOverlay = $('place-overlay');
+  const placeSteps = <%- js([t('conf.placeStep1'), t('conf.placeStep2'), t('conf.placeStep3')]) %>;
   form.addEventListener('submit', () => {
     const btn = form.querySelector('.sum-cta');
     btn.setAttribute('aria-disabled', 'true');
     btn.textContent = I18N.placing;
+    placeOverlay.hidden = false;
+    let i = 0;
+    setInterval(() => { i = (i + 1) % placeSteps.length; $('place-step').textContent = placeSteps[i]; }, 1600);
   });
 
-  const promoInput = form.querySelector('input[name="promocode"]');
+  // Coupon check: validates the code only and previews the discount. Nothing is ordered.
+  const promoInput = $('promo-input');
   const promoBtn = form.querySelector('.promo-apply');
   const promoFeedback = $('promo-feedback');
-  if (promoBtn && promoInput && promoFeedback) {
+  const pricing = $('sum-pricing');
+  const summary = form.querySelector('.summary-card');
+  const showPromoFeedback = (text, kind) => {
+    promoFeedback.hidden = false;
+    promoFeedback.textContent = text;
+    promoFeedback.className = 'promo-feedback ' + kind;
+  };
+  if (promoBtn && promoInput) {
+    promoInput.addEventListener('input', () => {
+      if (promo) { promo = null; update(); }
+      promoFeedback.hidden = true;
+    });
     promoBtn.addEventListener('click', async () => {
       const code = promoInput.value.trim();
-      if (!code) return;
-      const c = form.querySelector('input[name="billingcycle"]:checked');
-      const p = form.querySelector('input[name="paymentmethod"]:checked');
-      if (!c || !p) {
-        promoFeedback.hidden = false;
-        promoFeedback.textContent = t('err.chooseCycle');
-        promoFeedback.className = 'promo-feedback bad';
-        return;
-      }
+      if (!code) { promoInput.focus(); return; }
       promoBtn.disabled = true;
-      promoBtn.textContent = I18N.checking;
+      promoBtn.classList.add('is-busy');
       promoFeedback.hidden = true;
+      summary.classList.add('is-loading');
+      const started = Date.now();
       try {
         const r = await fetch('/store/promo-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            promocode: code,
-            group: <%- js(group.slug) %>,
-            product: <%- js(product.slug) %>,
-            billingcycle: c.value,
-            paymentmethod: p.value,
-          }),
+          body: JSON.stringify({ promocode: code }),
         });
         const j = await r.json();
+        // Keep the shimmer visible long enough to read as a real check.
+        await new Promise((res) => setTimeout(res, Math.max(0, 650 - (Date.now() - started))));
         if (!j.ok) throw new Error(j.error || I18N.checkFail);
-        if (j.redirect) location.href = j.redirect;
-        else {
-          promoFeedback.hidden = false;
-          promoFeedback.textContent = t('checkout.promoApplied', { code });
-          promoFeedback.className = 'promo-feedback ok';
-        }
+        promo = { code: j.code || code, type: j.type || '', value: Number(j.value) || 0, unverified: !!j.unverified };
+        update();
+        showPromoFeedback(fill(I18N.promoApplied, { code: promo.code }), 'ok');
       } catch (err) {
-        promoFeedback.hidden = false;
-        promoFeedback.textContent = err.message || I18N.checkFail;
-        promoFeedback.className = 'promo-feedback bad';
+        promo = null;
+        update();
+        showPromoFeedback(err.message || I18N.checkFail, 'bad');
       } finally {
+        summary.classList.remove('is-loading');
         promoBtn.disabled = false;
-        promoBtn.textContent = <%- js(t('conf.applyPromo')) %>;
+        promoBtn.classList.remove('is-busy');
       }
     });
   }
