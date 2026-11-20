@@ -89,12 +89,10 @@ let step = 0;
           <% }) %>
         </div>
         <div class="promo" id="promo-box">
-          <span class="promo-label" id="promo-label"><%= t('conf.promo') %> <span class="opt"><%= t('common.optional') %></span></span>
-          <div class="promo-field">
-            <span class="promo-icon" aria-hidden="true"><%- icon('bolt') %></span>
+          <label class="promo-label" id="promo-label"><%- icon('bolt') %><%= t('conf.promo') %> <span class="opt"><%= t('common.optional') %></span></label>
+          <div class="promo-row">
             <input name="promocode" id="promo-input" value="<%= form.promocode || '' %>" autocomplete="off" aria-labelledby="promo-label" placeholder="<%= t('conf.promoPlaceholder') %>">
             <button type="button" class="promo-apply"><span><%= t('conf.applyPromo') %></span></button>
-            <span class="promo-spinner" aria-hidden="true"></span>
           </div>
         </div>
         <div id="promo-feedback" class="promo-feedback" role="status" hidden></div>
@@ -127,6 +125,7 @@ let step = 0;
             <div class="place-ring-wrap" aria-hidden="true">
               <div class="place-ring-bg"></div>
               <div class="place-ring"></div>
+              <div class="place-ring-dot"></div>
             </div>
             <p class="place-title"><%= t('conf.placing') %></p>
             <p class="place-step" id="place-step"><%= t('conf.placeStep1') %></p>
@@ -135,7 +134,10 @@ let step = 0;
               <span class="place-dot" id="pd1"></span>
               <span class="place-dot" id="pd2"></span>
             </div>
-            <p class="place-brand">SNBD HOST &middot; <%= t('conf.secure') %></p>
+            <div class="place-brand">
+              <img src="/img/snbd-logo.png" alt="SNBD HOST" width="110" height="28">
+              <span class="place-secure"><%- icon('lock') %> <%= t('conf.secure') %></span>
+            </div>
           </div>
         </div>
         <p class="sum-secure"><%- icon('lock') %><%= t('conf.secure') %></p>
@@ -266,7 +268,13 @@ let step = 0;
   // The order is only created here, when the checkout button submits the form.
   const placeOverlay = $('place-overlay');
   const placeSteps = <%- js([t('conf.placeStep1'), t('conf.placeStep2'), t('conf.placeStep3')]) %>;
-  form.addEventListener('submit', () => {
+  let isSubmitting = false;
+  form.addEventListener('submit', (e) => {
+    if (isSubmitting) { e.preventDefault(); return; }
+    isSubmitting = true;
+    // Clear any active promo loading state before showing the checkout overlay.
+    if (pricing) pricing.classList.remove('is-loading');
+    if (promoBtn) { promoBtn.disabled = false; promoBtn.classList.remove('is-busy'); }
     const btn = form.querySelector('.sum-cta');
     btn.setAttribute('aria-disabled', 'true');
     placeOverlay.hidden = false;

@@ -54,7 +54,7 @@
 .epp input:focus{border-color:var(--brand-red,#BE3045);box-shadow:0 0 0 3px rgba(190,48,69,.12)}
 
 /* ── Payment method list ────────────────────────────────────────────────────── */
-.pay-list{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
+.pay-list{display:flex;flex-direction:column;gap:8px}
 .choice.pay{padding:14px 16px;border-radius:12px;border-width:1.5px}
 .choice.pay:has(input:checked){border-color:var(--brand-red,#BE3045);background:rgba(190,48,69,.025)}
 .choice.pay .gw-mark{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:#F3EEEA;flex:none}
@@ -63,22 +63,21 @@
 .choice.pay small{color:var(--g500);font-size:12px}
 
 /* ── Promo / coupon field ───────────────────────────────────────────────────── */
-.promo{margin:20px 0 0}
-.promo-label{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:700;color:var(--g700);margin-bottom:8px}
-.promo-label .opt{font-weight:500;color:var(--g500);font-size:12px}
-.promo-field{position:relative;display:flex;align-items:center;gap:6px;padding:4px 4px 4px 12px;border:2px dashed #E4C9CE;border-radius:14px;background:#FFFBFB;transition:border-color .2s,box-shadow .2s,background .2s}
-.promo-field:focus-within{border-style:solid;border-color:var(--brand-red,#BE3045);background:#fff;box-shadow:0 0 0 4px rgba(190,48,69,.1)}
-.promo-icon{display:grid;place-items:center;color:var(--brand-red,#BE3045);flex:none}
-.promo-icon .ico{width:16px;height:16px}
-.promo-field input{flex:1;min-width:0;border:0;background:transparent;padding:9px 4px;font:inherit;font-size:14px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);outline:none;box-shadow:none}
-.promo-field input::placeholder{text-transform:none;letter-spacing:0;color:#A9A1A5}
-.promo-apply{flex:none;position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:88px;min-height:38px;padding:0 16px;border:0;border-radius:10px;background:var(--ink);color:#fff;font:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:transform .15s,background .2s,box-shadow .2s;box-shadow:0 4px 10px -6px rgba(0,0,0,.35)}
-.promo-apply:hover:not(:disabled){background:#111;transform:translateY(-1px);box-shadow:0 6px 14px -6px rgba(0,0,0,.45)}
+.promo{margin:16px 0 0;padding-top:16px;border-top:1px solid var(--line)}
+.promo-label{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--g700);margin-bottom:8px;cursor:default}
+.promo-label .ico{width:14px;height:14px;color:var(--brand-red,#BE3045);flex:none}
+.promo-label .opt{font-weight:400;color:var(--g400);font-size:12px}
+.promo-row{display:flex;gap:8px}
+.promo-row input{flex:1;min-width:0;height:42px;padding:0 12px;border:1.5px solid var(--line);border-radius:10px;font:inherit;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s;background:#fff}
+.promo-row input::placeholder{text-transform:none;letter-spacing:0;color:#A9A1A5}
+.promo-row input:focus{border-color:var(--brand-red,#BE3045);box-shadow:0 0 0 3px rgba(190,48,69,.12)}
+.promo-apply{flex:none;position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:88px;height:42px;padding:0 18px;border:0;border-radius:10px;background:var(--ink);color:#fff;font:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:transform .15s,background .2s,box-shadow .2s;box-shadow:0 2px 8px -4px rgba(0,0,0,.3)}
+.promo-apply:hover:not(:disabled){background:#111;transform:translateY(-1px);box-shadow:0 4px 12px -4px rgba(0,0,0,.4)}
 .promo-apply:active:not(:disabled){transform:none;box-shadow:none}
 .promo-apply:disabled{cursor:progress;opacity:.85}
 .promo-apply.is-busy > span{visibility:hidden}
 .promo-apply.is-busy::after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:cfgSpin .7s linear infinite}
-.promo-feedback{display:flex;align-items:flex-start;gap:8px;margin:10px 2px 0;font-size:13px;font-weight:600;animation:cfgFadeUp .3s ease both}
+.promo-feedback{display:flex;align-items:flex-start;gap:8px;margin:10px 0 0;font-size:13px;font-weight:600;animation:cfgFadeUp .3s ease both}
 .promo-feedback.ok{color:var(--ok,#1a7a4a)}
 .promo-feedback.bad{color:var(--bad,#A1263A)}
 .promo-feedback.ok::before{content:"✓";display:grid;place-items:center;min-width:18px;height:18px;border-radius:50%;background:#D1FAE5;color:var(--ok,#1a7a4a);font-size:10px}
@@ -153,7 +152,10 @@
 .place-dot.done{background:var(--ok,#1a7a4a)}
 
 /* Branding stripe */
-.place-brand{margin-top:28px;padding-top:20px;border-top:1px solid var(--line);font-size:12px;color:var(--g400);font-weight:500}
+.place-brand{margin-top:24px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:6px}
+.place-brand img{opacity:.8;display:block}
+.place-secure{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--g400);font-weight:500}
+.place-secure .ico{width:11px;height:11px}
 
 @keyframes cfgFadeIn{from{opacity:0}to{opacity:1}}
 @keyframes cfgSlideUp{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
