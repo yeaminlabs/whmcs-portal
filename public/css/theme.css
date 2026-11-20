@@ -249,11 +249,63 @@ body.nav-collapsed .snav-link:focus-visible,body.nav-collapsed .snav-toggle:focu
 @media(max-width:480px){.authwrap .auth-card .field-row{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.authwrap .auth-card{animation:none}.authwrap-video .auth-video{display:none}.authwrap-video{background:#241e22 url(/img/auth-team-hero.webp) 50%/cover no-repeat}}
 
-/* Login: centered 1:1 card over the animated video background */
-.authwrap-video{grid-template-columns:1fr;place-items:center;padding:1rem}
-.authwrap-video .auth{position:relative;z-index:2;width:100%;max-width:420px;margin:0 auto;padding:0;background:transparent;box-shadow:none}
-.authwrap-video .auth-prefs{display:none}
-.auth-video iframe{transform:translate(-50%,-50%) scale(0.86)}
+/* Login: centered card over zoomed-out video background — matches Ebolt-style reference */
+/* Video: zoomed out so more of the scene is visible */
+.auth-video iframe{transform:translate(-50%,-50%) scale(0.78)}
+
+/* Full-viewport layout: video fills screen, card centered */
+.authwrap-video{position:relative;display:flex;align-items:center;justify-content:center;grid-template-columns:1fr;min-height:100dvh;padding:1rem;background:#111;overflow:hidden}
+.authwrap-video .auth-side,.authwrap-video .auth-pane,.authwrap-video .auth-prefs,.authwrap-video .auth-foot{display:none!important}
+.authwrap-video .auth{position:static;display:block;padding:0;background:transparent;box-shadow:none;max-width:none;width:auto}
+
+/* The card wrapper */
+.lc-wrap{position:relative;z-index:2;width:100%;max-width:400px;padding:2.25rem 2rem 2rem;background:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.65);border-radius:22px;box-shadow:0 32px 80px -24px rgba(0,0,0,.35),0 2px 8px rgba(0,0,0,.08);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);display:flex;flex-direction:column;align-items:center;gap:.9rem}
+
+/* Login icon button at top */
+.lc-icon-btn{display:grid;place-items:center;width:2.75rem;height:2.75rem;border-radius:12px;border:1.5px solid #e5e7eb;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.07);margin-bottom:.1rem;color:#374151}
+.lc-icon-btn .ico{width:1.1rem;height:1.1rem}
+
+/* Heading */
+.lc-title{margin:0;font-size:1.3125rem;font-weight:700;color:#111827;letter-spacing:-.025em;text-align:center}
+.lc-sub{margin:0;font-size:.8125rem;color:#6b7280;text-align:center;line-height:1.55;max-width:22rem}
+
+/* Form */
+.lc-form{display:flex;flex-direction:column;gap:.75rem;width:100%}
+
+/* Fields using existing .af base — override to match reference style */
+.lc-af{background:#fff;border-color:#e5e7eb;border-radius:10px;min-height:2.75rem}
+.lc-af:focus-within{border-color:#111827;box-shadow:0 0 0 3px rgba(17,24,39,.1)}
+.lc-af:focus-within .ico{color:#111827}
+.lc-af .ico{color:#9ca3af}
+.lc-af input::placeholder{color:#9ca3af;font-size:.9375rem}
+
+/* Forgot password sits below the password field */
+.lc-forgot{align-self:flex-end;font-size:.8125rem;color:#374151;text-decoration:none;margin-top:-.25rem}
+.lc-forgot:hover{color:#111827;text-decoration:underline}
+
+/* Submit button */
+.lc-submit{width:100%;min-height:2.875rem;padding:.75rem 1rem;background:#111827;color:#fff;border:0;border-radius:10px;font-size:.9375rem;font-weight:600;font-family:inherit;cursor:pointer;letter-spacing:-.01em;transition:background .15s,transform .15s}
+.lc-submit:hover{background:#1f2937;transform:translateY(-1px)}
+.lc-submit:active{transform:none}
+.lc-submit:focus-visible{outline:2px solid #111827;outline-offset:3px}
+
+/* Or divider */
+.lc-divider{display:flex;align-items:center;gap:.7rem;width:100%;font-size:.75rem;color:#9ca3af;font-weight:500;margin:0}
+.lc-divider::before,.lc-divider::after{content:"";flex:1;border-top:1px solid #e5e7eb}
+
+/* Social buttons: icon-only squares */
+.lc-social{display:flex;gap:.6rem;width:100%}
+.lc-social-btn{flex:1;display:grid;place-items:center;min-height:2.75rem;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;cursor:pointer;text-decoration:none;transition:background .15s,border-color .15s,transform .15s}
+.lc-social-btn:hover{background:#f9fafb;border-color:#d1d5db;transform:translateY(-1px)}
+
+/* Video shade: even dark veil for centered-card layout */
+.authwrap-video .auth-video-shade{background:rgba(0,0,0,.38)}
+
+/* Mobile */
+@media(max-width:480px){.lc-wrap{max-width:100%;padding:1.75rem 1.25rem 1.5rem;border-radius:18px}}
+
+/* Reduced motion: hide video, show static poster */
+@media(prefers-reduced-motion:reduce){.authwrap-video .auth-video{display:none}.authwrap-video{background:#0a0a0a url(/img/auth-team-hero.webp) 50%/cover no-repeat}}
 
 /* Payment method logos (bKash, Stripe) sit on a white tile */
 .gw-logo,.gw input:checked + span .gw-mark.gw-logo{background:none;border:0;border-radius:0;padding:0}

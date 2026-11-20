@@ -262,8 +262,10 @@ const nextQ = encodeURIComponent(cp);
   <div class="auth-video-shade" aria-hidden="true"></div>
   <% } %>
   <main id="main" class="auth" tabindex="-1">
+<% if (ti !== 'Log in') { %>
     <div class="auth-prefs">
       <% if (ti === 'Register') { %><a class="auth-switch" href="/login"><%- icon('user') %><%= t('auth.login') %></a><% } else { %><a class="auth-switch" href="/register"><%- icon('plus') %><%= t('auth.create') %></a><% } %>
       <% prefsMenu() %>
     </div>
+<% } %>
 <% } %>
