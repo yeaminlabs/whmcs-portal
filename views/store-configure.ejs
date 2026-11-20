@@ -32,7 +32,7 @@ const js = (v) => JSON.stringify(v).replace(/</g, '\\\\u003c');
           <label class="period-label"><%= t('conf.period') %></label>
           <select name="billingcycle" id="period-select">
             <% cycles.forEach(c => { %>
-            <option value="<%= c.id %>" data-price="<%= c.price %>" data-setup="<%= c.setup %>" <%= c.id === selected.id ? 'selected' : '' %><%= st(c.label) %></option>
+            <option value="<%= c.id %>" data-price="<%= c.price %>" data-setup="<%= c.setup %>" <%= c.id === selected.id ? 'selected' : '' %>><%= st(c.label) %></option>
             <% }) %>
           </select>
         </div>
@@ -75,6 +75,23 @@ const js = (v) => JSON.stringify(v).replace(/</g, '\\\\u003c');
       </section>
       <% } %>
 
+      <!-- Server fields (server products only) -->
+      <% if (product.kind === 'server') { %>
+      <section class="card">
+        <div class="card-head"><span class="card-title"><%= t('conf.server') %></span></div>
+        <div class="card-body">
+          <div class="field-row">
+            <label><%= t('conf.hostname') %><input name="hostname" value="<%= form.hostname || '' %>" placeholder="server1.mybusiness.com" autocomplete="off" autocapitalize="off" spellcheck="false" required></label>
+            <label><%= t('conf.rootpw') %><input type="password" name="rootpw" minlength="8" maxlength="64" autocomplete="new-password" required><small class="hint"><%= t('conf.rootpwHint') %></small></label>
+          </div>
+          <div class="field-row">
+            <label><%= t('conf.ns1') %><input name="ns1prefix" value="<%= form.ns1prefix || 'ns1' %>" autocomplete="off"></label>
+            <label><%= t('conf.ns2') %><input name="ns2prefix" value="<%= form.ns2prefix || 'ns2' %>" autocomplete="off"></label>
+          </div>
+        </div>
+      </section>
+      <% } %>
+
       <!-- Payment section -->
       <section class="card pay-card">
         <div class="card-head"><span class="card-title"><%= t('conf.payment') %></span></div>
@@ -107,16 +124,22 @@ const js = (v) => JSON.stringify(v).replace(/</g, '\\\\u003c');
             <b><%- brandMark(product.name) %><%= product.name %></b>
             <small><%= gname %></small>
           </div>
-          <dl class="sum-list">
-            <div><dt id="sum-cycle"><%= st(selected.label) %></dt><dd id="sum-price"><%= money(selected.price, prefix) %></dd></div>
-            <div id="sum-domain-row" hidden><dt id="sum-domain-label"><%= t('col.domain') %></dt><dd id="sum-domain">—</dd></div>
-            <div id="sum-setup-row"<% if (!selected.setup) { %> hidden<% } %>><dt><%= t('conf.setup') %></dt><dd id="sum-setup"><%= money(selected.setup, prefix) %></dd></div>
-            <div id="sum-promo-row" class="sum-promo" hidden><dt id="sum-promo-label"></dt><dd id="sum-promo"></dd></div>
-          </dl>
-          <div class="sum-total sum-total-row">
-            <span><%= t('conf.dueToday') %></span>
-            <strong id="sum-total"><%= money(selected.price + selected.setup, prefix) %></strong>
+          <div class="sum-pricing" id="sum-pricing">
+            <div class="sum-shimmer" aria-hidden="true"></div>
+            <dl class="sum-list">
+              <div><dt id="sum-cycle"><%= st(selected.label) %></dt><dd id="sum-price"><%= money(selected.price, prefix) %></dd></div>
+              <div id="sum-domain-row" hidden><dt id="sum-domain-label"><%= t('col.domain') %></dt><dd id="sum-domain">—</dd></div>
+              <div id="sum-setup-row"<% if (!selected.setup) { %> hidden<% } %>><dt><%= t('conf.setup') %></dt><dd id="sum-setup"><%= money(selected.setup, prefix) %></dd></div>
+              <div id="sum-promo-row" class="sum-promo" hidden><dt id="sum-promo-label"></dt><dd id="sum-promo"></dd></div>
+            </dl>
+            <div class="sum-total sum-total-row">
+              <span><%= t('conf.dueToday') %></span>
+              <strong id="sum-total"><%= money(selected.price + selected.setup, prefix) %></strong>
+            </div>
           </div>
+          <% if (billing) { %>
+          <p class="sum-bill" id="sum-bill-row"><%= t('conf.billedAs', { code: billing.code }) %> <b id="sum-bill"></b></p>
+          <% } %>
           <p class="sum-note"><%= t('conf.taxNote', { code: billing ? billing.code : product.pricing.code }) %></p>
           <button type="submit" class="btn red sum-cta"><%= t(session && session.clientId ? 'conf.complete' : 'pub.continueCheckout') %> <%- icon('arrow') %></button>
           <div class="sum-secure"><%- icon('lock') %> <%= t('conf.secure') %></div>
