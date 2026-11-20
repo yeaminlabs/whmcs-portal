@@ -58,9 +58,9 @@ const httpsUrl = (u) => (typeof u === 'string' && /^https:\/\/[^\s]+$/i.test(u) 
 // module responses from turning into controls that cannot be executed.
 const MODULE_ACTIONS = {
   openclaw_n8n: new Set(['ClientStart', 'ClientStop', 'ClientRestart', 'ClientReinstall']),
+  // Only controls that the WHMCS n8n module executes through the bridge are offered.
   snbd_n8n: new Set([
-    'start', 'restart', 'stop', 'upgrade', 'get_disk', 'get_env', 'save_env',
-    'change_password', 'reset_users', 'reset_data', 'get_ws_token',
+    'start', 'restart', 'stop', 'get_disk', 'get_env', 'save_env', 'get_ws_token',
   ]),
 };
 

@@ -74,7 +74,7 @@ the module back-ends as usual.
 | Module | Functions (`*` needs confirm) | How |
 |---|---|---|
 | `openclaw_n8n` | `ClientStart`, `ClientStop*`, `ClientRestart`, `ClientReinstall*` | module functions |
-| `snbd_n8n` | `start`, `restart`, `stop*`, `upgrade*`, `get_disk`, `get_env`, `save_env*` (`args.env`), `change_password*` (`args.password`, `args.email`), `reset_users*`, `reset_data*`, `get_ws_token` (`args.endpoint`) | the module's `ContainerManager` / `EnvEditor` / `WsTokenManager` (its AJAX handler needs a browser CSRF session) |
+| `snbd_n8n` | `start`, `restart`, `stop*`, `get_disk`, `get_env`, `save_env*` (`args.env`), `get_ws_token` | the module's `ContainerManager` / `EnvEditor` / `WsTokenManager` (its AJAX handler needs a browser CSRF session) |
 | `hermesagent` | `restart`, `viewlogs`, `regenpassword`, `downloadbackup`, `healthcheck`, `redeploy*`, `killswitch*` | module functions; logs/health → `data.logs`, password → `data.password`, backup → `data.file` one-time link |
 | `ArkHostHetznerVPS` | `Start`, `Stop*`, `Reboot`, `VNC` | module functions; VNC → `data.url` one-time console page + `data.password` |
 | `pvewhmcs` | `vmStart`, `vmReboot`, `vmShutdown*`, `vmStop*`, `noVNC` | module functions; noVNC → `data.url` |

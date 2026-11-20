@@ -38,7 +38,7 @@ const hasAction = (fn) => actions.some(a => a.fn === fn);
       </dl>
     </section>
 
-    <% if (nativeN8n && (hasAction('get_disk') || hasAction('get_env') || hasAction('change_password'))) { %>
+    <% if (nativeN8n && (hasAction('get_disk') || hasAction('get_env') || hasAction('save_env'))) { %>
     <section class="panel" id="n8n-tools">
       <header><span><%= t('svcx.n8n.tools') %></span></header>
       <div class="svc-body svc-n8n-tools">
@@ -50,9 +50,6 @@ const hasAction = (fn) => actions.some(a => a.fn === fn);
         <% } %>
         <% if (hasAction('save_env')) { %>
         <form method="post" action="/services/<%= s.id %>/action" class="svc-act svc-n8n-form" data-label="<%= t('svcx.n8n.saveEnvironment') %>" data-confirm="1" data-args="{}"><input type="hidden" name="fn" value="save_env"><textarea name="env" rows="3" placeholder='{"N8N_LOG_LEVEL":"info"}' required></textarea><button type="submit" class="btn ghost"><span><%= t('svcx.n8n.saveEnvironment') %></span></button></form>
-        <% } %>
-        <% if (hasAction('change_password')) { %>
-        <form method="post" action="/services/<%= s.id %>/action" class="svc-act svc-n8n-form" data-label="<%= t('svcx.n8n.changePassword') %>" data-confirm="1" data-args="{}"><input type="hidden" name="fn" value="change_password"><input name="password" type="password" minlength="10" placeholder="<%= t('svcx.n8n.newPassword') %>" required><input name="email" type="email" placeholder="<%= t('svcx.n8n.ownerEmail') %>" required><button type="submit" class="btn ghost"><span><%= t('svcx.n8n.changePassword') %></span></button></form>
         <% } %>
       </div>
     </section>

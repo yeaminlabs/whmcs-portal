@@ -20,13 +20,9 @@ const ACTIONS = {
     { fn: 'start', label: 'Start', confirm: false, danger: false },
     { fn: 'stop', label: 'Stop', confirm: true, danger: false },
     { fn: 'restart', label: 'Restart', confirm: false, danger: false },
-    { fn: 'upgrade', label: 'Update n8n', confirm: true, danger: false },
     { fn: 'get_disk', label: 'Disk usage', confirm: false, danger: false },
     { fn: 'get_env', label: 'View environment', confirm: false, danger: false },
     { fn: 'save_env', label: 'Save environment', confirm: true, danger: false },
-    { fn: 'change_password', label: 'Change owner password', confirm: true, danger: false },
-    { fn: 'reset_users', label: 'Reset users', confirm: true, danger: true },
-    { fn: 'reset_data', label: 'Reset all data', confirm: true, danger: true },
     { fn: 'get_ws_token', label: 'Live session token', confirm: false, danger: false },
   ],
   puqDockerN8N: [

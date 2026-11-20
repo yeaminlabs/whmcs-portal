@@ -38,13 +38,9 @@ final class Catalog
             'start' => ['label' => 'Start', 'via' => 'n8n', 'requires' => 'handleClientAjax', 'done' => 'Started'],
             'restart' => ['label' => 'Restart', 'via' => 'n8n', 'requires' => 'handleClientAjax', 'done' => 'Restarted'],
             'stop' => ['label' => 'Stop', 'via' => 'n8n', 'requires' => 'handleClientAjax', 'confirm' => true, 'done' => 'Stopped'],
-            'upgrade' => ['label' => 'Upgrade n8n', 'via' => 'n8n', 'requires' => 'handleClientAjax', 'confirm' => true, 'done' => 'Upgrade started'],
             'get_disk' => ['label' => 'Disk usage', 'via' => 'n8n', 'requires' => 'handleClientAjax', 'done' => 'Disk usage measured'],
             'get_env' => ['label' => 'View environment', 'via' => 'n8n', 'requires' => 'handleClientAjax', 'done' => 'Environment loaded'],
             'save_env' => ['label' => 'Save environment', 'via' => 'n8n', 'requires' => 'handleClientAjax', 'confirm' => true, 'done' => 'Environment saved'],
-            'change_password' => ['label' => 'Change owner password', 'via' => 'n8n', 'requires' => 'handleClientAjax', 'confirm' => true, 'done' => 'Password changed'],
-            'reset_users' => ['label' => 'Reset users', 'via' => 'n8n', 'requires' => 'handleClientAjax', 'confirm' => true, 'danger' => true, 'done' => 'Users reset'],
-            'reset_data' => ['label' => 'Reset all data', 'via' => 'n8n', 'requires' => 'handleClientAjax', 'confirm' => true, 'danger' => true, 'done' => 'Data reset'],
             'get_ws_token' => ['label' => 'Live session token', 'via' => 'n8n', 'requires' => 'handleClientAjax', 'done' => 'Token issued'],
         ],
         'hermesagent' => [
