@@ -51,6 +51,7 @@ const isPublic = !(session && session.clientId) && typeof publicPage !== 'undefi
 <% if (ti === 'Contact') { %><link rel="stylesheet" href="/css/contact.css"><% } %>
 <% if (ti === 'DNS lookup') { %><link rel="stylesheet" href="/css/dns-lookup.css"><% } %>
 <% if (ti === 'Dashboard') { %><link rel="stylesheet" href="/css/dashboard.css"><% } %>
+<% if (ti === 'Uptime') { %><link rel="stylesheet" href="/css/uptime.css"><% } %>
 <% if (typeof kbPage !== 'undefined' && kbPage) { %><link rel="stylesheet" href="/css/kb.css"><% } %>
 <% if (typeof kitsPage !== 'undefined' && kitsPage) { %><link rel="stylesheet" href="/css/kits.css"><% } %>
 <% const trk = (typeof tracking === 'object' && tracking) || null; if (trk && trk.gtmId) { %>

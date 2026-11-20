@@ -1,0 +1,47 @@
+/* Uptime monitor: a quiet, data-first surface within the client area. */
+.uptime-pagehead{margin-bottom:24px}
+.uptime-pagehead .sub{max-width:62ch;margin-top:8px}
+.uptime-add{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:22px 24px 24px;box-shadow:var(--shadow);margin:0 0 24px}
+.uptime-section-heading{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.uptime-section-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:var(--red-50);color:var(--red)}
+.uptime-section-icon .ico{width:18px;height:18px}
+.uptime-section-heading h2{margin:0;font-size:18px;letter-spacing:-.015em}
+.uptime-section-heading p{margin:2px 0 0;color:var(--g500);font-size:13px}
+.uptime-form{display:grid;grid-template-columns:minmax(150px,.8fr) minmax(240px,1.5fr) minmax(120px,.55fr) auto;align-items:end;gap:12px}
+.uptime-form label{margin:0;gap:7px}
+.uptime-label{font-size:12px;font-weight:700;color:var(--g700);letter-spacing:.04em}
+.uptime-form input,.uptime-form select{height:44px;box-shadow:none;border-color:var(--g300)}
+.uptime-form input:focus,.uptime-form select:focus{box-shadow:0 0 0 4px rgba(208,2,27,.12)}
+.uptime-add-btn{height:44px;white-space:nowrap;padding-inline:18px}
+.uptime-add-btn .ico,.uptime-actions .ico{width:15px;height:15px}
+.uptime-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+.uptime-card{display:flex;flex-direction:column;min-width:0;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);transition:border-color .18s,box-shadow .18s,transform .18s var(--ease)}
+.uptime-card:hover{border-color:var(--red-200);box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.uptime-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:0 0 18px}
+.uptime-card-header h2{margin:0 0 5px;font-size:18px;line-height:1.25;color:var(--ink)}
+.uptime-url{display:flex;align-items:center;gap:4px;min-width:0;color:var(--g500);font-size:13px;line-height:1.4;overflow-wrap:anywhere}
+.uptime-url:hover{color:var(--red)}
+.uptime-url .ico{width:13px;height:13px;flex:none}
+.uptime-status{display:inline-flex;align-items:center;gap:6px;flex:none;border:1px solid var(--g200);border-radius:999px;padding:4px 9px;font-size:11px;font-weight:700;text-transform:capitalize}
+.uptime-status i{width:6px;height:6px;border-radius:50%;background:currentColor}
+.uptime-status.is-up{color:var(--ok);background:var(--ok-bg);border-color:var(--ok-line)}
+.uptime-status.is-down{color:var(--bad);background:var(--bad-bg);border-color:var(--bad-line)}
+.uptime-status.is-unknown{color:var(--g600);background:var(--g50)}
+.uptime-metrics{list-style:none;margin:0;padding:14px 0;border-top:1px solid var(--line2);border-bottom:1px solid var(--line2);display:grid;gap:11px}
+.uptime-metrics li{display:flex;align-items:baseline;justify-content:space-between;gap:16px;color:var(--g600);font-size:13px}
+.uptime-metrics li span{min-width:0}
+.uptime-metrics li b{color:var(--ink);font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.uptime-error{color:var(--bad)!important;font-size:12px!important;overflow-wrap:anywhere}
+.uptime-actions{display:flex;gap:8px;margin-top:16px}
+.uptime-actions form{display:flex;flex:1}
+.uptime-actions button{width:100%;min-height:40px;padding-inline:12px}
+.uptime-delete{color:var(--bad)!important}
+.uptime-delete:hover{color:var(--bad)!important;background:var(--bad-bg)!important;border-color:var(--bad-line)!important}
+.uptime-empty{margin-top:0;padding:56px 20px}
+.uptime-empty-icon{display:grid;place-items:center;width:44px;height:44px;margin:0 auto 14px;border-radius:12px;background:var(--g100);color:var(--g500)}
+.uptime-empty-icon .ico{width:21px;height:21px}
+.uptime-empty h3{margin:0 0 6px;color:var(--ink);font-size:17px}
+.uptime-empty p{margin:0;color:var(--g600)}
+@media(max-width:760px){.uptime-form{grid-template-columns:1fr 1fr}.uptime-url-field{grid-column:1/-1}.uptime-add-btn{width:100%}}
+@media(max-width:480px){.uptime-add{padding:18px}.uptime-form{grid-template-columns:1fr}.uptime-url-field{grid-column:auto}.uptime-card-header{flex-direction:column}.uptime-status{align-self:flex-start}.uptime-actions{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){.uptime-card{transition:none}.uptime-card:hover{transform:none}}

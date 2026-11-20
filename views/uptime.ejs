@@ -1,41 +1,42 @@
 <%- include('_head') %>
-<div class="pagehead"><div><h1><%= t('up.title') %></h1><p class="sub"><%= t('up.sub') %></p></div></div>
+<div class="pagehead uptime-pagehead"><div><h1><%= t('up.title') %></h1><p class="sub"><%= t('up.sub') %></p></div></div>
 
-<section class="card" style="margin-bottom:16px">
-  <h2 style="margin:0 0 8px"><%= t('up.addTitle') %></h2>
-  <form method="post" action="/uptime/add" class="af" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end">
-    <label style="flex:1;min-width:160px"><span class="af-label"><%= t('up.name') %></span><input class="af-input" name="name" required placeholder="My site"></label>
-    <label style="flex:2;min-width:220px"><span class="af-label"><%= t('up.url') %></span><input class="af-input" name="url" required placeholder="https://example.com"></label>
-    <label style="min-width:120px"><span class="af-label"><%= t('up.interval') %></span>
-      <select class="af-input" name="interval">
+<section class="uptime-add" aria-labelledby="uptime-add-title">
+  <div class="uptime-section-heading">
+    <div class="uptime-section-icon" aria-hidden="true"><%- icon('plus') %></div>
+    <div><h2 id="uptime-add-title"><%= t('up.addTitle') %></h2><p><%= t('up.note') %></p></div>
+  </div>
+  <form method="post" action="/uptime/add" class="uptime-form">
+    <label><span class="uptime-label"><%= t('up.name') %></span><input name="name" required placeholder="My site"></label>
+    <label class="uptime-url-field"><span class="uptime-label"><%= t('up.url') %></span><input name="url" required placeholder="https://example.com"></label>
+    <label><span class="uptime-label"><%= t('up.interval') %></span>
+      <select name="interval">
         <option value="300">5 min</option>
         <option value="600">10 min</option>
         <option value="1800">30 min</option>
         <option value="3600">1 hour</option>
       </select>
     </label>
-    <button type="submit" class="btn"><%= t('up.add') %></button>
+    <button type="submit" class="btn uptime-add-btn"><%- icon('plus') %><%= t('up.add') %></button>
   </form>
-  <p class="sub" style="margin-top:8px;font-size:12px"><%= t('up.note') %></p>
 </section>
 
 <% if (!monitors.length) { %>
-  <div class="ui-empty"><h3><%= t('up.emptyTitle') %></h3><p><%= t('up.emptyText') %></p></div>
+  <div class="ui-empty uptime-empty"><div class="uptime-empty-icon" aria-hidden="true"><%- icon('activity') %></div><h3><%= t('up.emptyTitle') %></h3><p><%= t('up.emptyText') %></p></div>
 <% } else { %>
-  <div class="plan-grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">
+  <div class="uptime-grid">
     <% monitors.forEach(m => { %>
-    <article class="plan">
-      <header><h2><%= m.name %></h2><span class="plan-lead" style="background:<%= m.last_status==='up'?'#16a34a':m.last_status==='down'?'#dc2626':'#6b7280' %>;color:#fff"><%= m.last_status %></span></header>
-      <p style="word-break:break-all;font-size:12px;opacity:.7;margin:4px 0"><%= m.url %></p>
-      <ul class="plan-features">
-        <li><%- icon('check') %><span><b><%= t('up.uptime24') %>:</b> <%= m.uptime24 === null ? '—' : m.uptime24 + '%' %></span></li>
-        <li><%- icon('check') %><span><b><%= t('up.lastMs') %>:</b> <%= m.last_ms ? m.last_ms + ' ms' : '—' %></span></li>
-        <li><%- icon('check') %><span><b><%= t('up.lastChecked') %>:</b> <%= m.last_checked ? new Date(m.last_checked).toLocaleString() : '—' %></span></li>
-        <% if (m.last_error) { %><li><%- icon('check') %><span style="color:#dc2626"><%= m.last_error %></span></li><% } %>
+    <article class="uptime-card">
+      <header class="uptime-card-header"><div><h2><%= m.name %></h2><a class="uptime-url" href="<%= m.url %>" target="_blank" rel="noreferrer"><%= m.url %><%- icon('external') %></a></div><span class="uptime-status <%= m.last_status === 'up' ? 'is-up' : m.last_status === 'down' ? 'is-down' : 'is-unknown' %>"><i aria-hidden="true"></i><%= m.last_status %></span></header>
+      <ul class="uptime-metrics">
+        <li><span><%= t('up.uptime24') %></span><b><%= m.uptime24 === null ? '—' : m.uptime24 + '%' %></b></li>
+        <li><span><%= t('up.lastMs') %></span><b><%= m.last_ms ? m.last_ms + ' ms' : '—' %></b></li>
+        <li><span><%= t('up.lastChecked') %></span><b><%= m.last_checked ? new Date(m.last_checked).toLocaleString() : '—' %></b></li>
+        <% if (m.last_error) { %><li class="uptime-error"><span><%= m.last_error %></span></li><% } %>
       </ul>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <form method="post" action="/uptime/<%= m.id %>/check"><button type="submit" class="btn ghost"><%= t('up.checkNow') %></button></form>
-        <form method="post" action="/uptime/<%= m.id %>/delete" onsubmit="return confirm('<%= t('up.confirmDelete') %>')"><button type="submit" class="btn ghost" style="color:#dc2626"><%= t('up.delete') %></button></form>
+      <div class="uptime-actions">
+        <form method="post" action="/uptime/<%= m.id %>/check"><button type="submit" class="btn ghost"><%- icon('refresh') %><%= t('up.checkNow') %></button></form>
+        <form method="post" action="/uptime/<%= m.id %>/delete" onsubmit="return confirm('<%= t('up.confirmDelete') %>')"><button type="submit" class="btn ghost uptime-delete"><%= t('up.delete') %></button></form>
       </div>
     </article>
     <% }) %>
