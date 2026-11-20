@@ -261,22 +261,9 @@ const nextQ = encodeURIComponent(cp);
   </div>
   <div class="auth-video-shade" aria-hidden="true"></div>
   <% } %>
-  <aside class="auth-side" aria-label="SNBD HOST">
-    <a class="as-brand" href="/" aria-label="<%= t('brand.home') %>"><img src="/img/snbd-mark.png" alt="" width="40" height="40"><span>SNBD HOST</span></a>
-    <div class="as-copy">
-      <h2><%= t('auth.heroTitle') %></h2>
-      <p><%= t('auth.heroText') %></p>
-    </div>
-    <ul class="as-cards">
-      <li><span class="as-ico" aria-hidden="true"><%- icon('disk') %></span><b><%= t('auth.feat1Title') %></b><small><%= t('auth.feat1Text') %></small></li>
-      <li><span class="as-ico" aria-hidden="true"><%- icon('headset') %></span><b><%= t('auth.feat2Title') %></b><small><%= t('auth.feat2Text') %></small></li>
-    </ul>
-  </aside>
-  <div class="auth-pane">
+  <main id="main" class="auth" tabindex="-1">
     <div class="auth-prefs">
       <% if (ti === 'Register') { %><a class="auth-switch" href="/login"><%- icon('user') %><%= t('auth.login') %></a><% } else { %><a class="auth-switch" href="/register"><%- icon('plus') %><%= t('auth.create') %></a><% } %>
       <% prefsMenu() %>
     </div>
-    <main id="main" class="auth" tabindex="-1">
-      <img class="auth-logo" src="/img/snbd-logo.png" alt="SNBD HOST" width="144" height="36">
 <% } %>
