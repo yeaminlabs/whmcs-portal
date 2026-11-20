@@ -108,14 +108,14 @@ let step = 0;
       <div class="sum-body" id="sum-body">
         <div class="sum-product"><b><%- brandMark(product.name) %><%= product.name %></b><small><%= gname %></small></div>
         <div class="sum-pricing" id="sum-pricing">
-        <div class="sum-shimmer" aria-hidden="true"></div>
-        <dl>
-          <div><dt id="sum-cycle"><%= st(selected.label) %></dt><dd id="sum-price"><%= money(selected.price, prefix) %></dd></div>
-          <div id="sum-setup-row"<% if (!selected.setup) { %> hidden<% } %>><dt><%= t('conf.setup') %></dt><dd id="sum-setup"><%= money(selected.setup, prefix) %></dd></div>
-          <% if (product.kind === 'hosting') { %><div id="sum-domain-row" hidden><dt id="sum-domain-label"><%= t('col.domain') %></dt><dd id="sum-domain">—</dd></div><% } %>
-          <div id="sum-promo-row" class="sum-promo" hidden><dt id="sum-promo-label"></dt><dd id="sum-promo"></dd></div>
-        </dl>
-        <div class="sum-total"><span><%= t('conf.dueToday') %></span><strong id="sum-total"><%= money(selected.price + selected.setup, prefix) %></strong></div>
+          <div class="sum-shimmer" aria-hidden="true"></div>
+          <dl>
+            <div><dt id="sum-cycle"><%= st(selected.label) %></dt><dd id="sum-price"><%= money(selected.price, prefix) %></dd></div>
+            <div id="sum-setup-row"<% if (!selected.setup) { %> hidden<% } %>><dt><%= t('conf.setup') %></dt><dd id="sum-setup"><%= money(selected.setup, prefix) %></dd></div>
+            <% if (product.kind === 'hosting') { %><div id="sum-domain-row" hidden><dt id="sum-domain-label"><%= t('col.domain') %></dt><dd id="sum-domain">—</dd></div><% } %>
+            <div id="sum-promo-row" class="sum-promo" hidden><dt id="sum-promo-label"></dt><dd id="sum-promo"></dd></div>
+          </dl>
+          <div class="sum-total sum-total-row"><span><%= t('conf.dueToday') %></span><strong id="sum-total"><%= money(selected.price + selected.setup, prefix) %></strong></div>
         </div>
         <% if (billing) { %>
         <p class="sum-bill" id="sum-bill-row"><%= t('conf.billedAs', { code: billing.code }) %> <b id="sum-bill"></b></p>
@@ -124,9 +124,18 @@ let step = 0;
         <button type="submit" class="btn red sum-cta"><%= t(session && session.clientId ? 'conf.complete' : 'pub.continueCheckout') %> <%- icon('arrow') %></button>
         <div class="place-overlay" id="place-overlay" role="status" aria-live="polite" hidden>
           <div class="place-card">
-            <span class="place-ring" aria-hidden="true"></span>
-            <b><%= t('conf.placing') %></b>
-            <small id="place-step"><%= t('conf.placeStep1') %></small>
+            <div class="place-ring-wrap" aria-hidden="true">
+              <div class="place-ring-bg"></div>
+              <div class="place-ring"></div>
+            </div>
+            <p class="place-title"><%= t('conf.placing') %></p>
+            <p class="place-step" id="place-step"><%= t('conf.placeStep1') %></p>
+            <div class="place-dots" aria-hidden="true">
+              <span class="place-dot active" id="pd0"></span>
+              <span class="place-dot" id="pd1"></span>
+              <span class="place-dot" id="pd2"></span>
+            </div>
+            <p class="place-brand">SNBD HOST &middot; <%= t('conf.secure') %></p>
           </div>
         </div>
         <p class="sum-secure"><%- icon('lock') %><%= t('conf.secure') %></p>
@@ -260,10 +269,18 @@ let step = 0;
   form.addEventListener('submit', () => {
     const btn = form.querySelector('.sum-cta');
     btn.setAttribute('aria-disabled', 'true');
-    btn.textContent = I18N.placing;
     placeOverlay.hidden = false;
     let i = 0;
-    setInterval(() => { i = (i + 1) % placeSteps.length; $('place-step').textContent = placeSteps[i]; }, 1600);
+    const stepEl = $('place-step');
+    const dots = [0, 1, 2].map((n) => $('pd' + n));
+    function advanceStep() {
+      if (dots[i]) { dots[i].classList.remove('active'); dots[i].classList.add('done'); }
+      i = (i + 1) % placeSteps.length;
+      if (dots[i]) { dots[i].classList.remove('done'); dots[i].classList.add('active'); }
+      stepEl.classList.add('fade');
+      setTimeout(() => { if (stepEl) { stepEl.textContent = placeSteps[i]; stepEl.classList.remove('fade'); } }, 220);
+    }
+    setInterval(advanceStep, 1800);
   });
 
   // Coupon check: validates the code only and previews the discount. Nothing is ordered.
@@ -288,7 +305,7 @@ let step = 0;
       promoBtn.disabled = true;
       promoBtn.classList.add('is-busy');
       promoFeedback.hidden = true;
-      summary.classList.add('is-loading');
+      pricing.classList.add('is-loading');
       const started = Date.now();
       try {
         const r = await fetch('/store/promo-code', {
@@ -308,7 +325,7 @@ let step = 0;
         update();
         showPromoFeedback(err.message || I18N.checkFail, 'bad');
       } finally {
-        summary.classList.remove('is-loading');
+        pricing.classList.remove('is-loading');
         promoBtn.disabled = false;
         promoBtn.classList.remove('is-busy');
       }
