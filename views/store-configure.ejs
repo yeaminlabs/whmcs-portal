@@ -9,28 +9,62 @@ const prefix = product.pricing.prefix;
 const methods = paymethods.length ? paymethods : [];
 const pm = form.paymentmethod || (methods[0] && methods[0].module);
 const gname = tr('group.' + group.slug, group.name);
-const js = (v) => JSON.stringify(v).replace(/</g, '\\u003c');
-let step = 0;
+const js = (v) => JSON.stringify(v).replace(/</g, '\\\\u003c');
 %>
 <nav class="crumbs" aria-label="Breadcrumb"><a href="/store"><%= t('store.crumb') %></a><%- icon('chev') %><a href="/store/<%= group.slug %>"><%- brandMark(group.slug + ' ' + group.name) %><%= gname %></a><%- icon('chev') %><span><%= product.name %></span></nav>
-<div class="pagehead"><div><h1><%- brandMark(product.name) %><%- brandText(t('conf.title', { name: product.name })) %></h1><p class="sub"><%= t(product.kind === 'hosting' ? 'conf.subHosting' : product.kind === 'server' ? 'conf.subServer' : 'conf.subOther') %></p></div></div>
+<div class="pagehead"><div><h1><%= t('conf.cartTitle') %></h1><p class="sub"><%= t('conf.cartSub') %></p></div></div>
 
 <% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
 
-<form method="post" action="/store/<%= group.slug %>/<%= product.slug %>" class="checkout" id="checkout" novalidate>
-  <div class="checkout-main">
+<form method="post" action="/store/<%= group.slug %>/<%= product.slug %>" class="cart" id="cart" novalidate>
+  <div class="cart-grid">
+    <div class="cart-main">
+      <!-- Plan card -->
+      <section class="card plan-card">
+        <div class="plan-head">
+          <div class="plan-brand"><%- brandMark(product.name) %></div>
+          <div class="plan-info">
+            <b class="plan-name"><%- brandText(product.name) %></b>
+            <p class="plan-desc"><%= t(product.kind === 'hosting' ? 'conf.subHosting' : product.kind === 'server' ? 'conf.subServer' : 'conf.subOther') %></p>
+          </div>
+        </div>
+        <div class="plan-period">
+          <label class="period-label"><%= t('conf.period') %></label>
+          <select name="billingcycle" id="period-select">
+            <% cycles.forEach(c => { %>
+            <option value="<%= c.id %>" data-price="<%= c.price %>" data-setup="<%= c.setup %>" <%= c.id === selected.id ? 'selected' : '' %><%= st(c.label) %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="plan-price-wrap">
+          <strong class="plan-price-big"><%= money(selected.price, prefix) %></strong>
+          <span class="plan-price-note"><%= t('conf.perMonth', { amount: money(selected.perMonth || selected.price, prefix) }) %></span>
+        </div>
+        <% if (selected.setup) { %>
+        <div class="plan-setup"><small><%= t('conf.setup') %>: <%= money(selected.setup, prefix) %></small></div>
+        <% } %>
+        <div class="plan-features">
+          <ul class="feature-list">
+            <% if (product.kind === 'hosting') { %>
+            <li><span class="check">✓</span><%= t('conf.featureDomain') %></li>
+            <li><span class="check">✓</span><%= t('conf.featureEmail') %></li>
+            <% } %>
+            <li><span class="check">✓</span><%= t('conf.featureSupport') %></li>
+          </ul>
+        </div>
+      </section>
 
-    <% if (product.kind === 'hosting') { step++; %>
-    <section class="panel step" aria-labelledby="s-domain">
-      <header><span id="s-domain"><span class="step-n"><%= step %></span><%= t('conf.domain') %></span></header>
-      <div class="step-body">
-        <div class="choice-row" role="radiogroup" aria-label="<%= t('conf.domain') %>">
+      <!-- Domain section (hosting only) -->
+      <% if (product.kind === 'hosting') { %>
+      <section class="card domain-card">
+        <div class="card-head"><span class="card-title"><%= t('conf.domain') %></span></div>
+        <div class="domain-option">
           <label class="choice"><input type="radio" name="domainoption" value="register" <%= domainoption === 'register' ? 'checked' : '' %>><span><b><%= t('conf.register') %></b><small><%= t('conf.registerHint') %></small></span></label>
           <label class="choice"><input type="radio" name="domainoption" value="transfer" <%= domainoption === 'transfer' ? 'checked' : '' %>><span><b><%= t('conf.transfer') %></b><small><%= t('conf.transferHint') %></small></span></label>
           <label class="choice"><input type="radio" name="domainoption" value="owndomain" <%= domainoption === 'owndomain' ? 'checked' : '' %>><span><b><%= t('conf.own') %></b><small><%= t('conf.ownHint') %></small></span></label>
         </div>
         <div class="domain-row">
-          <label for="domain" class="sr-only"><%= t('col.domain') %></label>
+          <label class="sr-only" for="domain"><%= t('col.domain') %></label>
           <input id="domain" name="domain" value="<%= form.domain || '' %>" placeholder="mybusiness.com" autocomplete="off" autocapitalize="off" spellcheck="false" required>
           <button type="button" class="btn ghost" id="check-domain"><%= t('conf.check') %></button>
         </div>
@@ -38,115 +72,80 @@ let step = 0;
         <label class="epp" id="epp-field"<% if (domainoption !== 'transfer') { %> hidden<% } %>><%= t('conf.epp') %> <span class="opt"><%= t('conf.eppHint') %></span>
           <input name="eppcode" autocomplete="off">
         </label>
-      </div>
-    </section>
-    <% } %>
+      </section>
+      <% } %>
 
-    <% step++; %>
-    <section class="panel step" aria-labelledby="s-cycle">
-      <header><span id="s-cycle"><span class="step-n"><%= step %></span><%= t('conf.cycle') %></span><small><%= t('conf.cycleHint') %></small></header>
-      <div class="step-body">
-        <div class="cycle-grid" role="radiogroup" aria-label="<%= t('conf.cycle') %>">
-          <% cycles.forEach(c => { %>
-          <label class="choice cycle">
-            <input type="radio" name="billingcycle" value="<%= c.id %>" data-price="<%= c.price %>" data-setup="<%= c.setup %>" data-label="<%= st(c.label) %>" <%= c.id === selected.id ? 'checked' : '' %>>
-            <span>
-              <b><%= st(c.label) %></b>
-              <strong><%= money(c.price, prefix) %></strong>
-              <% if (c.months > 1) { %><small><%= t('conf.perMonth', { amount: money(c.perMonth, prefix) }) %></small><% } else if (c.setup > 0) { %><small><%= t('store.setupFee', { amount: money(c.setup, prefix) }) %></small><% } else { %><small>&nbsp;</small><% } %>
-              <% if (c.save) { %><em class="save"><%= t('conf.save', { pct: c.save }) %></em><% } %>
-            </span>
-          </label>
+      <!-- Payment section -->
+      <section class="card pay-card">
+        <div class="card-head"><span class="card-title"><%= t('conf.payment') %></span></div>
+        <div class="pay-list" role="radiogroup" aria-label="<%= t('conf.payment') %>">
+          <% methods.forEach(m => { %>
+          <% const mName = String(m.displayname || m.module).split('|')[0].trim(); const mDesc = String(m.displayname).includes('|') ? String(m.displayname).split('|').slice(1).join(' ').trim() : ''; const mLogo = payLogo(m.module) || payLogo(mName); %>
+          <label class="pay-row"><input type="radio" name="paymentmethod" value="<%= m.module %>" <%= m.module === pm ? 'checked' : '' %>><span class="gw-mark<%= mLogo ? ' gw-logo' : '' %>"><% if (mLogo) { %><%- mLogo %><% } else { %><%- icon('wallet') %><% } %></span><span class="pay-info"><b><%= mName %></b><% if (mDesc) { %><small><%= mDesc %></small><% } %></span><span class="pay-check" aria-hidden="true"></span></label>
           <% }) %>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <% if (product.kind === 'server') { step++; %>
-    <section class="panel step" aria-labelledby="s-server">
-      <header><span id="s-server"><span class="step-n"><%= step %></span><%= t('conf.server') %></span></header>
-      <div class="step-body">
-        <div class="field-row">
-          <label><%= t('conf.hostname') %><input name="hostname" value="<%= form.hostname || '' %>" placeholder="server1.mybusiness.com" autocomplete="off" autocapitalize="off" spellcheck="false" required></label>
-          <label><%= t('conf.rootpw') %><input type="password" name="rootpw" minlength="8" maxlength="64" autocomplete="new-password" required><small class="hint"><%= t('conf.rootpwHint') %></small></label>
-        </div>
-        <div class="field-row">
-          <label><%= t('conf.ns1') %><input name="ns1prefix" value="<%= form.ns1prefix || 'ns1' %>" autocomplete="off"></label>
-          <label><%= t('conf.ns2') %><input name="ns2prefix" value="<%= form.ns2prefix || 'ns2' %>" autocomplete="off"></label>
-        </div>
-      </div>
-    </section>
-    <% } %>
-
-    <% step++; %>
-    <section class="panel step" aria-labelledby="s-pay">
-      <header><span id="s-pay"><span class="step-n"><%= step %></span><%= t('conf.payment') %></span></header>
-      <div class="pay-list" role="radiogroup" aria-label="<%= t('conf.payment') %>">
-        <% methods.forEach(m => { %>
-        <% const mName = String(m.displayname || m.module).split('|')[0].trim(); const mDesc = String(m.displayname).includes('|') ? String(m.displayname).split('|').slice(1).join(' ').trim() : ''; const mLogo = payLogo(m.module) || payLogo(mName); %>
-        <label class="pay-row"><input type="radio" name="paymentmethod" value="<%= m.module %>" <%= m.module === pm ? 'checked' : '' %>><span class="gw-mark<%= mLogo ? ' gw-logo' : '' %>"><% if (mLogo) { %><%- mLogo %><% } else { %><%- icon('wallet') %><% } %></span><span class="pay-info"><b><%= mName %></b><% if (mDesc) { %><small><%= mDesc %></small><% } %></span><span class="pay-check" aria-hidden="true"></span></label>
-        <% }) %>
-      </div>
-    </section>
-
-    <% step++; %>
-    <section class="panel step" aria-labelledby="s-promo">
-      <header><span id="s-promo"><span class="step-n"><%= step %></span><%- icon('bolt') %><%= t('conf.promo') %></span><small><%= t('common.optional') %></small></header>
-      <div class="step-body">
-        <div class="promo-row">
-          <input name="promocode" id="promo-input" value="<%= form.promocode || '' %>" autocomplete="off" placeholder="<%= t('conf.promoPlaceholder') %>" aria-label="<%= t('conf.promo') %>">
-          <button type="button" class="promo-apply"><span><%= t('conf.applyPromo') %></span></button>
-        </div>
-        <div id="promo-feedback" class="promo-feedback" role="status" hidden></div>
-      </div>
-    </section>
-  </div>
-
-  <aside class="checkout-side">
-    <div class="panel summary-card">
-      <header><%= t('conf.summary') %></header>
-      <div class="sum-body" id="sum-body">
-        <div class="sum-product"><b><%- brandMark(product.name) %><%= product.name %></b><small><%= gname %></small></div>
-        <div class="sum-pricing" id="sum-pricing">
-          <div class="sum-shimmer" aria-hidden="true"></div>
-          <dl>
-            <div><dt id="sum-cycle"><%= st(selected.label) %></dt><dd id="sum-price"><%= money(selected.price, prefix) %></dd></div>
-            <div id="sum-setup-row"<% if (!selected.setup) { %> hidden<% } %>><dt><%= t('conf.setup') %></dt><dd id="sum-setup"><%= money(selected.setup, prefix) %></dd></div>
-            <% if (product.kind === 'hosting') { %><div id="sum-domain-row" hidden><dt id="sum-domain-label"><%= t('col.domain') %></dt><dd id="sum-domain">—</dd></div><% } %>
-            <div id="sum-promo-row" class="sum-promo" hidden><dt id="sum-promo-label"></dt><dd id="sum-promo"></dd></div>
-          </dl>
-          <div class="sum-total sum-total-row"><span><%= t('conf.dueToday') %></span><strong id="sum-total"><%= money(selected.price + selected.setup, prefix) %></strong></div>
-        </div>
-        <% if (billing) { %>
-        <p class="sum-bill" id="sum-bill-row"><%= t('conf.billedAs', { code: billing.code }) %> <b id="sum-bill"></b></p>
-        <% } %>
-        <p class="sum-note"><%= t('conf.taxNote', { code: billing ? billing.code : product.pricing.code }) %></p>
-        <button type="submit" class="btn red sum-cta"><%= t(session && session.clientId ? 'conf.complete' : 'pub.continueCheckout') %> <%- icon('arrow') %></button>
-        <div class="place-overlay" id="place-overlay" role="status" aria-live="polite" hidden>
-          <div class="place-card">
-            <div class="place-ring-wrap" aria-hidden="true">
-              <div class="place-ring-bg"></div>
-              <div class="place-ring"></div>
-              <div class="place-ring-dot"></div>
-            </div>
-            <p class="place-title"><%= t('conf.placing') %></p>
-            <p class="place-step" id="place-step"><%= t('conf.placeStep1') %></p>
-            <div class="place-dots" aria-hidden="true">
-              <span class="place-dot active" id="pd0"></span>
-              <span class="place-dot" id="pd1"></span>
-              <span class="place-dot" id="pd2"></span>
-            </div>
-            <div class="place-brand">
-              <img src="/img/snbd-logo.png" alt="SNBD HOST" width="110" height="28">
-              <span class="place-secure"><%- icon('lock') %> <%= t('conf.secure') %></span>
-            </div>
+      <!-- Promo section -->
+      <section class="card promo-card">
+        <div class="promo-inner">
+          <label class="promo-label"><%= t('conf.promo') %></label>
+          <div class="promo-field">
+            <input name="promocode" id="promo-input" value="<%= form.promocode || '' %>" autocomplete="off" placeholder="<%= t('conf.promoPlaceholder') %>" aria-label="<%= t('conf.promo') %>">
+            <button type="button" class="promo-apply"><span><%= t('conf.applyPromo') %></span></button>
           </div>
         </div>
-        <p class="sum-secure"><%- icon('lock') %><%= t('conf.secure') %></p>
-      </div>
+        <div id="promo-feedback" class="promo-feedback" role="status" hidden></div>
+      </section>
     </div>
-  </aside>
+
+    <aside class="cart-sidebar">
+      <div class="card summary-card">
+        <header><%= t('conf.summary') %></header>
+        <div class="sum-body">
+          <div class="sum-product">
+            <b><%- brandMark(product.name) %><%= product.name %></b>
+            <small><%= gname %></small>
+          </div>
+          <dl class="sum-list">
+            <div><dt id="sum-cycle"><%= st(selected.label) %></dt><dd id="sum-price"><%= money(selected.price, prefix) %></dd></div>
+            <div id="sum-domain-row" hidden><dt id="sum-domain-label"><%= t('col.domain') %></dt><dd id="sum-domain">—</dd></div>
+            <div id="sum-setup-row"<% if (!selected.setup) { %> hidden<% } %>><dt><%= t('conf.setup') %></dt><dd id="sum-setup"><%= money(selected.setup, prefix) %></dd></div>
+            <div id="sum-promo-row" class="sum-promo" hidden><dt id="sum-promo-label"></dt><dd id="sum-promo"></dd></div>
+          </dl>
+          <div class="sum-total sum-total-row">
+            <span><%= t('conf.dueToday') %></span>
+            <strong id="sum-total"><%= money(selected.price + selected.setup, prefix) %></strong>
+          </div>
+          <p class="sum-note"><%= t('conf.taxNote', { code: billing ? billing.code : product.pricing.code }) %></p>
+          <button type="submit" class="btn red sum-cta"><%= t(session && session.clientId ? 'conf.complete' : 'pub.continueCheckout') %> <%- icon('arrow') %></button>
+          <div class="sum-secure"><%- icon('lock') %> <%= t('conf.secure') %></div>
+        </div>
+      </div>
+    </aside>
+  </div>
 </form>
+
+<div class="place-overlay" id="place-overlay" role="status" aria-live="polite" hidden>
+  <div class="place-card">
+    <div class="place-ring-wrap" aria-hidden="true">
+      <div class="place-ring-bg"></div>
+      <div class="place-ring"></div>
+      <div class="place-ring-dot"></div>
+    </div>
+    <p class="place-title"><%= t('conf.placing') %></p>
+    <p class="place-step" id="place-step"><%= t('conf.placeStep1') %></p>
+    <div class="place-dots" aria-hidden="true">
+      <span class="place-dot active" id="pd0"></span>
+      <span class="place-dot" id="pd1"></span>
+      <span class="place-dot" id="pd2"></span>
+    </div>
+    <div class="place-brand">
+      <img src="/img/snbd-logo.png" alt="SNBD HOST" width="110" height="28">
+      <span class="place-secure"><%- icon('lock') %> <%= t('conf.secure') %></span>
+    </div>
+  </div>
+</div>
 
 <script>
 (() => {
@@ -158,7 +157,6 @@ let step = 0;
     promoRow: t('conf.promoRow'), promoApplied: t('conf.promoApplied'), promoAtCheckout: t('conf.promoAtCheckout'),
   }) %>;
   let promo = null;
-  // Preview of the coupon's effect on today's total. WHMCS applies the real amount at checkout.
   function promoDiscount(subtotal, setup) {
     if (!promo || promo.unverified) return { amount: 0, label: I18N.promoAtCheckout };
     const pct = promo.type.toLowerCase().includes('percent');
@@ -169,8 +167,8 @@ let step = 0;
     if (free) { const amount = Math.min(subtotal, setup); return { amount, label: '−' + fmt(amount) }; }
     return { amount: 0, label: I18N.promoAtCheckout };
   }
-  const fill = (s, v) => s.replace(/\{(\w+)\}/g, (m, k) => (v[k] == null ? m : v[k]));
-  const form = document.getElementById('checkout');
+  const fill = (s, v) => s.replace(/{(\w+)}/g, (m, k) => (v[k] == null ? m : v[k]));
+  const form = document.getElementById('cart');
   const prefix = <%- js(prefix) %>;
   const tlds = <%- js(tlds || {}) %>;
   const billing = <%- js(billing) %>;
@@ -178,7 +176,7 @@ let step = 0;
   const fmt = fmtWith(prefix);
   const $ = (id) => document.getElementById(id);
   const domainInput = $('domain');
-
+  const periodSelect = $('period-select');
   const domainOption = () => { const r = form.querySelector('input[name="domainoption"]:checked'); return r ? r.value : null; };
   const cleanDomain = (v) => String(v || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '');
   function domainFee(map) {
@@ -191,10 +189,10 @@ let step = 0;
     return fee == null ? null : fee;
   }
   function update() {
-    const c = form.querySelector('input[name="billingcycle"]:checked');
-    if (!c) return;
-    const price = Number(c.dataset.price), setup = Number(c.dataset.setup);
-    $('sum-cycle').textContent = c.dataset.label;
+    const c = periodSelect.value;
+    const optEl = periodSelect.options[periodSelect.selectedIndex];
+    const price = Number(optEl.dataset.price || 0), setup = Number(optEl.dataset.setup || 0);
+    $('sum-cycle').textContent = optEl.label;
     $('sum-price').textContent = fmt(price);
     $('sum-setup-row').hidden = !setup;
     $('sum-setup').textContent = fmt(setup);
@@ -223,19 +221,11 @@ let step = 0;
       $('sum-promo').textContent = discount.label;
     }
     if (billing) {
-      const b = billing.cycles[c.value] || { price: 0, setup: 0 };
+      const b = billing.cycles[c] || { price: 0, setup: 0 };
       const bfee = domainFee(billing.tlds) || 0;
       $('sum-bill').textContent = fmtWith(billing.prefix)(b.price + b.setup + bfee);
     }
   }
-  form.addEventListener('change', (e) => {
-    if (e.target.name === 'domainoption') {
-      const epp = $('epp-field');
-      if (epp) epp.hidden = e.target.value !== 'transfer';
-      $('domain-status').textContent = '';
-    }
-    update();
-  });
   if (domainInput) {
     domainInput.addEventListener('input', () => { $('domain-status').textContent = ''; $('domain-status').className = 'domain-status'; update(); });
     $('check-domain').addEventListener('click', async () => {
@@ -251,9 +241,7 @@ let step = 0;
         const opt = domainOption();
         if (opt === 'register') {
           status.className = 'domain-status ' + (j.available ? 'ok' : 'bad');
-          status.textContent = j.available
-            ? fill(I18N.available, { domain: d }) + (j.register != null ? ' · ' + fill(I18N.firstYear, { price: fmt(j.register) }) : '')
-            : fill(I18N.taken, { domain: d });
+          status.textContent = j.available ? fill(I18N.available, { domain: d }) + (j.register != null ? ' · ' + fill(I18N.firstYear, { price: fmt(j.register) }) : '') : fill(I18N.taken, { domain: d });
         } else if (opt === 'transfer') {
           status.className = 'domain-status ' + (j.available ? 'bad' : 'ok');
           status.textContent = j.available ? fill(I18N.notRegistered, { domain: d }) : fill(I18N.canTransfer, { domain: d }) + (j.transfer != null ? ' · ' + fmt(j.transfer) : '');
@@ -267,15 +255,16 @@ let step = 0;
       }
     });
   }
-  // The order is only created here, when the checkout button submits the form.
+  // Order only creates on checkout submit — coupon Apply never triggers this.
   const placeOverlay = $('place-overlay');
   const placeSteps = <%- js([t('conf.placeStep1'), t('conf.placeStep2'), t('conf.placeStep3')]) %>;
   let isSubmitting = false;
   form.addEventListener('submit', (e) => {
     if (isSubmitting) { e.preventDefault(); return; }
     isSubmitting = true;
-    // Clear any active promo loading state before showing the checkout overlay.
+    const pricing = $('sum-pricing');
     if (pricing) pricing.classList.remove('is-loading');
+    const promoBtn = form.querySelector('.promo-apply');
     if (promoBtn) { promoBtn.disabled = false; promoBtn.classList.remove('is-busy'); }
     const btn = form.querySelector('.sum-cta');
     btn.setAttribute('aria-disabled', 'true');
@@ -292,13 +281,11 @@ let step = 0;
     }
     setInterval(advanceStep, 1800);
   });
-
-  // Coupon check: validates the code only and previews the discount. Nothing is ordered.
+  // Coupon check: validates only, previews discount. Nothing is ordered.
   const promoInput = $('promo-input');
   const promoBtn = form.querySelector('.promo-apply');
   const promoFeedback = $('promo-feedback');
   const pricing = $('sum-pricing');
-  const summary = form.querySelector('.summary-card');
   const showPromoFeedback = (text, kind) => {
     promoFeedback.hidden = false;
     promoFeedback.textContent = text;
@@ -324,7 +311,6 @@ let step = 0;
           body: JSON.stringify({ promocode: code }),
         });
         const j = await r.json();
-        // Keep the shimmer visible long enough to read as a real check.
         await new Promise((res) => setTimeout(res, Math.max(0, 650 - (Date.now() - started))));
         if (!j.ok) throw new Error(j.error || I18N.checkFail);
         promo = { code: j.code || code, type: j.type || '', value: Number(j.value) || 0, unverified: !!j.unverified };
@@ -341,6 +327,7 @@ let step = 0;
       }
     });
   }
+  periodSelect.addEventListener('change', update);
   update();
 })();
 </script>

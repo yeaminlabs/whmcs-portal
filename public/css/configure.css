@@ -1,162 +1,169 @@
 /* =============================================================================
-   Store configure / checkout page — visual design + animations
+   Store configure / checkout page — clean cart redesign
+   Single cart view: plan card (left) + order summary (right)
+   No double boxes, no highlight overrides, simple and native
    ============================================================================= */
 
 /* ── Breadcrumb ─────────────────────────────────────────────────────────────── */
-.crumbs{display:flex;align-items:center;gap:6px;margin:0 0 20px;font-size:13px;color:var(--g500)}
+.crumbs{display:flex;align-items:center;gap:6px;margin:0 0 16px;font-size:13px;color:var(--g500)}
 .crumbs a{color:var(--g600);font-weight:600;text-decoration:none}
 .crumbs a:hover{color:var(--ink)}
 .crumbs .ico{width:14px;height:14px;color:var(--g400)}
 
+/* ── Page head ──────────────────────────────────────────────────────────────── */
+.pagehead{margin:0 0 24px}
+.pagehead h1{font-size:20px;font-weight:800;color:var(--ink);margin:0 0 4px;letter-spacing:-.02em}
+.pagehead .sub{font-size:14px;color:var(--g500);margin:0}
+
 /* ── Layout ─────────────────────────────────────────────────────────────────── */
-.checkout{display:grid;grid-template-columns:1fr 340px;gap:28px;align-items:start;max-width:1080px}
-@media(max-width:860px){.checkout{grid-template-columns:1fr}}
-.checkout-main{display:flex;flex-direction:column;gap:16px}
+.cart{display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start;max-width:1100px;margin:0 auto}
+@media(max-width:860px){.cart{grid-template-columns:1fr}}
+.cart-main{display:flex;flex-direction:column;gap:16px}
+.cart-sidebar{position:sticky;top:80px}
 
-/* ── Step panels ────────────────────────────────────────────────────────────── */
-.panel.step{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 1px 3px rgba(16,24,40,.04),0 8px 24px -16px rgba(16,24,40,.1);transition:box-shadow .2s}
-.panel.step:focus-within{box-shadow:0 1px 3px rgba(16,24,40,.06),0 12px 32px -16px rgba(16,24,40,.16)}
-.panel.step > header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#FAFAFA,#F7F5F3)}
-.panel.step > header span:first-child{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--ink)}
-.step-n{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--brand-red,#BE3045);color:#fff;font-size:11px;font-weight:800;flex:none}
-.panel.step > header small{font-size:12px;font-weight:500;color:var(--g500)}
-.step-body{padding:18px 20px 20px}
+/* ── Cards ──────────────────────────────────────────────────────────────────── */
+.card{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.06)}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line);background:#FAFAF9}
+.card-title{font-size:13px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--g500)}
+.card .card-body,.step-body{padding:18px}
 
-/* ── Cycle grid ─────────────────────────────────────────────────────────────── */
-.cycle-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
-.choice.cycle{position:relative;border:2px solid var(--line);border-radius:14px;cursor:pointer;overflow:hidden;transition:border-color .18s,box-shadow .18s,transform .15s;background:#fff}
-.choice.cycle:hover{border-color:#d1d5db;transform:translateY(-1px);box-shadow:0 6px 16px -8px rgba(16,24,40,.14)}
-.choice.cycle input{position:absolute;opacity:0;width:0;height:0}
-.choice.cycle input:checked + span{background:linear-gradient(135deg,rgba(190,48,69,.06),rgba(190,48,69,.02))}
-.choice.cycle:has(input:checked){border-color:var(--brand-red,#BE3045);box-shadow:0 0 0 1px var(--brand-red,#BE3045),0 6px 18px -10px rgba(190,48,69,.4)}
-.choice.cycle span{display:flex;flex-direction:column;gap:4px;padding:14px 14px 12px;pointer-events:none}
-.choice.cycle b{font-size:12px;font-weight:600;color:var(--g600);text-transform:uppercase;letter-spacing:.04em}
-.choice.cycle strong{font-size:18px;font-weight:800;color:var(--ink)}
-.choice.cycle small{font-size:11px;color:var(--g500)}
-.choice.cycle .save{position:absolute;top:8px;right:8px;padding:2px 7px;border-radius:999px;background:linear-gradient(90deg,#BE3045,#E8798A);color:#fff;font-size:10px;font-weight:700;letter-spacing:.02em}
+/* ── Plan card ──────────────────────────────────────────────────────────────── */
+.plan-head{display:flex;align-items:center;gap:12px;padding:18px 18px 6px;border-bottom:none;background:transparent;border-bottom:1px solid var(--line)}
+.plan-brand{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;background:#F3EEEA;flex:none}
+.plan-brand img,.plan-brand svg{width:20px;height:20px}
+.plan-info{min-width:0}
+.plan-name{display:block;font-size:15px;font-weight:700;color:var(--ink);margin:0 0 2px}
+.plan-desc{display:block;font-size:12px;color:var(--g500);margin:0}
 
-/* ── Domain choice row ──────────────────────────────────────────────────────── */
-.choice-row{display:flex;flex-direction:column;gap:8px}
-.choice{position:relative;display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--line);border-radius:12px;cursor:pointer;background:#fff;transition:border-color .15s}
-.choice:has(input:checked){border-color:var(--brand-red,#BE3045);background:rgba(190,48,69,.03)}
+.plan-period{padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.period-label{font-size:13px;font-weight:600;color:var(--g600)}
+#period-select{height:38px;padding:0 12px;border:1.5px solid var(--line);border-radius:10px;font:inherit;font-size:14px;color:var(--ink);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s;min-width:140px}
+#period-select:focus{border-color:var(--brand-red,#BE3045);box-shadow:0 0 0 3px rgba(190,48,69,.12)}
+
+.plan-price-wrap{padding:0 18px 6px}
+.plan-price-big{display:block;font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-.03em;margin:0 0 2px}
+.plan-price-note{display:block;font-size:12px;color:var(--g500);margin:0}
+
+.plan-setup{padding:0 18px 10px;font-size:12px;color:var(--g500)}
+
+.plan-features{padding:10px 18px 18px}
+.feature-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.feature-list li{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--g600)}
+.feature-list .check{flex:none;width:18px;height:18px;border-radius:50%;border:1px solid var(--ok,#1a7a4a);color:var(--ok,#1a7a4a);font-size:11px;font-weight:800;display:grid;place-items:center;margin-top:2px}
+
+/* ── Domain card ────────────────────────────────────────────────────────────── */
+.domain-option{display:flex;flex-direction:column;gap:8px;padding:14px 18px 0;border-bottom:1px solid var(--line)}
+.choice{position:relative;display:flex;align-items:center;gap:10px;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;background:#fff;transition:border-color .15s}
+.choice:hover{border-color:#d1d5db}
 .choice input{position:absolute;opacity:0;width:0;height:0}
-/* Cancel app.css inner-border on span — only the outer .choice box should show */
-.choice > span{border:0;padding:0;background:none;box-shadow:none;border-radius:0;display:block;pointer-events:none}
-.choice b{display:block;font-size:14px;font-weight:600;color:var(--ink)}
-.choice small{font-size:12px;color:var(--g500)}
-.domain-row{display:flex;gap:8px;margin-top:14px}
+.choice > span{display:flex;flex-direction:column;gap:2px;pointer-events:none;border:0;padding:0;background:none;box-shadow:none;border-radius:0}
+.choice b{display:block;font-size:13px;font-weight:600;color:var(--ink)}
+.choice small{font-size:11px;color:var(--g500)}
+.choice:has(input:checked){border-color:var(--brand-red,#BE3045);background:rgba(190,48,69,.03)}
+
+.domain-row{display:flex;gap:8px;padding:14px 18px 0;border-bottom:none}
 .domain-row input{flex:1;min-width:0;height:40px;padding:0 12px;border:1.5px solid var(--line);border-radius:10px;font:inherit;font-size:14px;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s;background:#fff}
 .domain-row input:focus{border-color:var(--brand-red,#BE3045);box-shadow:0 0 0 3px rgba(190,48,69,.12)}
-.domain-status{margin-top:8px;font-size:13px;font-weight:500;min-height:1.4em}
+.btn.ghost{height:40px;padding:0 14px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:border-color .15s,background .15s}
+.btn.ghost:hover{border-color:var(--brand-red,#BE3045);background:rgba(190,48,69,.03)}
+.domain-status{padding:0 18px 12px;margin-top:8px;font-size:13px;font-weight:500;min-height:1.4em}
 .domain-status.ok{color:var(--ok,#1a7a4a)}
 .domain-status.bad{color:var(--bad,#A1263A)}
-.epp{display:flex;flex-direction:column;gap:4px;margin-top:14px;font-size:13px;font-weight:600;color:var(--ink)}
+.epp{padding:0 18px 18px;display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--ink)}
 .epp input{margin-top:4px;height:40px;padding:0 12px;border:1.5px solid var(--line);border-radius:10px;font:inherit;font-size:14px;color:var(--ink);outline:none}
 .epp input:focus{border-color:var(--brand-red,#BE3045);box-shadow:0 0 0 3px rgba(190,48,69,.12)}
+.opt{font-size:11px;color:var(--g500);font-weight:400}
 
-/* ── Payment method list (flat rows, no inner boxes) ────────────────────────── */
+/* ── Payment card ───────────────────────────────────────────────────────────── */
 .pay-list{display:flex;flex-direction:column}
-.pay-row{display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;transition:background .15s;border-top:1px solid var(--line)}
+.pay-row{display:flex;align-items:center;gap:12px;padding:13px 18px;cursor:pointer;transition:background .15s;border-top:1px solid var(--line)}
 .pay-row:first-child{border-top:0}
 .pay-row input{position:absolute;opacity:0;width:0;height:0}
-.pay-row .gw-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:#F3EEEA;flex:none}
+.pay-row .gw-mark{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:#F3EEEA;flex:none}
 .pay-row .gw-logo{background:none}
 .pay-info{flex:1;min-width:0}
-.pay-info b{display:block;font-size:14px;font-weight:600;color:var(--ink)}
-.pay-info small{font-size:12px;color:var(--g500)}
+.pay-info b{display:block;font-size:13px;font-weight:600;color:var(--ink)}
+.pay-info small{font-size:11px;color:var(--g500)}
 .pay-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center;transition:border-color .15s,background .15s}
 .pay-row:has(input:checked){background:rgba(190,48,69,.03)}
 .pay-row:has(input:checked) .pay-check{border-color:var(--brand-red,#BE3045);background:var(--brand-red,#BE3045)}
 .pay-row:has(input:checked) .pay-check::after{content:"";width:6px;height:6px;border-radius:50%;background:#fff}
+.pay-card{padding-bottom:0}
 
-/* ── Promo header bolt icon ─────────────────────────────────────────────────── */
-#s-promo .ico{width:16px;height:16px;color:var(--brand-red,#BE3045);flex:none}
-/* ── Promo / coupon field ───────────────────────────────────────────────────── */
-.promo-row{display:flex;gap:8px}
-.promo-row input{flex:1;min-width:0;height:42px;padding:0 12px;border:1.5px solid var(--line);border-radius:10px;font:inherit;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s;background:#fff}
-.promo-row input::placeholder{text-transform:none;letter-spacing:0;color:#A9A1A5}
-.promo-row input:focus{border-color:var(--brand-red,#BE3045);box-shadow:0 0 0 3px rgba(190,48,69,.12)}
-.promo-apply{flex:none;position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:88px;height:42px;padding:0 18px;border:0;border-radius:10px;background:var(--ink);color:#fff;font:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:transform .15s,background .2s,box-shadow .2s;box-shadow:0 2px 8px -4px rgba(0,0,0,.3)}
+/* ── Promo card ─────────────────────────────────────────────────────────────── */
+.promo-inner{padding:14px 18px 0;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+.promo-label{font-size:13px;font-weight:600;color:var(--g600)}
+.promo-field{flex:1;display:flex;gap:8px}
+.promo-field input{flex:1;min-width:0;height:40px;padding:0 12px;border:1.5px solid var(--line);border-radius:10px;font:inherit;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s;background:#fff}
+.promo-field input::placeholder{text-transform:none;letter-spacing:0;color:#A9A1A5}
+.promo-field input:focus{border-color:var(--brand-red,#BE3045);box-shadow:0 0 0 3px rgba(190,48,69,.12)}
+.promo-apply{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:88px;height:40px;padding:0 16px;border:0;border-radius:10px;background:var(--ink);color:#fff;font:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:transform .15s,background .2s,box-shadow .2s;box-shadow:0 2px 8px -4px rgba(0,0,0,.3)}
 .promo-apply:hover:not(:disabled){background:#111;transform:translateY(-1px);box-shadow:0 4px 12px -4px rgba(0,0,0,.4)}
-.promo-apply:active:not(:disabled){transform:none;box-shadow:none}
 .promo-apply:disabled{cursor:progress;opacity:.85}
 .promo-apply.is-busy > span{visibility:hidden}
 .promo-apply.is-busy::after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:cfgSpin .7s linear infinite}
-.promo-feedback{display:flex;align-items:flex-start;gap:8px;margin:10px 0 0;font-size:13px;font-weight:600;animation:cfgFadeUp .3s ease both}
+.promo-feedback{padding:10px 18px 16px;display:flex;align-items:flex-start;gap:8px;font-size:13px;font-weight:600;animation:cfgFadeUp .3s ease both}
 .promo-feedback.ok{color:var(--ok,#1a7a4a)}
 .promo-feedback.bad{color:var(--bad,#A1263A)}
 .promo-feedback.ok::before{content:"✓";display:grid;place-items:center;min-width:18px;height:18px;border-radius:50%;background:#D1FAE5;color:var(--ok,#1a7a4a);font-size:10px}
 .promo-feedback.bad::before{content:"✕";display:grid;place-items:center;min-width:18px;height:18px;border-radius:50%;background:#FBEDEE;color:var(--bad,#A1263A);font-size:10px}
 
 /* ── Summary sidebar card ───────────────────────────────────────────────────── */
-.checkout-side{position:sticky;top:80px}
-.checkout-side .summary-card{border-radius:20px;border:1px solid var(--line);background:#fff;box-shadow:0 2px 4px rgba(16,24,40,.04),0 20px 50px -24px rgba(16,24,40,.28);overflow:hidden}
-.checkout-side .summary-card::before{content:"";display:block;height:4px;background:linear-gradient(90deg,#BE3045 0%,#E8798A 60%,#F7B4BF 100%)}
-.checkout-side .summary-card > header{padding:16px 20px 4px;font-weight:800;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--g500)}
+.summary-card{border-radius:16px;border:1px solid var(--line);background:#fff;box-shadow:0 2px 4px rgba(16,24,40,.04),0 20px 50px -24px rgba(16,24,40,.28);overflow:hidden}
+.summary-card > header{padding:16px 20px 4px;font-weight:800;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--g500)}
 .sum-body{padding:4px 20px 20px}
 .sum-product{display:flex;flex-direction:column;gap:2px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line)}
 .sum-product b{font-size:15px;font-weight:700;color:var(--ink)}
 .sum-product small{font-size:12px;color:var(--g500)}
-
-/* ── Pricing area: shimmer scoped here only ─────────────────────────────────── */
-.sum-pricing{position:relative;border-radius:12px;padding:12px 14px;background:#FAFAF9;border:1px solid var(--line);margin-bottom:14px;min-height:56px;overflow:hidden;transition:opacity .2s}
-.sum-pricing dl{margin:0;display:flex;flex-direction:column;gap:6px}
-.sum-pricing dl div{display:flex;align-items:center;justify-content:space-between;font-size:13px}
-.sum-pricing dl dt{color:var(--g600);font-weight:500}
-.sum-pricing dl dd{font-weight:700;color:var(--ink);margin:0}
+.sum-list{margin:0;display:flex;flex-direction:column;gap:8px}
+.sum-list dl{margin:0}
+.sum-list dl div{display:flex;align-items:center;justify-content:space-between;font-size:13px}
+.sum-list dt{color:var(--g600);font-weight:500}
+.sum-list dd{font-weight:700;color:var(--ink);margin:0}
 .sum-promo dt{color:var(--ok,#1a7a4a)!important;font-weight:600;display:inline-flex;align-items:center;gap:5px}
 .sum-promo dt::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ok,#1a7a4a);box-shadow:0 0 0 3px rgba(26,122,74,.15);flex:none}
 .sum-promo dd{color:var(--ok,#1a7a4a)!important;font-weight:700;animation:cfgFadeUp .4s cubic-bezier(.2,.8,.2,1)}
-
-/* Shimmer overlay — only on sum-pricing */
-.sum-shimmer{position:absolute;inset:0;border-radius:12px;pointer-events:none;opacity:0;transition:opacity .2s;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.85) 50%,transparent 100%);background-size:200% 100%}
-.sum-pricing.is-loading .sum-shimmer{opacity:1;animation:cfgShimmer 1s linear infinite}
-.sum-pricing.is-loading dl,.sum-pricing.is-loading .sum-total-row{opacity:0.15;pointer-events:none}
-
-@keyframes cfgShimmer{from{background-position:120% 0}to{background-position:-120% 0}}
-
-/* ── Total row ──────────────────────────────────────────────────────────────── */
 .sum-total{display:flex;align-items:center;justify-content:space-between;padding-top:12px;margin-top:4px;border-top:1.5px solid var(--line)}
 .sum-total span{font-size:13px;font-weight:700;color:var(--g700)}
 .sum-total strong{font-size:20px;font-weight:800;color:var(--ink);display:inline-block}
 .sum-total strong.bump{animation:cfgBump .45s cubic-bezier(.2,.8,.2,1)}
 @keyframes cfgBump{0%{transform:translateY(5px) scale(.96);opacity:0}60%{transform:translateY(-2px);opacity:1}100%{transform:none}}
-.sum-bill{margin:10px 0 0;font-size:12px;color:var(--g500)}
 .sum-note{margin:8px 0 14px;font-size:11px;color:var(--g400)}
+.sum-secure{display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;color:var(--g500);font-weight:500}
+.sum-secure .ico{width:12px;height:12px}
 
 /* ── CTA button ─────────────────────────────────────────────────────────────── */
 .sum-cta{width:100%;margin:0 0 10px;padding:14px 20px;border-radius:14px;font-size:15px;font-weight:700;letter-spacing:-.01em;box-shadow:0 10px 24px -12px rgba(190,48,69,.7);transition:transform .18s,box-shadow .2s,background .15s}
 .sum-cta:hover:not([aria-disabled]){transform:translateY(-2px);box-shadow:0 16px 30px -12px rgba(190,48,69,.85)}
 .sum-cta:active:not([aria-disabled]){transform:none}
 .sum-cta[aria-disabled="true"]{opacity:.8;pointer-events:none}
-.sum-secure{display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;color:var(--g500);font-weight:500}
-.sum-secure .ico{width:12px;height:12px}
+
+/* ── Pricing shimmer (scoped to sum-pricing tile) ───────────────────────────── */
+.sum-pricing{position:relative;border-radius:12px;padding:12px 14px;background:#FAFAF9;border:1px solid var(--line);margin-bottom:14px;min-height:56px;overflow:hidden;transition:opacity .2s}
+.sum-pricing.is-loading{opacity:.6;pointer-events:none}
+.sum-shimmer{position:absolute;inset:0;border-radius:12px;pointer-events:none;opacity:0;transition:opacity .2s;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.85) 50%,transparent 100%);background-size:200% 100%}
+.sum-pricing.is-loading .sum-shimmer{opacity:1;animation:cfgShimmer 1s linear infinite}
+@keyframes cfgShimmer{from{background-position:120% 0}to{background-position:-120% 0}}
+
+@keyframes cfgSpin{to{transform:rotate(360deg)}}
+@keyframes cfgFadeUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
 /* ── Order processing overlay ───────────────────────────────────────────────── */
-/* Full-screen animated processing screen. Visible only after checkout submit. */
 .place-overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(251,250,248,.92);backdrop-filter:blur(8px) saturate(1.4);-webkit-backdrop-filter:blur(8px) saturate(1.4);animation:cfgFadeIn .35s ease both}
 .place-overlay[hidden]{display:none}
 .place-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:0;padding:40px 48px 36px;border-radius:24px;background:#fff;border:1px solid rgba(0,0,0,.07);box-shadow:0 32px 80px -24px rgba(16,24,40,.35),0 2px 8px rgba(16,24,40,.06);max-width:360px;width:calc(100% - 48px);text-align:center;animation:cfgSlideUp .4s cubic-bezier(.2,.8,.2,1) both}
-
-/* Spinner ring */
 .place-ring-wrap{position:relative;width:72px;height:72px;margin:0 auto 24px}
 .place-ring-bg{position:absolute;inset:0;border-radius:50%;border:5px solid #F3E3E6}
 .place-ring{position:absolute;inset:0;border-radius:50%;border:5px solid transparent;border-top-color:var(--brand-red,#BE3045);border-right-color:rgba(190,48,69,.35);animation:cfgSpin .9s linear infinite}
 .place-ring-dot{position:absolute;top:4px;left:50%;width:7px;height:7px;border-radius:50%;background:var(--brand-red,#BE3045);transform:translateX(-50%);animation:cfgSpinDot .9s linear infinite}
 @keyframes cfgSpinDot{from{transform:translateX(-50%) rotate(0deg) translateY(-31px) rotate(0deg)}to{transform:translateX(-50%) rotate(360deg) translateY(-31px) rotate(-360deg)}}
-
-/* Text */
 .place-title{font-size:18px;font-weight:800;color:var(--ink);margin:0 0 6px;letter-spacing:-.02em}
 .place-step{font-size:13px;color:var(--g500);min-height:1.4em;transition:opacity .3s}
 .place-step.fade{opacity:0}
-
-/* Progress dots */
 .place-dots{display:flex;gap:7px;margin-top:24px;justify-content:center}
 .place-dot{width:7px;height:7px;border-radius:50%;background:#E4D8DB;transition:background .4s,transform .4s}
 .place-dot.active{background:var(--brand-red,#BE3045);transform:scale(1.2)}
 .place-dot.done{background:var(--ok,#1a7a4a)}
-
-/* Branding stripe */
 .place-brand{margin-top:24px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:6px}
 .place-brand img{opacity:.8;display:block}
 .place-secure{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--g400);font-weight:500}
@@ -164,15 +171,19 @@
 
 @keyframes cfgFadeIn{from{opacity:0}to{opacity:1}}
 @keyframes cfgSlideUp{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
-@keyframes cfgSpin{to{transform:rotate(360deg)}}
-@keyframes cfgFadeUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-
-/* ── Field common styles ────────────────────────────────────────────────────── */
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:540px){.field-row{grid-template-columns:1fr}}
 
 /* ── Reduced motion ─────────────────────────────────────────────────────────── */
 @media(prefers-reduced-motion:reduce){
   .place-ring,.place-ring-dot,.promo-apply.is-busy::after,.sum-shimmer,.sum-pricing.is-loading .sum-shimmer{animation:none!important}
   .sum-total strong.bump,.sum-promo dd,.promo-feedback,.place-card,.place-overlay{animation:none!important}
 }
+
+/* ── Neutralize app.css checkout rules so configure.css is single source ────── */
+/* app.css defines .checkout, .choice, .choice-row, .cycle-grid, .checkout-side, .sum-* etc.
+   Our cart page uses .cart (not .checkout) and clean .card/.choice markup, so
+   these resets prevent double boxes and highlight overrides. */
+.app-checkout-reset .choice > span,
+.cart .choice > span,
+.cart .choice.cycle > span{border:0;padding:0;background:none;box-shadow:none;border-radius:0;display:block}
+.cart .panel{box-shadow:none;border:0}
+@media(max-width:860px){.cart-sidebar{position:static}}
