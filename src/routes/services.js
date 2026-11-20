@@ -75,6 +75,17 @@ function resultData(data) {
   if (typeof d.password === 'string' && d.password) out.password = d.password.slice(0, 200);
   if (typeof d.logs === 'string') out.logs = d.logs.split('\n').slice(-200).join('\n');
   if (d.file && httpUrl(d.file.url)) out.file = { name: cleanStr(String(d.file.name || 'download'), 200) || 'download', url: d.file.url };
+  if (d.disk && typeof d.disk === 'object') out.disk = {
+    usedBytes: Number.isFinite(Number(d.disk.usedBytes)) ? Number(d.disk.usedBytes) : null,
+    sizeBytes: Number.isFinite(Number(d.disk.sizeBytes)) ? Number(d.disk.sizeBytes) : null,
+    error: cleanStr(String(d.disk.error || ''), 300) || null,
+  };
+  if (d.planStorageGb != null) out.planStorageGb = cleanStr(String(d.planStorageGb), 40);
+  if (d.env && typeof d.env === 'object') out.env = d.env;
+  if (typeof d.token === 'string' && d.token) out.token = d.token.slice(0, 4096);
+  if (Number.isFinite(Number(d.ttl))) out.ttl = Number(d.ttl);
+  if (typeof d.endpoint === 'string') out.endpoint = cleanStr(d.endpoint, 32);
+  if (httpsUrl(d.wsUrl)) out.wsUrl = d.wsUrl;
   return out;
 }
 
@@ -87,6 +98,15 @@ async function renderDashboard(req, res, view) {
     fn: String(a.fn), label: fnLabel(t, a.fn, a.label), confirm: Boolean(a.confirm), danger: Boolean(a.danger),
     icon: kinds.fnIcon(a.fn), console: kinds.CONSOLE_FNS.includes(a.fn),
   }));
+  const n8nUpgrade = kind === 'n8n'
+    ? actions.find((a) => /^(upgrade|update)$/i.test(a.fn))
+    : null;
+  const n8nUpdate = n8nUpgrade ? {
+    action: n8nUpgrade,
+    current: String((view.panel || {}).version || '').trim(),
+    target: String((view.panel || {}).targetVersion || config.n8nTargetVersion || '').trim(),
+    cooldown: Math.max(0, Number((view.panel || {}).cooldown) || 0),
+  } : null;
   let result = null;
   const stored = req.session.svcResult;
   if (stored && stored.id === service.id) result = stored;
@@ -96,6 +116,7 @@ async function renderDashboard(req, res, view) {
     title: service.name || 'Service', view, kind, service, panel: view.panel || {}, actions,
     sso: Array.isArray(view.sso) ? view.sso : [], active: service.status === 'Active', upgrades, ordered: null, error: null, flash: res.locals.flash,
     result, confirmAction, k: kinds,
+    n8nUpdate,
   });
 }
 
@@ -146,8 +167,17 @@ router.post('/services/:id/action', requireLogin, actionRateLimiter, async (req,
   if (!/^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(fn) || /^admin/i.test(fn)) {
     return reply(403, { ok: false, code: 'not_allowed', message: t('svcx.err.not_allowed') });
   }
+  let args = {};
+  if (typeof req.body.args === 'string' && req.body.args.trim()) {
+    try { args = JSON.parse(req.body.args); } catch (e) { return reply(400, { ok: false, code: 'bad_request', message: t('svcx.err.bad_request') }); }
+    if (!args || typeof args !== 'object' || Array.isArray(args)) return reply(400, { ok: false, code: 'bad_request', message: t('svcx.err.bad_request') });
+  }
+  if (req.body.password || req.body.email) args = { ...args, password: req.body.password, email: req.body.email };
+  if (req.body.env) {
+    try { args = { ...args, env: JSON.parse(req.body.env) }; } catch (e) { return reply(400, { ok: false, code: 'bad_request', message: t('svcx.err.bad_request') }); }
+  }
   try {
-    const out = await bridge('service.action', { clientId: req.session.clientId, serviceId: id, fn, confirm, args: {} });
+    const out = await bridge('service.action', { clientId: req.session.clientId, serviceId: id, fn, confirm, args });
     const detail = res.locals.lang === 'en' ? cleanStr(String((out && out.message) || ''), 500) : '';
     return reply(200, { ok: true, message: t('svcx.done', { action: label }), detail, data: resultData(out && out.data) });
   } catch (e) {

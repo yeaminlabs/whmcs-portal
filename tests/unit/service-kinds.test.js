@@ -5,6 +5,7 @@ describe('Service Kinds', () => {
     expect(kindOf({ module: 'cpanel' })).toBe('hosting');
     expect(kindOf({ module: 'snbd_n8n' })).toBe('n8n');
     expect(kindOf({ module: 'openclaw_n8n' })).toBe('n8n');
+    expect(kindOf({ module: 'puqDockerN8N' })).toBe('n8n');
     expect(kindOf({ module: 'hermesagent' })).toBe('hermes');
     expect(kindOf({ module: 'ArkHostHetznerVPS' })).toBe('vps');
     expect(kindOf({ module: 'pvewhmcs' })).toBe('vps');
@@ -20,6 +21,7 @@ describe('Service Kinds', () => {
 
   test('respects view.kind override', () => {
     expect(kindOf({ module: 'cpanel', kind: 'n8n' })).toBe('n8n');
+    expect(kindOf({ module: 'puqDockerN8N', kind: 'generic' })).toBe('n8n');
   });
 
   test('CPANEL_APPS includes expected apps', () => {

@@ -7,6 +7,8 @@ const STATES = ['running', 'stopped', 'deploying', 'suspended', 'error', 'unknow
 const state = STATES.includes(p.state) ? p.state : 'unknown';
 const res = p.resources || {};
 const isClaw = view.module === 'openclaw_n8n';
+const nativeN8n = view.module === 'snbd_n8n';
+const hasAction = (fn) => actions.some(a => a.fn === fn);
 %>
 <div class="detail-grid">
   <div>
@@ -36,6 +38,31 @@ const isClaw = view.module === 'openclaw_n8n';
       </dl>
     </section>
 
+    <% if (nativeN8n && (hasAction('get_disk') || hasAction('get_env') || hasAction('get_ws_token') || hasAction('change_password'))) { %>
+    <section class="panel" id="n8n-tools">
+      <header><span><%= t('svcx.n8n.tools') %></span></header>
+      <div class="svc-body svc-n8n-tools">
+        <% if (hasAction('get_disk')) { %>
+        <form method="post" action="/services/<%= s.id %>/action" class="svc-act" data-label="<%= t('svcx.n8n.diskUsage') %>" data-args="{}"><input type="hidden" name="fn" value="get_disk"><button type="submit" class="btn ghost"><%- icon('activity') %><span><%= t('svcx.n8n.diskUsage') %></span></button></form>
+        <% } %>
+        <% if (hasAction('get_env')) { %>
+        <form method="post" action="/services/<%= s.id %>/action" class="svc-act" data-label="<%= t('svcx.n8n.viewEnvironment') %>" data-args="{}"><input type="hidden" name="fn" value="get_env"><button type="submit" class="btn ghost"><%- icon('file') %><span><%= t('svcx.n8n.viewEnvironment') %></span></button></form>
+        <% } %>
+        <% if (hasAction('get_ws_token')) { %>
+        <form method="post" action="/services/<%= s.id %>/action" class="svc-act" data-label="<%= t('svcx.n8n.liveSession') %>" data-args='{"endpoint":"stats"}'><input type="hidden" name="fn" value="get_ws_token"><button type="submit" class="btn ghost"><%- icon('activity') %><span><%= t('svcx.n8n.liveSession') %></span></button></form>
+        <form method="post" action="/services/<%= s.id %>/action" class="svc-act" data-label="<%= t('svcx.n8n.liveLogs') %>" data-args='{"endpoint":"logs"}'><input type="hidden" name="fn" value="get_ws_token"><button type="submit" class="btn ghost"><%- icon('file') %><span><%= t('svcx.n8n.liveLogs') %></span></button></form>
+        <form method="post" action="/services/<%= s.id %>/action" class="svc-act" data-label="<%= t('svcx.n8n.liveTerminal') %>" data-args='{"endpoint":"terminal"}'><input type="hidden" name="fn" value="get_ws_token"><button type="submit" class="btn ghost"><%- icon('terminal') %><span><%= t('svcx.n8n.liveTerminal') %></span></button></form>
+        <% } %>
+        <% if (hasAction('save_env')) { %>
+        <form method="post" action="/services/<%= s.id %>/action" class="svc-act svc-n8n-form" data-label="<%= t('svcx.n8n.saveEnvironment') %>" data-confirm="1" data-args="{}"><input type="hidden" name="fn" value="save_env"><textarea name="env" rows="3" placeholder='{"N8N_LOG_LEVEL":"info"}' required></textarea><button type="submit" class="btn ghost"><span><%= t('svcx.n8n.saveEnvironment') %></span></button></form>
+        <% } %>
+        <% if (hasAction('change_password')) { %>
+        <form method="post" action="/services/<%= s.id %>/action" class="svc-act svc-n8n-form" data-label="<%= t('svcx.n8n.changePassword') %>" data-confirm="1" data-args="{}"><input type="hidden" name="fn" value="change_password"><input name="password" type="password" minlength="10" placeholder="<%= t('svcx.n8n.newPassword') %>" required><input name="email" type="email" placeholder="<%= t('svcx.n8n.ownerEmail') %>" required><button type="submit" class="btn ghost"><span><%= t('svcx.n8n.changePassword') %></span></button></form>
+        <% } %>
+      </div>
+    </section>
+    <% } %>
+
     <section class="panel" id="svc-actions">
       <header><span><%= t('svcx.controls') %></span><a href="/services/<%= s.id %>" class="svc-head-link"><%- icon('refresh') %><%= t('svcx.refresh') %></a></header>
       <div class="svc-body">
@@ -46,6 +73,25 @@ const isClaw = view.module === 'openclaw_n8n';
         <%- include('_result') %>
       </div>
     </section>
+
+    <% if (n8nUpdate) { %>
+    <section class="panel n8n-update-card" aria-labelledby="n8n-update-title">
+      <header><span id="n8n-update-title"><%- icon('download') %> <%= t('svcx.n8n.updateTitle') %></span></header>
+      <div class="svc-body">
+        <dl class="kv svc-kv-top">
+          <div><dt><%= t('svcx.n8n.installed') %></dt><dd><%= n8nUpdate.current || '—' %></dd></div>
+          <div><dt><%= t('svcx.n8n.available') %></dt><dd><%= n8nUpdate.target || '—' %></dd></div>
+        </dl>
+        <% if (n8nUpdate.cooldown > 0) { %>
+          <p class="hint"><%= t('svcx.n8n.cooldown', { minutes: Math.ceil(n8nUpdate.cooldown / 60) }) %></p>
+        <% } else if (n8nUpdate.current && n8nUpdate.target && n8nUpdate.current === n8nUpdate.target) { %>
+          <p class="hint"><%= t('svcx.n8n.upToDate') %></p>
+        <% } else { %>
+          <p class="hint"><%= t('svcx.n8n.updateHint') %></p>
+        <% } %>
+      </div>
+    </section>
+    <% } %>
   </div>
 
   <div class="detail-side">

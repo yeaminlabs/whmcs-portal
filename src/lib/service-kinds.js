@@ -5,6 +5,7 @@ const KIND_BY_MODULE = {
   cpanel: 'hosting',
   snbd_n8n: 'n8n',
   openclaw_n8n: 'n8n',
+  puqDockerN8N: 'n8n',
   hermesagent: 'hermes',
   ArkHostHetznerVPS: 'vps',
   pvewhmcs: 'vps',
@@ -14,7 +15,9 @@ const KIND_BY_MODULE = {
 const KINDS = ['hosting', 'n8n', 'hermes', 'vps', 'generic'];
 
 function kindOf(view) {
-  if (view && KINDS.includes(view.kind)) return view.kind;
+  // A bridge addon may not know a newer module yet and return `generic`; use
+  // the module mapping so the portal still renders the right dashboard.
+  if (view && KINDS.includes(view.kind) && view.kind !== 'generic') return view.kind;
   return KIND_BY_MODULE[view && view.module] || 'generic';
 }
 

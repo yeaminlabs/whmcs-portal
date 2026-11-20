@@ -31,6 +31,9 @@ const config = {
   },
   googleClientId: process.env.GOOGLE_CLIENT_ID || '219815663641-p50rq613ol3ilqgbotogg4bb4hvg9s1e.apps.googleusercontent.com',
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+  // Target release shown by the client-facing n8n update card. The bridge still
+  // owns the actual update operation and validates service ownership.
+  n8nTargetVersion: process.env.N8N_TARGET_VERSION || '2.31.6',
   uptimerobot: {
     apiKey: process.env.UPTIMEROBOT_API_KEY || '',
     baseUrl: 'https://api.uptimerobot.com/v3',

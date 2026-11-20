@@ -24,6 +24,12 @@ const ACTIONS = {
     { fn: 'reset_users', label: 'Reset users', confirm: true, danger: true },
     { fn: 'reset_data', label: 'Reset all data', confirm: true, danger: true },
   ],
+  puqDockerN8N: [
+    { fn: 'start', label: 'Start', confirm: false, danger: false },
+    { fn: 'stop', label: 'Stop', confirm: true, danger: false },
+    { fn: 'restart', label: 'Restart', confirm: false, danger: false },
+    { fn: 'upgrade', label: 'Update n8n', confirm: true, danger: false },
+  ],
   openclaw_n8n: [
     { fn: 'ClientStart', label: 'Start', confirm: false, danger: false },
     { fn: 'ClientStop', label: 'Stop', confirm: true, danger: false },
@@ -74,7 +80,7 @@ function panelFor(id, s) {
     case 101:
       return { cpanelUrl: 'https://usa1.snbdhost.com:2083', webmailUrl: 'https://usa1.snbdhost.com:2096' };
     case 601:
-      return { url: 'https://flows-demo.n8n.snbdhost.com', state: state[601], version: '1.91.2', resources: { cpu: '1', ram: '1 GB', disk: '10 GB' }, database: 'SQLite', mode: 'Standard', workers: null };
+      return { url: 'https://flows-demo.n8n.snbdhost.com', state: state[601], version: '1.91.2', targetVersion: '2.31.6', cooldown: 0, resources: { cpu: '1', ram: '1 GB', disk: '10 GB' }, database: 'SQLite', mode: 'Standard', workers: null };
     case 602:
       return { url: 'https://claw-demo.openclaw.snbdhost.com', state: state[602], version: '1.88.0', resources: { cpu: '2', ram: '2 GB', disk: '20 GB' }, database: 'PostgreSQL', mode: 'Queue', workers: 2 };
     case 603:
