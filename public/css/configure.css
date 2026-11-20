@@ -40,7 +40,8 @@
 .choice{position:relative;display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--line);border-radius:12px;cursor:pointer;background:#fff;transition:border-color .15s}
 .choice:has(input:checked){border-color:var(--brand-red,#BE3045);background:rgba(190,48,69,.03)}
 .choice input{position:absolute;opacity:0;width:0;height:0}
-.choice span{pointer-events:none}
+/* Cancel app.css inner-border on span — only the outer .choice box should show */
+.choice > span{border:0;padding:0;background:none;box-shadow:none;border-radius:0;display:block;pointer-events:none}
 .choice b{display:block;font-size:14px;font-weight:600;color:var(--ink)}
 .choice small{font-size:12px;color:var(--g500)}
 .domain-row{display:flex;gap:8px;margin-top:14px}
