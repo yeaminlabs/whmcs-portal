@@ -87,7 +87,8 @@ let step = 0;
           <label class="choice pay gw"><input type="radio" name="paymentmethod" value="<%= m.module %>" <%= m.module === pm ? 'checked' : '' %>><span><span class="gw-mark<%= mLogo ? ' gw-logo' : '' %>"><% if (mLogo) { %><%- mLogo %><% } else { %><%- icon('wallet') %><% } %></span><b><%= mName %></b><% if (mDesc) { %><small><%= mDesc %></small><% } %></span></label>
           <% }) %>
         </div>
-        <label class="promo"><%= t('conf.promo') %> <span class="opt"><%= t('common.optional') %></span><input name="promocode" value="<%= form.promocode || '' %>" autocomplete="off"></label>
+        <label class="promo"><%= t('conf.promo') %> <span class="opt"><%= t('common.optional') %></span><input name="promocode" value="<%= form.promocode || '' %>" autocomplete="off"><button type="button" class="btn btn-sm promo-apply"><%= t('conf.applyPromo') %></button></label>
+<div id="promo-feedback" class="promo-feedback" hidden></div>
       </div>
     </section>
   </div>
@@ -212,6 +213,55 @@ let step = 0;
     btn.setAttribute('aria-disabled', 'true');
     btn.textContent = I18N.placing;
   });
+
+  const promoInput = form.querySelector('input[name="promocode"]');
+  const promoBtn = form.querySelector('.promo-apply');
+  const promoFeedback = $('promo-feedback');
+  if (promoBtn && promoInput && promoFeedback) {
+    promoBtn.addEventListener('click', async () => {
+      const code = promoInput.value.trim();
+      if (!code) return;
+      const c = form.querySelector('input[name="billingcycle"]:checked');
+      const p = form.querySelector('input[name="paymentmethod"]:checked');
+      if (!c || !p) {
+        promoFeedback.hidden = false;
+        promoFeedback.textContent = t('err.chooseCycle');
+        promoFeedback.className = 'promo-feedback bad';
+        return;
+      }
+      promoBtn.disabled = true;
+      promoBtn.textContent = I18N.checking;
+      promoFeedback.hidden = true;
+      try {
+        const r = await fetch('/store/promo-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            promocode: code,
+            group: <%- js(group.slug) %>,
+            product: <%- js(product.slug) %>,
+            billingcycle: c.value,
+            paymentmethod: p.value,
+          }),
+        });
+        const j = await r.json();
+        if (!j.ok) throw new Error(j.error || I18N.checkFail);
+        if (j.redirect) location.href = j.redirect;
+        else {
+          promoFeedback.hidden = false;
+          promoFeedback.textContent = t('checkout.promoApplied', { code });
+          promoFeedback.className = 'promo-feedback ok';
+        }
+      } catch (err) {
+        promoFeedback.hidden = false;
+        promoFeedback.textContent = err.message || I18N.checkFail;
+        promoFeedback.className = 'promo-feedback bad';
+      } finally {
+        promoBtn.disabled = false;
+        promoBtn.textContent = <%- js(t('conf.applyPromo')) %>;
+      }
+    });
+  }
   update();
 })();
 </script>

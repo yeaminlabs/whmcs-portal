@@ -260,6 +260,7 @@ module.exports = {
   'conf.ns2': 'NS2 prefix',
   'conf.payment': 'Payment method',
   'conf.promo': 'Promo code',
+  'conf.applyPromo': 'Apply',
   'conf.summary': 'Order summary',
   'conf.setup': 'Setup fee',
   'conf.dueToday': 'Due today',
@@ -714,6 +715,8 @@ module.exports = {
   'reg.have': 'Already have an account?',
 
   'err.sub': 'Something did not go as planned.',
+  'err.badRequest': 'Missing required information.',
+  'err.loginRequired': 'Please log in to use a promo code.',
   'err.notFound': 'We could not find that in your account.',
   'err.choosePayment': 'Choose how you want to pay.',
   'err.planGone': 'That plan is no longer available.',

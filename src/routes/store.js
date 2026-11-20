@@ -391,6 +391,51 @@ router.get('/checkout', async (req, res) => {
   }
 });
 
+/**
+ * Validate a promo code against WHMCS by attempting AddOrder.
+ * WHMCS validates all parameters before creating an order, so an invalid
+ * promocode returns an error without creating an order. A valid one creates
+ * the order — the caller can then redirect to payment.
+ */
+router.post('/store/promo-code', async (req, res) => {
+  const t = res.locals.t;
+  if (!req.session.clientId) return res.status(401).json({ ok: false, error: t('err.loginRequired') });
+  const { promocode, group, product: productSlug, billingcycle, paymentmethod } = req.body || {};
+  if (!promocode || !group || !productSlug || !billingcycle || !paymentmethod) {
+    return res.status(400).json({ ok: false, error: t('err.badRequest') });
+  }
+  try {
+    const order = {
+      group,
+      product: productSlug,
+      form: {
+        billingcycle,
+        paymentmethod,
+        promocode: String(promocode).trim(),
+      },
+    };
+    const { account } = await currencies(req);
+    const { params } = await validateOrder(t, order, account.code);
+    const data = await whmcs.call('AddOrder', { clientid: req.session.clientId, ...params });
+    if (data.result !== 'success') throw new Error(data.message || t('err.orderFailed'));
+    invalidateClient(req.session.clientId);
+    return res.json({
+      ok: true,
+      orderid: Number(data.orderid),
+      invoiceid: Number(data.invoiceid || 0),
+      redirect: Number(data.invoiceid || 0) > 0 ? `/invoices/${Number(data.invoiceid)}/pay` : '/services',
+    });
+  } catch (e) {
+    const msg = String(e.message || '');
+    const isPromoErr = /promo|discount|coupon/i.test(msg);
+    if (!isPromoErr) console.warn('[store] promo-code validation failed:', e.code || msg);
+    return res.status(422).json({
+      ok: false,
+      error: isPromoErr ? t('err.promoInvalid') : t('err.orderFailed'),
+    });
+  }
+});
+
 router.post('/checkout', async (req, res) => {
   if (!req.session.clientId) return res.redirect(303, '/login?next=/checkout');
   const pending = pendingOrder(req);

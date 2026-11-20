@@ -260,6 +260,7 @@ module.exports = {
   'conf.ns2': 'NS2 প্রিফিক্স',
   'conf.payment': 'পেমেন্ট পদ্ধতি',
   'conf.promo': 'প্রোমো কোড',
+  'conf.applyPromo': 'প্রয়োগ করুন',
   'conf.summary': 'অর্ডারের সারাংশ',
   'conf.setup': 'সেটআপ ফি',
   'conf.dueToday': 'আজ পরিশোধযোগ্য',
@@ -731,6 +732,8 @@ module.exports = {
   'reg.have': 'আগেই অ্যাকাউন্ট আছে?',
 
   'err.sub': 'কিছু একটা ঠিকমতো হয়নি।',
+  'err.badRequest': 'আবশ্যক তথ্য অনুপস্থিত।',
+  'err.loginRequired': 'প্রোমো কোড ব্যবহার করতে লগইন করুন।',
   'err.notFound': 'আপনার অ্যাকাউন্টে এটি খুঁজে পাওয়া যায়নি।',
   'err.choosePayment': 'কীভাবে পরিশোধ করবেন বেছে নিন।',
   'err.planGone': 'এই প্ল্যানটি আর পাওয়া যাচ্ছে না।',
