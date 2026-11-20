@@ -53,6 +53,17 @@ const wantsJson = (req) => String(req.get('accept') || '').includes('application
 const httpUrl = (u) => (typeof u === 'string' && /^https?:\/\/[^\s]+$/i.test(u) ? u : null);
 const httpsUrl = (u) => (typeof u === 'string' && /^https:\/\/[^\s]+$/i.test(u) ? u : null);
 
+// Keep the portal aligned with the WHMCS bridge contract. The bridge already
+// filters these server-side; this second gate prevents stale/misconfigured
+// module responses from turning into controls that cannot be executed.
+const MODULE_ACTIONS = {
+  openclaw_n8n: new Set(['ClientStart', 'ClientStop', 'ClientRestart', 'ClientReinstall']),
+  snbd_n8n: new Set([
+    'start', 'restart', 'stop', 'upgrade', 'get_disk', 'get_env', 'save_env',
+    'change_password', 'reset_users', 'reset_data', 'get_ws_token',
+  ]),
+};
+
 const ERROR_STATUS = { bad_request: 400, not_allowed: 403, not_found: 404, not_active: 409, confirm_required: 428 };
 
 function fnLabel(t, fn, fallback) {
@@ -94,7 +105,10 @@ async function renderDashboard(req, res, view) {
   const kind = kinds.kindOf(view);
   const service = view.service || {};
   const upgrades = await catalog.siblingsOf(service.pid, res.locals.displayCurrency.code).catch(() => []);
-  const actions = (Array.isArray(view.actions) ? view.actions : []).map((a) => ({
+  const allowed = MODULE_ACTIONS[view.module] || (kind === 'n8n' ? new Set() : null);
+  const actions = (Array.isArray(view.actions) ? view.actions : [])
+    .filter((a) => !allowed || allowed.has(String(a.fn)))
+    .map((a) => ({
     fn: String(a.fn), label: fnLabel(t, a.fn, a.label), confirm: Boolean(a.confirm), danger: Boolean(a.danger),
     icon: kinds.fnIcon(a.fn), console: kinds.CONSOLE_FNS.includes(a.fn),
   }));

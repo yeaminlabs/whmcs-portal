@@ -21,8 +21,13 @@ const ACTIONS = {
     { fn: 'stop', label: 'Stop', confirm: true, danger: false },
     { fn: 'restart', label: 'Restart', confirm: false, danger: false },
     { fn: 'upgrade', label: 'Update n8n', confirm: true, danger: false },
+    { fn: 'get_disk', label: 'Disk usage', confirm: false, danger: false },
+    { fn: 'get_env', label: 'View environment', confirm: false, danger: false },
+    { fn: 'save_env', label: 'Save environment', confirm: true, danger: false },
+    { fn: 'change_password', label: 'Change owner password', confirm: true, danger: false },
     { fn: 'reset_users', label: 'Reset users', confirm: true, danger: true },
     { fn: 'reset_data', label: 'Reset all data', confirm: true, danger: true },
+    { fn: 'get_ws_token', label: 'Live session token', confirm: false, danger: false },
   ],
   puqDockerN8N: [
     { fn: 'start', label: 'Start', confirm: false, danger: false },
@@ -171,6 +176,11 @@ const RESULTS = {
   stop: (id) => { state[id] = 'stopped'; return { message: 'Stopped.' }; },
   restart: (id) => { state[id] = 'running'; return { message: 'Restart command sent.' }; },
   upgrade: () => ({ message: 'n8n is updating to the latest version.' }),
+  get_disk: () => ({ message: 'Disk usage measured.', data: { disk: { usedBytes: 2147483648, sizeBytes: 10737418240, error: null }, planStorageGb: '10' } }),
+  get_env: () => ({ message: 'Environment loaded.', data: { env: { N8N_LOG_LEVEL: 'info' } } }),
+  save_env: (_id, args) => ({ message: 'Environment saved.', data: { env: args.env } }),
+  change_password: () => ({ message: 'Password changed.' }),
+  get_ws_token: (_id, args) => ({ message: 'Token issued.', data: { token: `mock-${crypto.randomBytes(12).toString('hex')}`, ttl: 300, endpoint: args.endpoint, wsUrl: 'https://n8n-ws.snbdhost.com' } }),
   reset_users: () => ({ message: 'User accounts were reset. Open n8n to create a new owner account.' }),
   reset_data: () => ({ message: 'All workflows and data were deleted.' }),
   reinstall: (id) => { state[id] = 'deploying'; return { message: 'Reinstall started. This takes about 2 minutes.' }; },
@@ -188,11 +198,12 @@ const RESULT_BY_FN = {
   stop: 'stop', ClientStop: 'stop', Stop: 'stop', vmShutdown: 'stop', vmStop: 'stop',
   restart: 'restart', ClientRestart: 'restart', Reboot: 'restart', vmReboot: 'restart',
   upgrade: 'upgrade', reset_users: 'reset_users', reset_data: 'reset_data', ClientReinstall: 'reinstall',
+  get_disk: 'get_disk', get_env: 'get_env', save_env: 'save_env', change_password: 'change_password', get_ws_token: 'get_ws_token',
   healthcheck: 'healthcheck', viewlogs: 'viewlogs', regenpassword: 'regenpassword', downloadbackup: 'downloadbackup',
   redeploy: 'redeploy', killswitch: 'killswitch', VNC: 'console', noVNC: 'console', resetpassword: 'resetpassword',
 };
 
-async function action({ clientId, serviceId, fn, confirm }) {
+async function action({ clientId, serviceId, fn, confirm, args = {} }) {
   const row = await ownedRow(clientId, serviceId);
   if (!row) throw bridgeError('not_found', 'Service not found');
   if (row.status !== 'Active') throw bridgeError('not_active', 'Service is not active');
@@ -201,7 +212,16 @@ async function action({ clientId, serviceId, fn, confirm }) {
   const def = (ACTIONS[module] || []).find((a) => a.fn === fn);
   if (!def) throw bridgeError('not_allowed', 'Function not allowed');
   if (def.confirm && confirm !== true) throw bridgeError('confirm_required', 'This action needs confirmation');
-  const out = RESULTS[RESULT_BY_FN[fn]](row.id);
+  if (fn === 'save_env' && (!args.env || typeof args.env !== 'object' || Array.isArray(args.env))) {
+    throw bridgeError('bad_request', 'args.env must be an object');
+  }
+  if (fn === 'change_password' && (!args.password || String(args.password).length < 10 || !args.email)) {
+    throw bridgeError('bad_request', 'A valid owner email and password are required');
+  }
+  if (fn === 'get_ws_token' && !['stats', 'logs', 'terminal'].includes(args.endpoint)) {
+    throw bridgeError('bad_request', 'args.endpoint must be stats, logs or terminal');
+  }
+  const out = RESULTS[RESULT_BY_FN[fn]](row.id, args);
   return { message: out.message, data: out.data || {} };
 }
 
