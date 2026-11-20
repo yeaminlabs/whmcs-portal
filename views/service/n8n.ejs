@@ -38,7 +38,7 @@ const hasAction = (fn) => actions.some(a => a.fn === fn);
       </dl>
     </section>
 
-    <% if (nativeN8n && (hasAction('get_disk') || hasAction('get_env') || hasAction('get_ws_token') || hasAction('change_password'))) { %>
+    <% if (nativeN8n && (hasAction('get_disk') || hasAction('get_env') || hasAction('change_password'))) { %>
     <section class="panel" id="n8n-tools">
       <header><span><%= t('svcx.n8n.tools') %></span></header>
       <div class="svc-body svc-n8n-tools">
@@ -47,11 +47,6 @@ const hasAction = (fn) => actions.some(a => a.fn === fn);
         <% } %>
         <% if (hasAction('get_env')) { %>
         <form method="post" action="/services/<%= s.id %>/action" class="svc-act" data-label="<%= t('svcx.n8n.viewEnvironment') %>" data-args="{}"><input type="hidden" name="fn" value="get_env"><button type="submit" class="btn ghost"><%- icon('file') %><span><%= t('svcx.n8n.viewEnvironment') %></span></button></form>
-        <% } %>
-        <% if (hasAction('get_ws_token')) { %>
-        <form method="post" action="/services/<%= s.id %>/action" class="svc-act" data-label="<%= t('svcx.n8n.liveSession') %>" data-args='{"endpoint":"stats"}'><input type="hidden" name="fn" value="get_ws_token"><button type="submit" class="btn ghost"><%- icon('activity') %><span><%= t('svcx.n8n.liveSession') %></span></button></form>
-        <form method="post" action="/services/<%= s.id %>/action" class="svc-act" data-label="<%= t('svcx.n8n.liveLogs') %>" data-args='{"endpoint":"logs"}'><input type="hidden" name="fn" value="get_ws_token"><button type="submit" class="btn ghost"><%- icon('file') %><span><%= t('svcx.n8n.liveLogs') %></span></button></form>
-        <form method="post" action="/services/<%= s.id %>/action" class="svc-act" data-label="<%= t('svcx.n8n.liveTerminal') %>" data-args='{"endpoint":"terminal"}'><input type="hidden" name="fn" value="get_ws_token"><button type="submit" class="btn ghost"><%- icon('terminal') %><span><%= t('svcx.n8n.liveTerminal') %></span></button></form>
         <% } %>
         <% if (hasAction('save_env')) { %>
         <form method="post" action="/services/<%= s.id %>/action" class="svc-act svc-n8n-form" data-label="<%= t('svcx.n8n.saveEnvironment') %>" data-confirm="1" data-args="{}"><input type="hidden" name="fn" value="save_env"><textarea name="env" rows="3" placeholder='{"N8N_LOG_LEVEL":"info"}' required></textarea><button type="submit" class="btn ghost"><span><%= t('svcx.n8n.saveEnvironment') %></span></button></form>
