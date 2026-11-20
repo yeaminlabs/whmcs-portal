@@ -17,7 +17,7 @@
         <option value="3600">1 hour</option>
       </select>
     </label>
-    <button type="submit" class="btn uptime-add-btn"><%- icon('plus') %><%= t('up.add') %></button>
+    <button type="submit" class="btn uptime-add-btn btn-dark"><%- icon('plus') %><%= t('up.add') %></button>
   </form>
 </section>
 
@@ -27,11 +27,11 @@
   <div class="uptime-grid">
     <% monitors.forEach(m => { %>
     <article class="uptime-card">
-      <header class="uptime-card-header"><div><h2><%= m.name %></h2><a class="uptime-url" href="<%= m.url %>" target="_blank" rel="noreferrer"><%= m.url %><%- icon('external') %></a></div><span class="uptime-status <%= m.last_status === 'up' ? 'is-up' : m.last_status === 'down' ? 'is-down' : 'is-unknown' %>"><i aria-hidden="true"></i><%= m.last_status %></span></header>
+      <header class="uptime-card-header"><div><h2><%= m.name %></h2><a class="uptime-url" href="<%= m.url %>" target="_blank" rel="noreferrer"><%= m.url %><%- icon('external') %></a></div><span class="uptime-badge <%= m.last_status === 'up' ? 'is-up' : m.last_status === 'down' ? 'is-down' : 'is-unknown' %>"><i aria-hidden="true"></i><%= m.last_status %></span></header>
       <ul class="uptime-metrics">
-        <li><span><%= t('up.uptime24') %></span><b><%= m.uptime24 === null ? '—' : m.uptime24 + '%' %></b></li>
-        <li><span><%= t('up.lastMs') %></span><b><%= m.last_ms ? m.last_ms + ' ms' : '—' %></b></li>
-        <li><span><%= t('up.lastChecked') %></span><b><%= m.last_checked ? new Date(m.last_checked).toLocaleString() : '—' %></b></li>
+        <li><span><%- icon('check') %><%= t('up.uptime24') %></span><b><%= m.uptime24 === null ? '—' : m.uptime24 + '%' %></b></li>
+        <li><span><%- icon('check') %><%= t('up.lastMs') %></span><b><%= m.last_ms ? m.last_ms + ' ms' : '—' %></b></li>
+        <li><span><%- icon('check') %><%= t('up.lastChecked') %></span><b><%= m.last_checked ? new Date(m.last_checked).toLocaleString() : '—' %></b></li>
         <% if (m.last_error) { %><li class="uptime-error"><span><%= m.last_error %></span></li><% } %>
       </ul>
       <div class="uptime-actions">
