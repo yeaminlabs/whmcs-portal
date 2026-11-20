@@ -141,6 +141,7 @@ function decorate(p, currencyCode) {
     kind: kindOf(p.type),
     module: p.module || '',
     ...parseDescription(p.description),
+    descriptionText: String(p.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim(),
     pricing,
     from,
     paid,

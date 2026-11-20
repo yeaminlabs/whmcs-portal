@@ -25,7 +25,7 @@ const js = (v) => JSON.stringify(v).replace(/</g, '\\\\u003c');
           <div class="plan-brand"><%- brandMark(product.name) %></div>
           <div class="plan-info">
             <b class="plan-name"><%- brandText(product.name) %></b>
-            <% const planDesc = product.tagline || product.lead || ''; %>
+            <% const planDesc = product.tagline || product.lead || product.descriptionText || ''; %>
             <% if (planDesc) { %><p class="plan-desc"><%= planDesc %></p><% } %>
           </div>
         </div>
