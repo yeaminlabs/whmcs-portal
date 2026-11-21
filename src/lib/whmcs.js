@@ -33,7 +33,7 @@ const TIMEOUT_MS = 15000;
 // the invoice, provision a module, and run gateway hooks). Never retry it: a
 // timeout does not prove that WHMCS did not create the order, and retrying can
 // create a duplicate order.
-const MUTATION_TIMEOUT_MS = 30000;
+const MUTATION_TIMEOUT_MS = 60000;
 const NON_RETRYABLE_ACTIONS = new Set(['AddOrder']);
 const MAX_ATTEMPTS = 2;
 const RETRY_DELAY_MS = 300;
@@ -185,7 +185,7 @@ class WhmcsClient {
           logCall(`${action} (attempt ${attempt} failed)`, params, { result: 'error', message: err.message });
           const retryable = !status || status >= 500;
           if (!retryable || attempt >= attempts) {
-            throw new Error(`WHMCS API call failed after ${attempt} attempt${attempt === 1 ? '' : 's'}: ${err.message}`);
+            throw new Error(`WHMCS ${action} call failed after ${attempt} attempt${attempt === 1 ? '' : 's'}: ${err.message}`);
           }
           await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
         }
