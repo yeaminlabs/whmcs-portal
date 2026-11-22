@@ -30,10 +30,13 @@ const httpAgent = new http.Agent({ keepAlive: true, maxSockets: 16, family: 4 })
 const httpsAgent = new https.Agent({ keepAlive: true, maxSockets: 16, family: 4 });
 const TIMEOUT_MS = 15000;
 // Order creation can legitimately take longer than a read (WHMCS may create
-// the invoice, provision a module, and run gateway hooks). Never retry it: a
-// timeout does not prove that WHMCS did not create the order, and retrying can
-// create a duplicate order.
-const MUTATION_TIMEOUT_MS = 60000;
+// the invoice, provision a module, and run gateway hooks). Never impose a
+// client-side deadline on it: a timeout does not prove that WHMCS did not
+// create the order, and retrying can create a duplicate order. Axios treats
+// timeout=0 as no timeout. The request remains single-flight per session in
+// placeOrder(), so a second click cannot create a second order while this one
+// is still being processed.
+const MUTATION_TIMEOUT_MS = 0;
 const NON_RETRYABLE_ACTIONS = new Set(['AddOrder']);
 const MAX_ATTEMPTS = 2;
 const RETRY_DELAY_MS = 300;
