@@ -668,13 +668,17 @@ async function clientCredit(req) {
 }
 
 async function renderPay(req, res, invoice, error = null, status = 200) {
-  const [paymethods, credit, card, bkash] = await Promise.all([
+  const [allPaymethods, credit, card, bkash] = await Promise.all([
     catalog.paymentMethods(),
     clientCredit(req),
     config.stripe.enabled ? pay.stripeAmount(invoice).catch(() => null) : null,
     config.bkash.enabled ? pay.bkashAmounts(invoice).catch(() => null) : null,
   ]);
-  const inApp = [config.stripe.enabled && pay.STRIPE_GATEWAY, config.bkash.enabled && pay.BKASH_GATEWAY].filter(Boolean);
+  // Stripe has a per-charge minimum. If this invoice is too small (or Stripe
+  // cannot prepare it), do not render a dead card option that only fails after
+  // the customer submits the payment form.
+  const paymethods = allPaymethods.filter((m) => m.module !== pay.STRIPE_GATEWAY || Boolean(card));
+  const inApp = [card && pay.STRIPE_GATEWAY, config.bkash.enabled && pay.BKASH_GATEWAY].filter(Boolean);
   const failed = ['card', 'bkash', 'bkash-cancel'].includes(req.query.failed) ? req.query.failed : null;
   const charges = {};
   if (card) charges[pay.STRIPE_GATEWAY] = { amount: card.charge, code: card.currency.code };
@@ -711,7 +715,12 @@ router.post('/invoices/:id/pay', async (req, res) => {
 
     const methods = await catalog.paymentMethods();
     if (!methods.some((m) => m.module === method)) throw new Error(res.locals.t('err.choosePayment'));
-    if (method === pay.STRIPE_GATEWAY && config.stripe.enabled) return res.redirect(303, `/invoices/${invoice.invoiceid}/pay/card`);
+    if (method === pay.STRIPE_GATEWAY && config.stripe.enabled) {
+      // Re-check at submit time so a stale page cannot send a too-small charge
+      // to the card route after the invoice balance changed.
+      await pay.stripeAmount(invoice);
+      return res.redirect(303, `/invoices/${invoice.invoiceid}/pay/card`);
+    }
     if (method === pay.BKASH_GATEWAY && config.bkash.enabled) {
       return pay.startBkash(req, res, invoice).catch((err) => {
         console.error('[pay] bkash start failed:', err.message);
