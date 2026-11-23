@@ -1,62 +1,39 @@
 <%- include('_head') %>
-<h1><%= t('auth.welcome') %></h1>
-<p class="sub auth-sub"><%= t('auth.sub') %></p>
-
-<% if (mock) { %><p class="alert"><%= t('auth.demo') %> <code>demo@example.com / demo1234</code></p><% } %>
-<% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
-<form method="post" action="/login" class="card auth-card" aria-label="Log in">
-  <input type="hidden" name="next" value="<%= next || '' %>">
-  <label class="af-field"><span class="af-label"><%= t('prof.email') %></span>
-    <span class="af"><%- icon('mail') %><input type="email" name="email" required autocomplete="email" placeholder="name@company.com"></span>
-  </label>
-  <label class="af-field"><span class="af-label"><%= t('auth.password') %></span>
-    <span class="af"><%- icon('lock') %><input type="password" name="password" id="pw" required autocomplete="current-password" placeholder="••••••••">
-      <button type="button" class="af-eye" id="pwToggle" aria-label="<%= t('auth.showPassword') %>" aria-pressed="false"><%- icon('eye') %></button></span>
-  </label>
-  <button type="submit" class="auth-submit"><span><%= t('auth.signIn') %></span><%- icon('arrow') %></button>
-
-  <div class="or-divider" aria-hidden="true"><span><%= t('auth.orContinue') %></span></div>
-  <div class="google-wrap" id="google-wrap">
-    <div id="g_id_onload"
-         data-client_id="<%= googleClientId %>"
-         data-context="signin"
-         data-ux_mode="popup"
-         data-callback="handleGoogleCredential"
-         data-auto_prompt="false"
-         data-itp_support="true"></div>
-    <div class="g_id_signin" id="g-button"
-         data-type="standard"
-         data-shape="rectangular"
-         data-theme="outline"
-         data-text="signin_with"
-         data-locale="<%= lang %>"
-         data-size="large"
-         data-logo_alignment="center"
-         data-width="384"></div>
-    <p class="google-error alert err" id="google-error" role="alert" hidden></p>
+<%
+const pwShow = t('auth.showPassword');
+const pwHide = t('auth.hidePassword');
+%>
+<div class="login-card" aria-labelledby="login-title">
+  <div class="login-head">
+    <h1 id="login-title"><%= t('auth.welcome') %> <span class="hi-emoji">👋</span></h1>
+    <p class="login-sub"><%= t('auth.sub') %></p>
   </div>
-  <p class="auth-alt"><%= t('auth.new') %> <a href="/register"><%= t('auth.create') %></a></p>
-  <p class="auth-alt"><a href="/forgot-password"><%= t('auth.forgot') %></a></p>
-</form>
+  <div class="login-toggle" role="group" aria-label="<%= t('auth.signIn') %> / <%= t('auth.create') %>">
+    <button type="button" class="toggle active"><%= t('auth.signIn') %></button>
+    <button type="button" class="toggle"><%= t('auth.create') %></button>
+  </div>
+  <% if (mock) { %><p class="alert"><%= t('auth.demo') %> <code>demo@example.com / demo1234</code></p><% } %>
+  <% if (error) { %><p class="alert err" role="alert"><%= error %></p><% } %>
+  <form method="post" action="/login" class="login-form" id="login-form" aria-label="Log in">
+    <input type="hidden" name="next" value="<%= next || '' %>">
+    <label class="lf-field"><span class="lf-label">* <%= t('prof.email') %></span><input type="email" name="email" required autocomplete="email" placeholder="your@email.com"></label>
+    <label class="lf-field"><span class="lf-label">* <%= t('auth.password') %></span><input type="password" name="password" id="pw" required autocomplete="current-password" placeholder="••••••••"><button type="button" class="lf-eye" id="pwToggle" aria-label="<%= pwShow %>" aria-pressed="false"><%- icon('eye') %></button></label>
+    <div class="lf-remember"><label><input type="checkbox" name="remember" value="1"><span><%= t('auth.remember') %></span></label><a href="/forgot-password"><%= t('auth.forgot') %></a></div>
+    <button type="submit" class="login-submit"><%= t('auth.signIn') %></button>
+  </form>
+  <hr class="login-divider" aria-hidden="true">
+  <button class="login-social login-google" type="button"><span class="soc-ico"><img src="/img/google-g.png" alt="Google" width="18" height="18"></span><%= t('auth.googleBtn') %></button>
+  <button class="login-social login-apple" type="button"><span class="soc-ico"></span><%= t('auth.appleBtn') %></button>
+</div>
 <script>
-(function(){var g=document.getElementById('g-button'),c=document.querySelector('.auth-card');if(g&&c){var w=Math.floor(Math.min(384,Math.max(200,c.clientWidth)));g.setAttribute('data-width',String(w))}})();
-(function(){var t=document.getElementById('pwToggle'),p=document.getElementById('pw');if(t&&p)t.addEventListener('click',function(){var show=p.type==='password';p.type=show?'text':'password';t.setAttribute('aria-pressed',String(show));t.setAttribute('aria-label',show?<%- JSON.stringify(t('auth.hidePassword')) %>:<%- JSON.stringify(t('auth.showPassword')) %>)})})();
-function showGoogleError(msg) {
-  const el = document.getElementById('google-error');
-  el.textContent = msg;
-  el.hidden = false;
-}
-function handleGoogleCredential(response) {
-  fetch('/auth/google', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id_token: response.credential, next: (document.querySelector('form[action="/login"] input[name="next"]') || {}).value || '' }),
-  }).then(async (r) => {
-    const data = await r.json().catch(() => ({}));
-    if (r.ok && data.ok) { location.href = data.redirect || '/'; return; }
-    showGoogleError(data.error || <%- JSON.stringify(t('auth.googleFail')) %>);
-  }).catch(() => showGoogleError(<%- JSON.stringify(t('auth.googleNet')) %>));
-}
+(function(){var t=document.getElementById('pwToggle'),p=document.getElementById('pw');if(t&&p)t.addEventListener('click',function(){var show=p.type==='password';p.type=show?'text':'password';t.setAttribute('aria-pressed',String(show));t.setAttribute('aria-label',show?<%- JSON.stringify(pwHide) %>:<%- JSON.stringify(pwShow) %>})})();
+function showGoogleError(msg){const el=document.getElementById('google-error');if(el){el.textContent=msg;el.hidden=false}}
+function handleGoogleCredential(response){fetch('/auth/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id_token:response.credential,next:(document.querySelector('form[action="/login"] input[name="next]")||{}).value||''})}).then(async(r)=>{const data=await r.json().catch(()=>({}));if(r.ok&&data.ok){location.href=data.redirect||'/';return}showGoogleError(data.error||<%- JSON.stringify(t('auth.googleFail')) %>}).catch(()=>showGoogleError(<%- JSON.stringify(t('auth.googleNet')) %>))}
 </script>
 <script src="https://accounts.google.com/gsi/client?hl=<%= lang %>" async defer onerror="showGoogleError(<%= JSON.stringify(t('auth.googleLoad')) %>)"></script>
+<div id="google-wrap" hidden>
+  <div id="g_id_onload" data-client_id="<%= googleClientId %>" data-context="signin" data-ux_mode="popup" data-callback="handleGoogleCredential" data-auto_prompt="false" data-itp_support="true"></div>
+  <div class="g_id_signin" id="g-button" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with" data-locale="<%= lang %>" data-size="large" data-logo_alignment="center" data-width="384"></div>
+  <p class="google-error alert err" id="google-error" role="alert" hidden></p>
+</div>
 <%- include('_foot') %>
