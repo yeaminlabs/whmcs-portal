@@ -109,15 +109,16 @@ describe('new views compile and render', () => {
     expect(verify).toContain('bad');
   });
 
-  test('login.ejs compiles with forgot link', async () => {
+  test('login.ejs compiles with forgot link and two-panel layout', async () => {
     const html = await render('login.ejs', { ...baseLocals, ti: 'Log in', title: 'Log in', googleClientId: 'x', next: '', session: {} });
     expect(html).toContain('/forgot-password');
-    expect(html).toContain('Forgot password?');
-    expect(html).toContain('class="authwrap authwrap-video"');
-    expect(html).toContain('youtube-nocookie.com/embed/e22zHsgwv84');
+    expect(html).toContain('class="authwrap"');
+    expect(html).toContain('auth-inner');
+    expect(html).toContain('auth-side');
+    expect(html).not.toContain('youtube-nocookie.com');
   });
 
-  test('video background stays exclusive to the login screen', async () => {
+  test('no video on any auth screen', async () => {
     const html = await render('forgot-password.ejs', { ...baseLocals, session: {} });
     expect(html).toContain('class="authwrap"');
     expect(html).not.toContain('authwrap-video');

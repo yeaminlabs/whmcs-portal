@@ -112,39 +112,33 @@ code{font-size:.9em;background:var(--g100);padding:1px 6px;border-radius:4px}
 .or-divider{display:flex;align-items:center;gap:12px;margin:18px 0 0;color:var(--g500);font-size:13px}
 .or-divider::before,.or-divider::after{content:"";flex:1;border-top:1px solid var(--line)}
 
-/* login — compact card, no video, no hero sidebar */
-.authwrap.auth-login{background:#f2f4f8}
-.authwrap.auth-login .auth{background:transparent;box-shadow:none;padding:0}
-.login-card{max-width:400px;margin:0 auto}
-.login-head{margin:0 0 20px}
-.login-head h1{margin:0 0 4px;font-size:22px;font-weight:800;letter-spacing:-.02em}
-.login-head .hi-emoji{font-size:20px}
-.login-sub{margin:0;color:var(--g600);font-size:13px}
-.login-toggle{display:flex;gap:6px;margin:0 0 20px}
-.login-toggle .toggle{flex:1;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--g600);font-size:14px;font-weight:600;cursor:pointer}
-.login-toggle .toggle.active{border-color:var(--brand-red,#BE3045);color:var(--brand-red,#BE3045);background:#FDF4F5}
-.login-toggle .toggle:first-child{border-top-left-radius:10px;border-bottom-left-radius:10px}
-.login-toggle .toggle:last-child{border-top-right-radius:10px;border-bottom-right-radius:10px}
-.lf-field{margin:0 0 14px}
-.lf-label{display:block;font-size:12px;font-weight:700;color:var(--g700);letter-spacing:.04em;margin:0 0 6px}
-.lf-field input{width:100%;height:42px;padding:0 12px;border:1.5px solid var(--line);border-radius:10px;font:inherit;font-size:14px;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s;background:#fff}
-.lf-field input:focus{border-color:var(--brand-red,#BE3045);box-shadow:0 0 0 3px rgba(190,48,69,.12)}
-.lf-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:0;padding:4px;cursor:pointer;color:var(--g500);font-size:14px}
-.lf-remember{display:flex;justify-content:space-between;align-items:center;margin:6px 0 16px;font-size:13px}
-.lf-remember label{display:flex;align-items:center;gap:6px;cursor:pointer}
-.lf-remember input{margin:0}
-.login-submit{width:100%;height:46px;border:0;border-radius:10px;background:var(--brand-red,#BE3045);color:#fff;font:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s,transform .15s;box-shadow:0 10px 24px -12px rgba(190,48,69,.7)}
-.login-submit:hover{background:#A92134;transform:translateY(-1px)}
+/* login — compact two-panel card design */
+.login-card{width:100%;animation:authUp .4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes authUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.login-head{margin:0 0 1rem}
+.login-head h1{margin:0 0 4px;font-size:1.625rem;font-weight:800;letter-spacing:-.02em;color:#111827}
+.login-head .hi-emoji{font-size:1.3rem}
+.login-toggle{display:flex;gap:5px;margin:0 0 1.25rem;padding:4px;background:#f3f4f6;border-radius:11px;width:fit-content}
+.login-toggle .toggle{flex:1;padding:8px 18px;border:1px solid transparent;border-radius:8px;background:transparent;color:#6b7280;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;transition:all .15s}
+.login-toggle .toggle:hover{color:#374151}
+.login-toggle .toggle.active{border-color:transparent;color:#111827;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.lf-field{margin:0 0 14px;position:relative}
+.lf-label{display:block;font-size:12px;font-weight:600;color:#374151;margin:0 0 6px}
+.lf-field input{width:100%;height:42px;padding:0 12px;border:1.5px solid #d1d5db;border-radius:10px;font:inherit;font-size:14px;color:#111827;outline:none;transition:border-color .15s,box-shadow .15s;background:#fff}
+.lf-field input:focus{border-color:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.lf-pw input{padding-right:40px}
+.lf-eye{position:absolute;right:10px;bottom:11px;background:none;border:0;padding:4px;cursor:pointer;color:#9ca3af;line-height:1;display:grid;place-items:center}
+.lf-eye:hover{color:#374151}
+.lf-eye .ico{width:1rem;height:1rem}
+.lf-remember{display:flex;justify-content:space-between;align-items:center;margin:2px 0 14px;font-size:13px}
+.lf-remember label{display:flex;align-items:center;gap:6px;cursor:pointer;color:#374151;font-weight:500}
+.lf-remember input{margin:0;accent-color:#2563EB}
+.lf-remember a{color:#2563EB;font-weight:600;text-decoration:none}
+.lf-remember a:hover{text-decoration:underline}
+.login-submit{width:100%;height:44px;border:0;border-radius:10px;background:#2563EB;color:#fff;font:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s,transform .15s;box-shadow:0 8px 20px -8px rgba(37,99,235,.6)}
+.login-submit:hover{background:#1D4ED8;transform:translateY(-1px)}
 .login-submit:active{transform:none}
-.login-divider{border:none;border-top:1px solid var(--line);margin:20px 0}
-.login-social{width:100%;height:42px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font:inherit;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:border-color .15s,background .15s}
-.login-social:hover{border-color:var(--g400);background:#fafafa}
-.login-social.login-google{margin-bottom:8px}
-.soc-ico{display:grid;place-items:center;width:34px;height:34px;border-radius:8px;background:#F3EEEA;flex:none}
-.soc-ico img{width:18px;height:18px}
-.login-foot{margin:16px 0 0;font-size:12px;color:var(--g600);text-align:center}
-.login-foot a{color:var(--brand-red,#BE3045);text-decoration:none;font-weight:600}
-.login-foot a:hover{text-decoration:underline}
+.login-divider{border:none;border-top:1px solid #e5e7eb;margin:18px 0}
 
 
 /* dashboard — the one dark band, the site's signature */

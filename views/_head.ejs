@@ -250,12 +250,24 @@ const nextQ = encodeURIComponent(cp);
 <main id="main" class="pubmain" tabindex="-1">
 <% if (flash) { %><p class="alert <%= flash.type === 'ok' ? 'ok' : flash.type === 'err' ? 'err' : '' %> flash" role="status"><%= flash.text || t(flash.key, flash.vars) %></p><% } %>
 <% } else { %>
-<div class="authwrap<%= ti === 'Log in' ? ' auth-login' : '' %>">
-  <div class="auth-pane">
-    <div class="auth-prefs">
-      <% if (ti === 'Register') { %><a class="auth-switch" href="/login"><%- icon('user') %><%= t('auth.login') %></a><% } else { %><a class="auth-switch" href="/register"><%- icon('plus') %><%= t('auth.create') %></a><% } %>
-      <% prefsMenu() %>
-    </div>
-    <main id="main" class="auth" tabindex="-1">
-      <img class="auth-logo" src="/img/snbd-logo.png" alt="SNBD HOST" width="144" height="36">
+<div class="authwrap">
+  <div class="auth-inner">
+    <aside class="auth-side" aria-hidden="true">
+      <a class="as-brand" href="/" tabindex="-1"><img src="/img/snbd-mark.png" alt="" width="40" height="40"><span>SNBD HOST</span></a>
+      <div class="as-copy">
+        <h2>Manage Your Hosting, Simply.</h2>
+        <p>Services, domains, billing and support — all in one clean client area.</p>
+      </div>
+      <div class="as-mockup">
+        <div class="as-mock-card"><span class="as-mock-dot green"></span><span class="as-mock-info"><span class="as-mock-name">USA Shared Hosting</span><span class="as-mock-sub">Active · Renews Dec 2025</span></span><span class="as-mock-badge">Online</span></div>
+        <div class="as-mock-card"><span class="as-mock-dot green"></span><span class="as-mock-info"><span class="as-mock-name">BDIX VPS — 2 GB</span><span class="as-mock-sub">Active · 99.9% Uptime</span></span><span class="as-mock-badge">Online</span></div>
+        <div class="as-mock-card"><span class="as-mock-dot yellow"></span><span class="as-mock-info"><span class="as-mock-name">domain.com</span><span class="as-mock-sub">Invoice due in 3 days</span></span><span class="as-mock-badge warn">Due</span></div>
+      </div>
+      <div class="as-dots"><span class="as-dot active"></span><span class="as-dot"></span><span class="as-dot"></span></div>
+    </aside>
+    <div class="auth-pane">
+      <div class="auth-prefs">
+        <% prefsMenu() %>
+      </div>
+      <main id="main" class="auth" tabindex="-1">
 <% } %>
